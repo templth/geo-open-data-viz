@@ -1,0 +1,12 @@
+<div class="form-group form-group-sm" ng-class="{'has-error':isError}">
+  <label for="{{for}}"
+         class="col-sm-3 control-label"
+         ng-class="{'required':req}"
+         style="padding-right: 5px;">{{label}}</label>
+
+  <div class="col-sm-8"
+       style="padding-left: 5px">
+    <span ng-transclude></span>
+    <span class="help-inline" ng-show="isError">{{error}}</span>
+  </div>
+</div>

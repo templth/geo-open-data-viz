@@ -1,0 +1,11 @@
+{
+  "id": "myid",
+  "name": "name",
+  "category": "category",
+  "source": "source",
+  "tags": [ "tag1", "tag2" ],
+  "originUrl": "originUrl",
+  "imported": true,
+  "importFile": "importFile",
+  "structureFile": "structureFile"
+}

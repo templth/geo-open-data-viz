@@ -1,0 +1,120 @@
+<div ng-controller="MapController">
+  <div class="col-md-8" id="map" map="map"></div>
+  <div class="col-md-4">
+
+  <accordion close-others="oneAtATime">
+    <!-- Properties -->
+    <accordion-group is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+      <accordion-heading>
+        Properties <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+      </accordion-heading>
+
+      <form name="propertiesForm" novalidate class="form-horizontal">
+        <field label="Projection">
+          <select class="form-control input-sm" name="projection" ng-model="properties.projection">
+            <option value="none">None</option>
+            <option value="orthographic">Orthographic</option>
+            <option value="mercator">Mercator</option>
+          </select>
+        </field>
+
+        <field label="Scale">
+          <input class="form-control input-sm" name="scale" type="text" 
+                     placeholder="Scale" required ng-model="session.scale" />
+        </field>
+
+         <div class="form-group">
+           <button type="submit" class="btn btn-primary pull-right" 
+                        value="Login" title="Login">
+             <span>Login</span>
+           </button>
+        </div>
+      </form>
+    </accordion-group>
+    <!-- End properties -->
+
+    <!-- Interactions -->
+    <accordion-group>
+      <accordion-heading>
+        Interactions <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+      </accordion-heading>
+
+      <form name="interactionsForm" novalidate class="form-horizontal">
+        <field label="Move">
+          <input class="form-control input-sm" name="move" type="text" 
+                     placeholder="Move" required ng-model="session.username" />
+        </field>
+
+        <field label="Zoom">
+          <input class="form-control input-sm" name="scale" type="text" 
+                     placeholder="Scale" required ng-model="session.scale" />
+        </field>
+
+         <div class="form-group">
+           <button type="submit" class="btn btn-primary pull-right" 
+                        value="Login" title="Login">
+             <span>Login</span>
+           </button>
+        </div>
+      </form>
+    </accordion-group>
+    <!-- End interactions -->
+
+    <!-- Behaviors -->
+    <accordion-group>
+      <accordion-heading>
+        Behaviors <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+      </accordion-heading>
+
+      Zoom and center on click
+      Auto rotation
+      Display all points (animation)
+    </accordion-group>
+    <!-- End Behaviors -->
+
+    <!-- Layers -->
+    <accordion-group>
+      <accordion-heading>
+        Layers <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+      </accordion-heading>
+
+      <!-- Layer graticule -->
+      <accordion-group ng-repeat="layer in layers">
+        <accordion-heading>
+          {{layer.name}} <div class="pull-right"><span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>&nbsp;<span class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span></div>
+        </accordion-heading>
+
+        <p>The body of the accordion group grows to fit the contents</p>
+          <button class="btn btn-default btn-sm" ng-click="addItem()">Add Item</button>
+          <div ng-repeat="item in items">{{item}}</div>
+      </accordion-group>
+      <!-- End layer graticule -->
+    </accordion-group>
+    <!-- End layers -->
+
+    <!-- Data sources -->
+    <accordion-group is-open="status.open">
+        <accordion-heading>
+            Data sources <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+        </accordion-heading>
+        This is just some content to illustrate fancy headings.
+    </accordion-group>
+    <!-- End data sources -->
+
+    <!-- Console -->
+    <accordion-group is-open="status.open">
+        <accordion-heading>
+            Console <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+        </accordion-heading>
+
+        <ul>
+          <li ng-repeat="message in messages">{{message.description}}</li>
+        </ul>
+    </accordion-group>
+    <!-- End console -->
+  </accordion>
+
+  <div ng-click="changeColor()">Tesy</div>
+  <div ng-click="hideLayer('graticuleLayer')">Tesy</div>
+  </div>
+</div>
