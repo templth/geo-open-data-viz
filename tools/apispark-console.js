@@ -1,11 +1,9 @@
 'use strict';
 
 var fs = require('fs');
-var urlApi = require('url');
 var program = require('commander');
-var request = require('request');
 var _ = require('lodash');
-var apisparkService = require('./apispark-service');
+var apisparkService = require('./lib/apispark-service');
 
 function loadApisparkConfiguration(callback) {
   fs.readFile('tools/apispark.json', 'utf8', function(err, data) {
@@ -18,135 +16,8 @@ function loadApisparkConfiguration(callback) {
   });
 }
 
-function executeApiRequest(configuration, path, method, data, callback) {
-  // console.log('>> url = '+configuration.baseUrl + 'api' + path);
-  var options = {
-    url: configuration.baseUrl + 'api' + path,
-    method: method,
-    headers: {
-      accept: 'application/json'
-    },
-    auth: {
-      user: configuration.username,
-      pass: configuration.password
-    }
-  };
-
-  if (data != null) {
-    options.json = data;
-  }
-
-  request(
-      options,
-      function(error, response, body) {
-        if (!error && response.statusCode === 200) {
-          var jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
-          callback(jsonBody);
-        } else if (!error && response.statusCode === 204) {
-          callback();
-        } else {
-          console.log('err = ' + error);
-          console.log('response.statusCode = ' + response.statusCode);
-          console.log(body);
-        }
-      });
-}
-
-function getRootUrl(rootUrl) {
-  var rootUrlElts = urlApi.parse(rootUrl);
-  // For dev environment
-  rootUrlElts.host = null;
-  rootUrlElts.port = 8182;
-  return urlApi.format(rootUrlElts);
-}
-
-function executeWebApiRequest(configuration, apiId,
-    path, method, data, callback) {
-  executeApiRequest(configuration, '/apis/' + apiId +
-      '/versions/1/access', 'GET', null, function(access) {
-    var options = {
-      url: getRootUrl(access.rootUrl) + path,
-      method: method,
-      headers: {
-        accept: 'application/json'
-      },
-      auth: {
-        user: access.username,
-        pass: access.token
-      }
-    };
-    console.log('url = ' + options.url);
-
-    if (data != null) {
-      options.json = data;
-    }
-
-    request(
-      options,
-      function(error, response, body) {
-        if (!error && response.statusCode === 200) {
-          var jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
-          callback(jsonBody);
-        } else if (!error && response.statusCode === 204) {
-          callback();
-        } else {
-          console.log('err = ' + error);
-          console.log('response.statusCode = ' + response.statusCode);
-          console.log(body);
-        }
-      }
-    );
-  });
-}
-
-function isDataStoreType(type) {
-  return (type === 'entitystore' || type === 'filestore');
-}
-
-function isWebApiType(type) {
-  return (type === 'fullwebapi');
-}
-
-function createDataStoreObject(name, type) {
-  return {
-    name: name,
-    description: '',
-    type: type/*,
-    template: false*/,
-    source: ''
-  };
-}
-
-function createWebApiObject(name, type) {
-  return {
-    name: name,
-    description: '',
-    domainName: name.toLowerCase(),
-    type: type/*,
-    template: false*/
-  };
-}
-
-function createFolderObject(name) {
-  return {
-    name: name
-  };
-}
-
-function createDependencyObject(webApi, store) {
-  return {
-    sourceVersion: {
-      id: webApi + '#1'
-    },
-    targetVersion: {
-      id: store + '#1'
-    },
-    type: ''
-  };
-}
-
 function checkNotEmptyOptionParameter(value, name) {
-  if (value == null) {
+  if (value === null) {
     throw new Error(name + ' must be specified');
   }
 }
@@ -217,11 +88,9 @@ program
         checkNotEmptyOptionParameter(name, 'Name of folder');
         checkNotEmptyOptionParameter(cell, 'Id of the cell');
 
-        var folder = createFolderObject(name);
-        executeApiRequest(configuration, '/stores/' +
-            cell + '/versions/1/folders/',
-            'POST', folder, function(addedFolder) {
-          if (options.id != null) {
+        apisparkService.createFolder(configuration, name,
+             cell, function(addedFolder) {
+          if (options.id !== null) {
             console.log(addedFolder.id);
           } else {
             console.log('Added folder with id ' + addedFolder.id);
@@ -279,21 +148,14 @@ program
       checkNotEmptyOptionParameter(webApi, 'Id of web api');
       checkNotEmptyOptionParameter(store, 'Type of data store');
 
-      var dependency = createDependencyObject(webApi, store);
-
-      executeApiRequest(configuration, '/apis/' + webApi +
-            '/versions/1/dependencies/',
-            'POST', dependency, function(addedDependency) {
+      var synchronize = isSynchronizeElementsOption(options);
+      apisparkService.linkCells(configuration, webApi, store,
+          synchronize, function(addedDependency) {
         console.log('Added dependency with id ' + addedDependency.id);
-        if (isSynchronizeElementsOption(options)) {
-          executeApiRequest(configuration, '/apis/' + webApi +
-            '/versions/1/dependencies/' + addedDependency.id + '/synchronize',
-            'POST', null, function() {
-            console.log('Synchronized dependency');
-          });
+        if (synchronize) {
+          console.log('Synchronized dependency');
         }
       });
-
     });
   }).on('--help', function() {
     console.log('  Examples:');
@@ -308,11 +170,11 @@ program
 // Management of entities
 
 function isEntitiesListOption(options) {
-  return (options.list != null);
+  return (options.list !== null);
 }
 
 function isEntitiesImportOption(options) {
-  return (options.import != null);
+  return (options.import !== null);
 }
 
 program
@@ -327,10 +189,7 @@ program
         var id = cell;
         checkNotEmptyOptionParameter(id, 'Id of cell');
 
-        executeApiRequest(configuration, '/stores/' + id +
-            '/versions/1/entities/', 'GET',
-            null, function(jsonBody) {
-          var entities = jsonBody.entities;
+        apisparkService.getEntities(configuration, id, function(entities) {
           console.log('List of entities:');
           _.forEach(entities, function(entity) {
             console.log('- (' + entity.id + ') ' + entity.name);
@@ -343,17 +202,8 @@ program
         var id = cell;
         checkNotEmptyOptionParameter(id, 'Id of cell');
 
-        fs.readFile(fileName, function(err, data) {
-          if (err) {
-            throw err;
-          }
-
-          executeApiRequest(configuration, '/stores/' + id +
-              '/versions/1/definition',
-              'POST', JSON.parse(data), function(jsonBody) {
-            console.log(jsonBody);
-            console.log('Uploaded entities definition');
-          });
+        apisparkService.importEntities(configuration, id, fileName, function() {
+          console.log('Uploaded entities definition');
         });
       });
     }
@@ -368,7 +218,7 @@ program
 // Management of folders
 
 function isEntitiesListOption(options) {
-  return (options.list !=null);
+  return (options.list !== null);
 }
 
 program
@@ -382,10 +232,7 @@ program
         var id = cell;
         checkNotEmptyOptionParameter(id, 'Id of cell');
 
-        executeApiRequest(configuration, '/stores/' + id +
-            '/versions/1/folders/', 'GET',
-            null, function(jsonBody) {
-          var folders = jsonBody.folders;
+        apisparkService.getFolders(configuration, id, function(folders) {
           console.log('List of folders:');
           _.forEach(folders, function(folder) {
             console.log('- (' + entity.id + ') ' + entity.name);
@@ -404,11 +251,11 @@ program
 // Import data
 
 function isDataDisplayOption(options) {
-  return (options.display !=null);
+  return (options.display !== null);
 }
 
 function isDataImportOption(options) {
-  return (options.import !=null);
+  return (options.import !== null);
 }
 
 program
@@ -424,8 +271,7 @@ program
         checkNotEmptyOptionParameter(id, 'Id of cell');
         checkNotEmptyOptionParameter(domain, 'Data domain');
 
-        executeWebApiRequest(configuration, id, domain + '/',
-            'GET', null, function(data) {
+        apisparkService.getData(configuration, id, domain, function(data) {
           console.log('ok');
           console.log(JSON.stringify(data, null, 2));
         });
@@ -436,16 +282,9 @@ program
         var id = cell;
         checkNotEmptyOptionParameter(id, 'Id of cell');
 
-        fs.readFile(fileName, function(err, data) {
-          if (err) {
-            throw err;
-          }
-
-          console.log(JSON.parse(data));
-          executeWebApiRequest(configuration, id, domain + '/',
-              'POST', JSON.parse(data), function() {
-            console.log('ok');
-          });
+        apisparkService.importData(configuration, id,
+            domain, fileName, function() {
+          console.log('ok');
         });
       });
     }

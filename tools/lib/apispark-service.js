@@ -3,14 +3,13 @@
 var fs = require('fs');
 var urlApi = require('url');
 var request = require('request');
-var _ = require('lodash');
 
 exports = module.exports;
 
 // Utility functions
 
 function executeApiRequest(configuration, path, method, data, callback) {
-  // console.log('>> url = '+configuration.baseUrl + 'api' + path);
+   console.log('>> url = '+configuration.baseUrl + 'api' + path);
   var options = {
     url: configuration.baseUrl + 'api' + path,
     method: method,
@@ -32,13 +31,19 @@ function executeApiRequest(configuration, path, method, data, callback) {
       function(error, response, body) {
         if (!error && response.statusCode === 200) {
           var jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
-          callback(jsonBody);
+          callback(null, jsonBody);
         } else if (!error && response.statusCode === 204) {
           callback();
         } else {
           console.log('err = ' + error);
           console.log('response.statusCode = ' + response.statusCode);
           console.log(body);
+          if (error !== null) {
+            callback(error, null);
+          } else {
+            var jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
+            callback(jsonBody, null);
+          }
         }
       });
 }
@@ -77,13 +82,19 @@ function executeWebApiRequest(configuration, apiId,
       function(error, response, body) {
         if (!error && response.statusCode === 200) {
           var jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
-          callback(jsonBody);
+          callback(null, jsonBody);
         } else if (!error && response.statusCode === 204) {
           callback();
         } else {
           console.log('err = ' + error);
           console.log('response.statusCode = ' + response.statusCode);
           console.log(body);
+          if (error !== null) {
+            callback(error, null);
+          } else {
+            var jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
+            callback(jsonBody, null);
+          }
         }
       }
     );
@@ -102,8 +113,8 @@ function createDataStoreObject(name, type) {
   return {
     name: name,
     description: '',
-    type: type/*,
-    template: false*/,
+    type: type,
+    // template: false*/,
     source: ''
   };
 }
@@ -151,7 +162,7 @@ exports.loadApisparkConfiguration = function(callback) {
 
 exports.getUserCells = function(configuration, callback) {
   executeApiRequest(configuration, '/dashboard',
-      'GET', null, function(jsonBody) {
+      'GET', null, function(err, jsonBody) {
     callback(jsonBody.cells);
   });
 };
@@ -160,21 +171,21 @@ exports.createCell = function(configuration, name, type, callback) {
   if (isDataStoreType(type)) {
     var dataStore = createDataStoreObject(name, type);
     executeApiRequest(configuration, '/stores/',
-        'POST', dataStore, function(addedCell) {
-      callback(addedCell);
+        'POST', dataStore, function(err, addedCell) {
+      callback(err, addedCell);
     });
   } else if (isWebApiType(type)) {
     var webApi = createWebApiObject(name, type);
     executeApiRequest(configuration, '/apis/',
-        'POST', webApi, function(addedCell) {
-      callback(addedCell);
+        'POST', webApi, function(err, addedCell) {
+      callback(err, addedCell);
     });
   }
 };
 
 function checkDeployment(configuration, deploymentTask, callback) {
   executeApiRequest(configuration, '/tasks/' + deploymentTask.id,
-            'GET', null, function(task) {
+            'GET', null, function(err, task) {
     if (task.status === 'success') {
       callback(true);
     } else if (task.status === 'failure') {
@@ -192,10 +203,110 @@ exports.deployCell = function(configuration, type, id, callback) {
 
   executeApiRequest(configuration, urlPrefix + id +
         '/versions/1/deploy',
-        'POST', null, function(task) {
+        'POST', null, function(err, task) {
       console.log('Started deployment');
       setTimeout(function() {
         checkDeployment(configuration, task, callback);
       }, 500);
     });
+};
+
+exports.createFolder = function(configuration, name, cellId, callback) {
+  var folder = createFolderObject(name);
+  executeApiRequest(configuration, '/stores/' +
+      cellId + '/versions/1/folders/',
+     'POST', folder, function(err, addedFolder) {
+    callback(err, addedFolder);
+  });
+};
+
+exports.linkCells = function(configuration, webApiId,
+      storeId, synchronize, callback) {
+  var dependency = createDependencyObject(webApiId, storeId);
+
+  executeApiRequest(configuration, '/apis/' + webApiId +
+      '/versions/1/dependencies/',
+      'POST', dependency, function(err, addedDependency) {
+    if (synchronize) {
+      executeApiRequest(configuration, '/apis/' + webApiId +
+          '/versions/1/dependencies/' + addedDependency.id + '/synchronize',
+          'POST', null, function(err) {
+        callback(err, addedDependency);
+      });
+    } else {
+      callback(err, addedDependency);
+    }
+  });
+};
+
+exports.getEntities = function(configuration, storeId, callback) {
+  executeApiRequest(configuration, '/stores/' + storeId +
+      '/versions/1/entities/', 'GET',
+      null, function(err, jsonBody) {
+    var entities = jsonBody.entities;
+    callback(entities);
+  });
+};
+
+exports.importEntities = function(configuration, storeId, fileName, callback) {
+  fs.readFile(fileName, function(err, data) {
+    if (err) {
+      throw err;
+    }
+
+    executeApiRequest(configuration, '/stores/' + storeId +
+        '/versions/1/definition',
+        'POST', JSON.parse(data), function(/*jsonBody*/) {
+      // TODO: jhandle errors
+      callback();
+    });
+  });
+};
+
+exports.getFolders = function(configuration, storeId, callback) {
+  executeApiRequest(configuration, '/stores/' + storeId +
+      '/versions/1/folders/', 'GET',
+      null, function(err, jsonBody) {
+    var folders = jsonBody.folders;
+    callback(folders);
+  });
+};
+
+exports.getResources = function(configuration, webApiId, callback) {
+  executeApiRequest(configuration, '/apis/' + webApiId +
+      '/versions/1/resources/', 'GET',
+      null, function(err, jsonBody) {
+    var resources = jsonBody.resources;
+    callback(resources);
+  });
+};
+
+exports.getRepresentations = function(configuration, webApiId, callback) {
+  executeApiRequest(configuration, '/apis/' + webApiId +
+      '/versions/1/representations/', 'GET',
+      null, function(err, jsonBody) {
+    var representations = jsonBody.representations;
+    callback(representations);
+  });
+};
+
+exports.getData = function(configuration, webApiId, domain, callback) {
+  executeWebApiRequest(configuration, webApiId, domain + '/',
+      'GET', null, function(err, data) {
+    callback(data);
+  });
+};
+
+exports.importData = function(configuration, webApiId,
+    domain, fileName, callback) {
+  fs.readFile(fileName, function(err, data) {
+    if (err) {
+      throw err;
+    }
+
+    executeWebApiRequest(configuration, webApiId, domain + '/',
+        'POST', JSON.parse(data), function() {
+      callback();
+    });
+  });
 };

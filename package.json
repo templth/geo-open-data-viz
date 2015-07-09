@@ -38,7 +38,8 @@
     "commander": "2.8.1",
     "request": "2.58.0",
     "chalk": "1.1.0",
-    "camelize": "1.0.0"
+    "camelize": "1.0.0",
+    "colors": "1.1.2"
   },
   "engines": {
     "node": ">=0.10.0"
@@ -46,6 +47,7 @@
   "scripts": {
     "test": "grunt test",
     "map:sample:generate": "node tools/map-sample-serializer.js",
-    "schema:generate": "node tools/schema-entities-generator.js"
+    "schema:generate": "node tools/schema-entities-generator.js",
+    "install": "node tools/installer.js"
   }
 }
