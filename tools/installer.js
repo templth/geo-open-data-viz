@@ -42,8 +42,9 @@ function executeTask(task, onEndCallback) {
     console.log('');
     onEndCallback();
   } else if (task.type !== null && task.type === 'message') {
-    console.log(' ' + task.message);
-    onEndCallback();
+    if (task.processing != null) {
+      task.processing(onEndCallback);
+    }
   } else {
     logTask(task.message, function(end) {
       executeTaskProcessing(task, function(success) {
@@ -63,10 +64,49 @@ function createGroupMessage(msg) {
   };
 }
 
+function createSimpleMessage(callback) {
+  return {
+    type: 'message',
+    processing: function(asyncCallback) {
+      callback();
+      asyncCallback();
+    }
+  };
+}
+
 function createWebApiIdMessage(msg) {
   return {
     message: msg,
     type: 'message'
+  };
+}
+
+function createCell(configuration, cellType, cellName) {
+  var cellMessage = '';
+  if (cellType === 'fullwebapi') {
+    cellMessage = 'Create Web API';
+  } else if (cellType === 'entitystore') {
+    cellMessage = 'Create entity store';
+  } else if (cellType === 'filestore') {
+    cellMessage = 'Create file store';
+  }
+  return {
+    message: cellMessage + ' "' + cellName + '"',
+    processing: function(callback) {
+      apisparkService.createCell(configuration, cellName,
+          cellType, function(err, addedCell) {
+        if (addedCell !== null) {
+          if (cellType === 'fullwebapi') {
+            cells.webApi.id = addedCell.id;
+          } else if (cellType === 'entitystore') {
+            cells.entityStore.id = addedCell.id;
+          } else if (cellType === 'filestore') {
+            cells.fileStore.id = addedCell.id;
+          }
+        }
+        callback((err == null));
+      });
+    }
   };
 }
 
@@ -76,9 +116,7 @@ function createFolderTask(configuration, msg, folderName) {
     processing: function(callback) {
       apisparkService.createFolder(configuration, folderName,
           cells.fileStore.id, function(err) {
-          	if (err!=null)
-          	console.log(JSON.stringify(err));
-        callback((err === null));
+        callback((err == null));
       });
     }
   };
@@ -90,7 +128,7 @@ function linkEntityStoreTask(configuration, msg) {
     processing: function(callback) {
       apisparkService.linkCells(configuration, cells.webApi.id,
           cells.entityStore.id, true, function(err) {
-        callback((err === null));
+        callback((err == null));
       });
     }
   };
@@ -101,8 +139,20 @@ function linkFileStoreTask(configuration, msg) {
     message: msg,
     processing: function(callback) {
       apisparkService.linkCells(configuration, cells.webApi.id,
-          cells.fileStore.id, true, function(err) {
-        callback((err === null));
+          cells.fileStore.id, false, function(err) {
+        callback((err == null));
+      });
+    }
+  };
+}
+
+function configureHttpEndpoinTask(configuration, msg) {
+  return {
+    message: msg,
+    processing: function(callback) {
+      apisparkService.configureHttpEndpoint(configuration, cells.webApi.id,
+          function(err) {
+        callback((err == null));
       });
     }
   };
@@ -113,8 +163,8 @@ function deployWebApiTask(configuration, msg) {
     message: msg,
     processing: function(callback) {
       apisparkService.deployCell(configuration, 'webapi',
-          cells.webApi.id, function(err) {
-        callback((err === null));
+          cells.webApi.id, function(err, success) {
+        callback(err == null && success);
       });
     }
   };
@@ -125,8 +175,8 @@ function deployEntityStoreTask(configuration, msg) {
     message: msg,
     processing: function(callback) {
       apisparkService.deployCell(configuration,
-          'entitystore', cells.entityStore.id, function(err) {
-        callback((err === null));
+          'entitystore', cells.entityStore.id, function(err, success) {
+        callback(err == null && success);
       });
     }
   };
@@ -137,8 +187,25 @@ function deployFileStoreTask(configuration, msg) {
     message: msg,
     processing: function(callback) {
       apisparkService.deployCell(configuration, 'filestore',
-          cells.fileStore.id, function(err) {
-        callback((err === null));
+          cells.fileStore.id, function(err, success) {
+        callback(err == null && success);
+      });
+    }
+  };
+}
+
+function importDataTask(configuration, msg, domain, fileName) {
+  return {
+    message: msg,
+    processing: function(callback) {
+      apisparkService.deployCell(configuration, 'filestore',
+          cells.fileStore.id, function(err, success) {
+        callback(err == null && success);
+      });
+
+      apisparkService.importData(configuration, cells.webApi.id,
+        domain, fileName, function(err) {
+        callback(err == null);
       });
     }
   };
@@ -149,49 +216,22 @@ apisparkService.loadApisparkConfiguration(function(configuration) {
     // Creating cells
 
     createGroupMessage('Create cells'),
-    {
-      message: 'Create Web API "' + cells.webApi.name + '"',
-      processing: function(callback) {
-        apisparkService.createCell(configuration, cells.webApi.name,
-            'fullwebapi', function(err, addedCell) {
-          if (addedCell !== null) {
-            cells.webApi.id = addedCell.id;
-          }
-          callback((err === null));
-        });
-      }
-    },
-    {
-      message: 'Create Entity Store "' + cells.entityStore.name + '"',
-      processing: function(callback) {
-        apisparkService.createCell(configuration, cells.entityStore.name,
-            'entitystore', function(err, addedCell) {
-          if (addedCell !== null) {
-            cells.entityStore.id = addedCell.id;
-          }
-          callback((err === null));
-        });
-      }
-    },
-    {
-      message: 'Create File Store "' + cells.fileStore.name + '"',
-      processing: function(callback) {
-        apisparkService.createCell(configuration, cells.fileStore.name,
-            'filestore', function(err, addedCell) {
-          if (addedCell !== null) {
-            cells.fileStore.id = addedCell.id;
-          }
-          callback((err === null));
-        });
-      }
-    },
+    createCell(configuration, 'fullwebapi', cells.webApi.name),
+    createCell(configuration, 'entitystore', cells.entityStore.name),
+    createCell(configuration, 'filestore', cells.fileStore.name),
 
     // Display hints
 
     createGroupMessage('Dispay identifiers of created cells'),
-    /*createSimpleMessage('Web API : ' + cells.webApi.id),
-    createSimpleMessage('Entity store : ' + cells.entityStore.id),
-    createSimpleMessage('File store : ' + cells.fileStore.id),*/
+    createSimpleMessage(function() {
+      console.log('  Web API : ' + cells.webApi.id);
+    }),
+    createSimpleMessage(function() {
+      console.log('  Entity store : ' + cells.entityStore.id);
+    }),
+    createSimpleMessage(function() {
+      console.log('  File store : ' + cells.fileStore.id);
+    }),
 
     // Creating structures
 
@@ -220,15 +260,19 @@ apisparkService.loadApisparkConfiguration(function(configuration) {
     linkEntityStoreTask(configuration, 'Link Web API with entity store'),
     linkFileStoreTask(configuration, 'Link Web API with file store'),
 
+    // Configure for HTTP
+    configureHttpEndpoinTask(configuration, 'Configure HTTP endpoint'),
+
     // Deploy all cells
     createGroupMessage('Deploy cells'),
-    deployWebApiTask(configuration, 'Deploy Web API', cells.webApi.id),
-    deployEntityStoreTask(configuration, 'Deploy entity store',
-      cells.entityStore.id),
-    deployFileStoreTask(configuration, 'Deploy file store', cells.fileStore.id),
+    deployWebApiTask(configuration, 'Deploy Web API'),
+    deployEntityStoreTask(configuration, 'Deploy entity store'),
+    deployFileStoreTask(configuration, 'Deploy file store'),
 
     // Import sample data
     createGroupMessage('Import sample data'),
+    importDataTask(configuration, 'Import sample map data',
+      'maps', 'schema/sample-map.json')
   ];
 
   async.series(_.map(tasks, function(task) {

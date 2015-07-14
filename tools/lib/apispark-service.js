@@ -3,6 +3,7 @@
 var fs = require('fs');
 var urlApi = require('url');
 var request = require('request');
+var async = require('async');
 
 exports = module.exports;
 
@@ -59,7 +60,8 @@ function getRootUrl(rootUrl) {
 function executeWebApiRequest(configuration, apiId,
     path, method, data, callback) {
   executeApiRequest(configuration, '/apis/' + apiId +
-      '/versions/1/access', 'GET', null, function(access) {
+      '/versions/1/access', 'GET', null, function(err, access) {
+        console.log('>> access = '+JSON.stringify(access));
     var options = {
       url: getRootUrl(access.rootUrl) + path,
       method: method,
@@ -147,6 +149,14 @@ function createDependencyObject(webApi, store) {
   };
 }
 
+function createEndpointObject(protocol, domain) {
+  return {
+    protocol: protocol,
+    domain: domain,
+    version: cells.api.id + '#1'
+  };
+}
+
 // Service functions
 
 exports.loadApisparkConfiguration = function(callback) {
@@ -183,13 +193,55 @@ exports.createCell = function(configuration, name, type, callback) {
   }
 };
 
+exports.configureHttpEndpoint = function(configuration, cellId, callback) {
+  async.series([
+    function(callback) {
+      console.log('>> configureHttpEndpoint 1');
+      executeApiRequest(configuration, '/apis/' + cellId + '/versions/endpoints/',
+          'GET', null, function(err, endpoints) {
+        if (err == null) {
+          callback(err, (endpoints != null && endpoints.length === 1)
+            ? endpoints[0] : null);
+        } else {
+          callback(err);
+        }
+      });
+    },
+    function(endpoint, callback) {
+      console.log('>> configureHttpEndpoint 2');
+      executeApiRequest(configuration, '/apis/' + cellId + '/versions/endpoints/' + endpoint.id,
+          'DELETE', null, function(err) {
+        if (err == null) {
+          callback(err, endpoint.domain);
+        } else {
+          callback(err);
+        }
+      });
+    },
+    function(endpoint, callback) {
+      console.log('>> configureHttpEndpoint 3');
+      var endpoint = createEndpointObject('http', domain);
+      executeApiRequest(configuration, '/apis/' + cellId + '/versions/endpoints/',
+          'POST', endpoint, function(err, addedEndpoint) {
+        if (err == null) {
+          callback(err, addedEndpoint);
+        } else {
+          callback(err);
+        }
+      });
+    }
+  ]);
+};
+
 function checkDeployment(configuration, deploymentTask, callback) {
   executeApiRequest(configuration, '/tasks/' + deploymentTask.id,
             'GET', null, function(err, task) {
-    if (task.status === 'success') {
-      callback(true);
+    if (err != null) {
+      callback(err, false);
+    } else if (task.status === 'success') {
+      callback(err, true);
     } else if (task.status === 'failure') {
-      callback(false);
+      callback(err, false);
     } else {
       setTimeout(function() {
         checkDeployment(configuration, task, callback);
@@ -204,7 +256,6 @@ exports.deployCell = function(configuration, type, id, callback) {
   executeApiRequest(configuration, urlPrefix + id +
         '/versions/1/deploy',
         'POST', null, function(err, task) {
-      console.log('Started deployment');
       setTimeout(function() {
         checkDeployment(configuration, task, callback);
       }, 500);
@@ -293,7 +344,7 @@ exports.getRepresentations = function(configuration, webApiId, callback) {
 exports.getData = function(configuration, webApiId, domain, callback) {
   executeWebApiRequest(configuration, webApiId, domain + '/',
       'GET', null, function(err, data) {
-    callback(data);
+    callback(err, data);
   });
 };
 
@@ -305,8 +356,8 @@ exports.importData = function(configuration, webApiId,
     }
 
     executeWebApiRequest(configuration, webApiId, domain + '/',
-        'POST', JSON.parse(data), function() {
-      callback();
+        'POST', JSON.parse(data), function(err) {
+      callback(err);
     });
   });
 };
