@@ -20,6 +20,7 @@
   "globals": {
     "angular": false,
     "d3": true,
-    "topojson": true
+    "topojson": true,
+    "_": true
   }
 }
