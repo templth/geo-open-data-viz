@@ -146,15 +146,15 @@ angular.module('mapManager.d3.services', [
 
 // Map creator service
 
-.service('mapCreatorService', [ 'mapService', 'mapInteractionService',
-    'layerService', 'projectionService', function(mapService,
+.service('mapCreatorService', [ 'currentMapService', 'mapInteractionService',
+    'layerService', 'projectionService', function(currentMapService,
       mapInteractionService, layerService, projectionService) {
   return {
     refreshMap: function(element) {
       console.log('refreshmap');
-      if (mapService.currentMapContext.svg != null) {
+      if (currentMapService.currentMapContext.svg != null) {
         console.log('remove svg');
-        mapService.currentMapContext.svg.remove();
+        currentMapService.currentMapContext.svg.remove();
       }
 
       this.createMap(element);
@@ -166,7 +166,11 @@ angular.module('mapManager.d3.services', [
       var height = 500;
 
       var projection = projectionService.createProjection(
-        mapService.currentMap.projection, {width: width, height: height});
+        currentMapService.currentMap.projection,
+          {width: width, height: height});
+      if (projection != null && currentMapService.currentMap.scale != null) {
+        projection.scale(currentMapService.currentMap.scale);
+      }
       var path = projectionService.configurePathWithProjection(projection);
 
       var svg = d3.select(element[0]).append('svg')
@@ -183,15 +187,16 @@ angular.module('mapManager.d3.services', [
       var g = svg.append('g').attr('id', 'layers');
 
       // Save current map context
-      mapService.currentMapContext.svg = svg;
-      mapService.currentMapContext.path = path;
-      mapService.currentMapContext.layers = g;
+      currentMapService.currentMapContext.svg = svg;
+      currentMapService.currentMapContext.path = path;
+      currentMapService.currentMapContext.projection = projection;
+      currentMapService.currentMapContext.layers = g;
 
       // Preload data
       // TODO
 
       // Create layers
-      var layers = mapService.currentMap.layers;
+      var layers = currentMapService.currentMap.layers;
       _.forEach(layers, function(layer) {
         if (layer.applied) {
           layerService.createLayer(svg, path, layer);
@@ -202,19 +207,25 @@ angular.module('mapManager.d3.services', [
       // TODO
 
       mapInteractionService.configureMoving(svg, 'mouseMove', {
-        type: mapService.currentMap.projection, raw: projection
+        type: currentMapService.currentMap.projection, raw: projection
       }, [ {type: 'path'}, {type: 'circle'}]);
       // this.configureMapResize(scope, element);
       mapInteractionService.configureZooming(svg, 'mouseWheel', {
-        type: mapService.currentMap.projection, raw: projection}, {
+        type: currentMapService.currentMap.projection, raw: projection}, {
         width: '', height: ''
       }, [{type: 'path'}, {type: 'circle'}]);
 
     },
 
     updateProjection: function(newProjection) {
-      mapService.currentMap.projection = newProjection;
-      this.refreshMap(mapService.currentMap.element);
+      currentMapService.currentMap.projection = newProjection;
+      this.refreshMap(currentMapService.currentMap.element);
+    },
+
+    updateScale: function(newScale) {
+      console.log('>> updateScale = '+newScale);
+      currentMapService.currentMap.scale = newScale;
+      this.refreshMap(currentMapService.currentMap.element);
     }
   };
 }])
@@ -265,8 +276,8 @@ angular.module('mapManager.d3.services', [
 
 // Layer service
 
-.service('layerService', [ '$parse', 'mapService', 'consoleService',
-    function($parse, mapService, consoleService) {
+.service('layerService', [ '$parse', 'currentMapService', 'consoleService',
+    function($parse, currentMapService, consoleService) {
   return {
     toggleLayerVisibility: function(layer) {
       if (layer.mode === 'fill') {
@@ -301,6 +312,14 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    refreshLayerApplying: function(svg, path, layer) {
+      if (layer.applied) {
+        var layerElement = d3.select(document.getElementById(layer.id));
+        layerElement.remove();
+        this.createLayer(svg, path, layer);
+      }
+    },
+
     createGraticuleLayer: function(svg, path, layer) {
       consoleService.logMessage('info',
         'Creating graticule layer with identifier "' + layer.id + '"');
@@ -325,51 +344,51 @@ angular.module('mapManager.d3.services', [
           .attr('d', path);
 
         if (layer.display.border) {
-          var stroke = '#000';
-          var strokeWidth = '1px';
+          var borderStroke = '#000';
+          var borderStrokeWidth = '1px';
           if (layer.styles.border != null) {
             if (layer.styles.border.stroke != null) {
-              stroke = layer.styles.border.stroke;
+              borderStroke = layer.styles.border.stroke;
             }
             if (layer.styles.border.strokeWidth != null) {
-              strokeWidth = layer.styles.border.strokeWidth;
+              borderStrokeWidth = layer.styles.border.strokeWidth;
             }
           }
 
           layerElement.append('use')
-            .style('stroke', stroke)
-            .style('stroke-width', strokeWidth)
+            .style('stroke', borderStroke)
+            .style('stroke-width', borderStrokeWidth)
             .style('fill', 'none')
             .attr('xlink:href', '#sphere');
         }
 
         if (layer.display.background) {
-          var fill = '#000';
+          var backgroundFill = '#000';
           if (layer.styles.background != null) {
             if (layer.styles.background.fill != null) {
-              fill = layer.styles.background.fill;
+              backgroundFill = layer.styles.background.fill;
             }
           }
 
           layerElement.append('use')
-            .style('fill', fill)
+            .style('fill', backgroundFill)
             .attr('xlink:href', '#sphere');
         }
       }
 
       if (layer.display.lines) {
-        var stroke = '#777';
-        var strokeWidth = '0.5px';
-        var strokeOpacity = '0.5';
+        var linesStroke = '#777';
+        var linesStrokeWidth = '0.5px';
+        var linesStrokeOpacity = '0.5';
         if (layer.styles.lines != null) {
           if (layer.styles.lines.stroke != null) {
-            stroke = layer.styles.lines.stroke;
+            linesStroke = layer.styles.lines.stroke;
           }
           if (layer.styles.lines.strokeWidth != null) {
-            strokeWidth = layer.styles.lines.strokeWidth;
+            linesStrokeWidth = layer.styles.lines.strokeWidth;
           }
           if (layer.styles.lines.strokeOpacity != null) {
-            strokeOpacity = layer.styles.lines.strokeOpacity;
+            linesStrokeOpacity = layer.styles.lines.strokeOpacity;
           }
         }
 
@@ -377,9 +396,9 @@ angular.module('mapManager.d3.services', [
           .attr('id', layer.id)
           .datum(graticule)
           .style('fill', 'none')
-          .style('stroke', stroke)
-          .style('stroke-width', strokeWidth)
-          .style('stroke-opacity', strokeOpacity)
+          .style('stroke', linesStroke)
+          .style('stroke-width', linesStrokeWidth)
+          .style('stroke-opacity', linesStrokeOpacity)
           .attr('d', path);
       }
     },
@@ -400,7 +419,7 @@ angular.module('mapManager.d3.services', [
               data.objects[layer.data.rootObject],
               function(a, b) { return a.id !== b.id; }));
 
-          if (layer.styles.path != null) {
+          if (layer.styles.lines != null) {
             var stroke = '#fff';
             var strokeWidth = '0.5px';
             var strokeOpacity = '0.5';
@@ -441,7 +460,7 @@ angular.module('mapManager.d3.services', [
       }
 
       if (layer.data.loaded) {
-      	handleData(layer.data.content);
+        handleData(layer.data.content);
       } else {
         d3.json(layer.data.url, handleData);
       }
@@ -468,7 +487,7 @@ angular.module('mapManager.d3.services', [
         // Experimental: display axis
 
         // A position encoding for the key only.
-        var x = d3.scale.linear()
+        /*var x = d3.scale.linear()
                   .domain([0, 1])
                   .range([0, 240]);
 
@@ -479,7 +498,7 @@ angular.module('mapManager.d3.services', [
               .tickValues(color.domain())
               .tickFormat(function(d) {
           return d;
-          /* === .5 ? formatPercent(d) : formatNumber(100 * d);*/
+          // === .5 ? formatPercent(d) : formatNumber(100 * d);
         });
 
         var svg = mapService.currentMapContext.svg;
@@ -512,7 +531,7 @@ angular.module('mapManager.d3.services', [
         g.call(xAxis).append('text')
         .attr('class', 'caption')
         .attr('y', -6)
-        .text('Percentage');
+        .text('Percentage');*/
 
         // End Experimental: display axis
       }

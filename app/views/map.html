@@ -1,120 +1,232 @@
-<div ng-controller="MapController">
+<div>
   <div class="col-md-8" id="map" map="map"></div>
   <div class="col-md-4">
-
-  <accordion close-others="oneAtATime">
-    <!-- Properties -->
-    <accordion-group is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
-      <accordion-heading>
-        Properties <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-      </accordion-heading>
-
-      <form name="propertiesForm" novalidate class="form-horizontal">
-        <field label="Projection">
-          <select class="form-control input-sm" name="projection" ng-model="properties.projection">
-            <option value="none">None</option>
-            <option value="orthographic">Orthographic</option>
-            <option value="mercator">Mercator</option>
-          </select>
-        </field>
-
-        <field label="Scale">
-          <input class="form-control input-sm" name="scale" type="text" 
-                     placeholder="Scale" required ng-model="session.scale" />
-        </field>
-
-         <div class="form-group">
-           <button type="submit" class="btn btn-primary pull-right" 
-                        value="Login" title="Login">
-             <span>Login</span>
-           </button>
-        </div>
-      </form>
-    </accordion-group>
-    <!-- End properties -->
-
-    <!-- Interactions -->
-    <accordion-group>
-      <accordion-heading>
-        Interactions <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-      </accordion-heading>
-
-      <form name="interactionsForm" novalidate class="form-horizontal">
-        <field label="Move">
-          <input class="form-control input-sm" name="move" type="text" 
-                     placeholder="Move" required ng-model="session.username" />
-        </field>
-
-        <field label="Zoom">
-          <input class="form-control input-sm" name="scale" type="text" 
-                     placeholder="Scale" required ng-model="session.scale" />
-        </field>
-
-         <div class="form-group">
-           <button type="submit" class="btn btn-primary pull-right" 
-                        value="Login" title="Login">
-             <span>Login</span>
-           </button>
-        </div>
-      </form>
-    </accordion-group>
-    <!-- End interactions -->
-
-    <!-- Behaviors -->
-    <accordion-group>
-      <accordion-heading>
-        Behaviors <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-      </accordion-heading>
-
-      Zoom and center on click
-      Auto rotation
-      Display all points (animation)
-    </accordion-group>
-    <!-- End Behaviors -->
-
-    <!-- Layers -->
-    <accordion-group>
-      <accordion-heading>
-        Layers <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-      </accordion-heading>
-
-      <!-- Layer graticule -->
-      <accordion-group ng-repeat="layer in layers">
+    <accordion close-others="oneAtATime">
+      <!-- Properties -->
+      <accordion-group is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
         <accordion-heading>
-          {{layer.name}} <div class="pull-right"><span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>&nbsp;<span class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span></div>
+          Properties <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
         </accordion-heading>
 
-        <p>The body of the accordion group grows to fit the contents</p>
-          <button class="btn btn-default btn-sm" ng-click="addItem()">Add Item</button>
-          <div ng-repeat="item in items">{{item}}</div>
+        <form name="propertiesForm" novalidate class="form-horizontal">
+          <field label="Projection">
+            <select class="form-control input-sm" name="projection" ng-model="properties.projection">
+              <option value="none">None</option>
+              <option value="orthographic">Orthographic</option>
+              <option value="mercator">Mercator</option>
+            </select>
+          </field>
+
+          <field label="Scale">
+            <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="properties.scale" />
+          </field>
+        </form>
       </accordion-group>
-      <!-- End layer graticule -->
-    </accordion-group>
-    <!-- End layers -->
+      <!-- End properties -->
 
-    <!-- Data sources -->
-    <accordion-group is-open="status.open">
+      <!-- Interactions -->
+      <accordion-group>
         <accordion-heading>
-            Data sources <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-        </accordion-heading>
-        This is just some content to illustrate fancy headings.
-    </accordion-group>
-    <!-- End data sources -->
-
-    <!-- Console -->
-    <accordion-group is-open="status.open">
-        <accordion-heading>
-            Console <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+          Interactions <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
         </accordion-heading>
 
-        <ul>
-          <li ng-repeat="message in messages">{{message.description}}</li>
-        </ul>
-    </accordion-group>
-    <!-- End console -->
-  </accordion>
+        <form name="interactionsForm" novalidate class="form-horizontal">
+          <field label="Move">
+            <input class="form-control input-sm" name="move" type="text" 
+                       placeholder="Move" required ng-model="session.username" />
+          </field>
 
-  <div ng-click="changeColor()">Tesy</div>
-  <div ng-click="hideLayer('graticuleLayer')">Tesy</div>
+          <field label="Zoom">
+            <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="session.scale" />
+          </field>
+
+           <div class="form-group">
+             <button type="submit" class="btn btn-primary pull-right" 
+                          value="Login" title="Login">
+               <span>Login</span>
+             </button>
+          </div>
+        </form>
+      </accordion-group>
+      <!-- End interactions -->
+
+      <!-- Behaviors -->
+      <accordion-group>
+        <accordion-heading>
+          Behaviors <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+        </accordion-heading>
+
+        Zoom and center on click
+        Auto rotation
+        Display all points (animation)
+      </accordion-group>
+      <!-- End Behaviors -->
+
+      <!-- Layers -->
+      <accordion-group>
+        <accordion-heading>
+          Layers <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+        </accordion-heading>
+
+        <!-- Layer graticule -->
+        <accordion-group ng-repeat="layer in layers">
+          <accordion-heading>
+            {{layer.name}}
+            <div class="pull-right">
+              <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>&nbsp;<span class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
+              &nbsp;&nbsp;&nbsp;
+              <i class="glyphicon glyphicon-refresh"></i>
+              <i class="glyphicon glyphicon-remove"></i>
+            </div>
+          </accordion-heading>
+
+          <div ng-if="shouldDisplayGraticuleProperties(layer)" ng-controller="UpdateLayerCtrl">
+            <!-- properties -->
+            <fieldset>
+              <legend class="small">Properties</legend>
+              <form name="layerForm" novalidate class="form-horizontal">
+                <field label="Name">
+                  <input class="form-control input-sm" name="name" type="text" 
+                       required ng-model="layer.name"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+                <field label="Apply on layer">
+                  <input class="form-control input-sm" name="applyOn" type="text" 
+                       required ng-model="layer.applyOn"
+                      ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+                <field label="Background">
+                  <input type="checkbox" ng-model="layer.display.background">
+                </field>
+                <field label="Lines">
+                  <input type="checkbox" ng-model="layer.display.lines">
+                </field>
+                <field label="Border">
+                  <input type="checkbox"  ng-model="layer.display.border">
+                </field>
+              </form>
+            </fieldset>
+            <!-- styles -->
+            <fieldset>
+              <legend class="small">Styles</legend>
+              <form name="propertiesForm" novalidate class="form-horizontal">
+                <!-- background -->
+                <field-multi-labels label1="background" label2="fill">
+                  <input class="form-control input-sm" name="scale" type="text" 
+                       required ng-model="layer.styles.background.fill"
+                        ng-model-options="{ updateOn: 'blur' }" />
+                </field-multi-labels>
+                <!-- border -->
+                <field-multi-labels label1="border" label2="stroke">
+                  <input class="form-control input-sm" name="scale" type="text" 
+                       required ng-model="layer.styles.border.stroke"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field-multi-labels>
+                <field-multi-labels label1="border" label2="strokeWidth">
+                  <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="layer.styles.border.strokeWidth"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field-multi-labels>
+                <!-- lines -->
+                <field-multi-labels label1="lines" label2="stroke">
+                  <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="layer.styles.lines.stroke"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field-multi-labels>
+                <field-multi-labels label1="lines" label2="strokeWidth">
+                  <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="layer.styles.lines.strokeWidth"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field-multi-labels>
+                <field-multi-labels label1="lines" label2="strokeOpacity">
+                  <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="layer.styles.lines.strokeOpacity"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field-multi-labels>
+              </form>
+            </fieldset>
+          </div>
+
+          <div ng-if="shoulldDisplayGeoDataProperties(layer)">
+          Geodata
+          </div>
+
+          <div ng-if="shoulldDisplayDataFillProperties(layer)">
+            <!-- properties -->
+            <fieldset>
+              <legend class="small">Properties</legend>
+              <form name="layerForm" novalidate class="form-horizontal">
+                <field label="Name">
+                  <input class="form-control input-sm" name="name" type="text" 
+                       required ng-model="layer.name"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+                <field label="Apply on layer">
+                  <input class="form-control input-sm" name="applyOn" type="text" 
+                       required ng-model="layer.applyOn"
+                      ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+              </form>
+            </fieldset>
+            <!-- data -->
+            <fieldset>
+              <legend class="small">Data</legend>
+              <form name="layerForm" novalidate class="form-horizontal">
+                <field label="URL">
+                  <input class="form-control input-sm" name="name" type="text" 
+                       required ng-model="layer.data.url"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+                <field label="Type">
+                  <input class="form-control input-sm" name="applyOn" type="text" 
+                       required ng-model="layer.data.type"
+                      ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+              </form>
+            </fieldset>
+            <!-- display -->
+            <fieldset>
+              <legend class="small">Display</legend>
+              <form name="layerForm" novalidate class="form-horizontal">
+                <field label="Value">
+                  <input class="form-control input-sm" name="name" type="text" 
+                       required ng-model="layer.display.fill.value"
+                       ng-model-options="{ updateOn: 'blur' }" />
+                </field>
+              </form>
+            </fieldset>
+          </div>
+
+          <div ng-if="shoulldDisplayDataObjectsProperties(layer)">
+          Data objects
+          </div>
+        </accordion-group>
+        <!-- End layer graticule -->
+      </accordion-group>
+      <!-- End layers -->
+
+      <!-- Sources -->
+      <accordion-group is-open="status.open">
+          <accordion-heading>
+              Sources <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+          </accordion-heading>
+          This is just some content to illustrate fancy headings.
+      </accordion-group>
+      <!-- End data sources -->
+
+      <!-- Console -->
+      <accordion-group is-open="status.open">
+          <accordion-heading>
+              Console <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+          </accordion-heading>
+
+          <ul>
+            <li ng-repeat="message in messages">{{message.description}}</li>
+          </ul>
+      </accordion-group>
+      <!-- End console -->
+    </accordion>
   </div>
 </div>

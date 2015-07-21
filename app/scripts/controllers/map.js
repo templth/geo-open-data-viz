@@ -8,15 +8,24 @@
  * Controller of the mapManagerApp
  */
 angular.module('mapManagerApp')
-  .controller('MapCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
+  .controller('MapCtrl', function($scope, currentMapService, layerService, //
+                                  projectionService, consoleService, //
+                                  mapCreatorService, map, maps, sources, //
+                                  commonsService) {
+    // Register common functions
+    commonsService.registerCommonFunctionsInScope(
+      $scope, 'map', maps, sources);
 
-    $scope.mapHints = {
-      scale: 150,
-      projection: ''
-    };
+    // Set current map elements
+    currentMapService.currentMap = map;
+
+    // Set current map in scope
+    commonsService.setCurrentMapInScope($scope, map);
+
+    // Add map functions in scipe
+    commonsService.registerCommonMapFunctionsInScope($scope);
+  })
+
+  .controller('UpdateLayerCtrl', function($scope, commonsService) {
+    commonsService.registerCommonMapLayerFunctionsInScope($scope);
   });

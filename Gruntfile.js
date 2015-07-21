@@ -419,9 +419,73 @@ module.exports = function (grunt) {
         configFile: 'test/karma.conf.js',
         singleRun: true
       }
+    },
+
+    html2js: {
+      options: {
+        base: 'app',
+        module: 'mapManager.templates',
+        singleModule: true,
+        useStrict: true,
+        htmlmin: {
+          collapseBooleanAttributes: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+          removeEmptyAttributes: true,
+          removeRedundantAttributes: true,
+          removeScriptTypeAttributes: true,
+          removeStyleLinkTypeAttributes: true
+        }
+      },
+      main: {
+        src: ['app/views/**/*.html'],
+        dest: 'app/scripts/templates.js'
+      },
     }
   });
 
+  grunt.loadNpmTasks('grunt-html2js');
+
+  grunt.registerTask('apisparkify', function() {
+    var fs = require('fs');
+    var $ = require('cheerio');
+
+    // Create an html directory
+    grunt.file.mkdir('dist/html');
+    grunt.log.ok('Created folder dist/html');
+
+    // Copy the index.html file into the created folder
+    grunt.file.copy('dist/index.html', 'dist/html/index.html', {});
+    grunt.log.ok('Copied file dist/index.html to folder dist/html');
+
+    // Update links in it
+    var indexFile = fs.readFileSync('dist/html/index.html').toString();
+    var parsedHTML = $.load(indexFile);
+
+    grunt.log.writeln('scripts');
+    parsedHTML('script').each(function(i, elt) {
+      var wElt = $(elt);
+      var srcAttr = wElt.attr('src');
+      if (srcAttr != null) {
+        wElt.attr('src', '../' + srcAttr);
+      }
+    });
+    grunt.log.ok('Updated script tags');
+
+    grunt.log.writeln('link');
+    parsedHTML('link').each(function(i, elt) {
+      var wElt = $(elt);
+      var hrefAttr = wElt.attr('href');
+      if (hrefAttr != null) {
+        wElt.attr('href', '../' + hrefAttr);
+      }
+    });
+    grunt.log.ok('Updated link tags');
+
+    fs.writeFileSync('dist/html/index.html', parsedHTML.html());
+    grunt.log.ok('Written updated file dist/index.html');
+  });
 
   grunt.registerTask('serve', 'Compile then start a connect web server', function (target) {
     if (target === 'dist') {
@@ -431,6 +495,7 @@ module.exports = function (grunt) {
     grunt.task.run([
       'clean:server',
       'wiredep',
+      'html2js:main',
       'concurrent:server',
       'autoprefixer:server',
       'connect:livereload',
@@ -448,6 +513,7 @@ module.exports = function (grunt) {
     'wiredep',
     'concurrent:test',
     'autoprefixer',
+    'html2js',
     'connect:test',
     'karma'
   ]);
@@ -458,6 +524,7 @@ module.exports = function (grunt) {
     'useminPrepare',
     'concurrent:dist',
     'autoprefixer',
+    'html2js',
     'concat',
     'ngAnnotate',
     'copy:dist',
@@ -466,7 +533,8 @@ module.exports = function (grunt) {
     'uglify',
     'filerev',
     'usemin',
-    'htmlmin'
+    'htmlmin',
+    'apisparkify'
   ]);
 
   grunt.registerTask('default', [

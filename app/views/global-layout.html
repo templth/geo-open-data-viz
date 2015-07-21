@@ -1,0 +1,59 @@
+    <!-- Header -->
+    <div class="header">
+      <div class="navbar navbar-default" role="navigation">
+        <div class="container">
+          <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#js-navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href="#/">Map Visualization</a>
+          </div>
+
+          <div class="collapse navbar-collapse" id="js-navbar-collapse">
+
+            <ul class="nav navbar-nav">
+              <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle">Maps <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li ng-repeat="map in maps"><a href="/#/maps/{{map.id}}">{{map.name}}</a></li>
+                  <li class="divider"></li>
+                  <li><a>Create new map</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle">Sources <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-header">Map</li>
+                  <li class="divider"></li>
+                  <li ng-repeat="source in mapSources = (sources | filter: { type: 'map' })"><a href="/#/sources/{{source.id}}">{{source.name}}</a></li>
+                  <li class="divider"></li>
+                  <li class="dropdown-header">Data</li>
+                  <li class="divider"></li>
+                  <li ng-repeat="source in mapSources = (sources | filter: { type: 'data' })"><a href="/#/sources/{{source.id}}">{{source.name}}</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specific sub view -->
+    <div ng-if="shoudDisplayHome()">
+      <ng-include src="'views/home.html'"></ng-include>
+    </div>
+    <div ng-if="shoudDisplayMap()">
+      <ng-include src="'views/map.html'"></ng-include>
+    </div>
+
+    <!-- Footer -->
+    <!-- div class="footer">
+      <div class="container">
+        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
+      </div>
+    </div -->

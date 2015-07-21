@@ -93,8 +93,40 @@ body {
 #map {
   background-color: #fff;
   border: 1px solid #ccc;
+  height: 500px;
 }
 .background {
   fill: none;
   pointer-events: all;
+}
+
+/* See:
+http://stackoverflow.com/questions/16852484/use-fieldset-legend-with-bootstrap
+http://jsfiddle.net/JamesD/PgA84/1/
+*/
+
+/*fieldset.scheduler-border {
+    border: 1px groove #ddd !important;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    -webkit-box-shadow:  0px 0px 0px 0px #000;
+            box-shadow:  0px 0px 0px 0px #000;
+}
+
+    legend.scheduler-border {
+        font-size: 1em !important;
+        font-weight: bold !important;
+        text-align: left !important;
+        width:auto;
+        padding:0 10px;
+        border-bottom:none;
+    }
+*/
+
+legend.small {
+  font-size: 1.1em;
+}
+
+.styles.label {
+  font-size: 1.1em;
 }
