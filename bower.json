@@ -15,6 +15,7 @@
     "d3": "~3.5.5",
     "topojson": "1.6.19",
     "angular-bootstrap-select": "0.0.5",
+    "angular-bootstrap-colorpicker": "3.0.18",
     "lodash": "3.8.0"
   },
   "devDependencies": {

@@ -18,6 +18,7 @@ angular
     'ngSanitize',
     'ngTouch',
     'ui.bootstrap',
+    'colorpicker.module',
     'mapManager.form',
     'mapManager.console',
     'mapManager.map',

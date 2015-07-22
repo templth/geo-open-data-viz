@@ -18,16 +18,26 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           return (layer.type === 'graticule');
         };
 
-        $scope.shoulldDisplayGeoDataProperties = function(layer) {
+        $scope.shouldDisplayGeoDataProperties = function(layer) {
           return (layer.type === 'geodata');
         };
 
-        $scope.shoulldDisplayDataFillProperties = function(layer) {
+        $scope.shouldDisplayGeoDataStylesProperties = function(layer) {
+          return (layer.type === 'geodata' &&
+            layer.styles != null);
+        };
+
+        $scope.shouldDisplayDataFillProperties = function(layer) {
           return (layer.type === 'data' && layer.mode === 'fill');
         };
 
-        $scope.shoulldDisplayDataObjectsProperties = function(layer) {
+        $scope.shouldDisplayDataObjectsProperties = function(layer) {
           return (layer.type === 'data' && layer.mode === 'objects');
+        };
+
+        $scope.shouldDisplayDataCircleProperties = function(layer) {
+          return (layer.type === 'data' && layer.mode === 'objects' &&
+            layer.display.shape.type === 'circle');
         };
 
         $scope.screenType = screenType;
@@ -100,6 +110,40 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           layerService.refreshLayerApplying(svg, path, layer);
         });
+      },
+
+      registerCommonMapLayerPanelFunctionsInScope: function($scope) {
+        $scope.displayLayerPanel = function(panelName) {
+          $scope.displayedPanel = panelName;
+        };
+
+        $scope.shouldDisplayLayerPanel = function(panelName) {
+          return ($scope.displayedPanel === panelName);
+        };
+
+        $scope.isDisplayedLayerPanel = function(panelName) {
+          return ($scope.displayedPanel === panelName);
+        };
+
+        $scope.displayLayerPanel('properties');
+
+        $scope.shoudDisplayLayerMode = function() {
+          return $scope.displayedLayerMode;
+        };
+
+        $scope.toggleLayerMode = function() {
+          $scope.displayedLayerMode = !$scope.displayedLayerMode;
+        };
+
+        $scope.displayLayerMode = function() {
+          $scope.displayedLayerMode = true;
+        };
+
+        $scope.hideLayerMode = function() {
+          $scope.displayedLayerMode = false;
+        };
+
+        $scope.displayedLayerMode = false;
       }
     };
   });
