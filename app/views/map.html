@@ -67,10 +67,10 @@
       <!-- Layers -->
       <accordion-group>
         <accordion-heading>
-          Layers <i tooltip="Add a layer" ng-click="openAddLayerDialog($event)" class="pull-right glyphicon glyphicon-plus"></i>
+          Layers <i tooltip="Add a layer" ng-click="openAddLayerDialog($event)" class="pull-right glyphicon glyphicon-plus grey-icon"></i>
         </accordion-heading>
 
-        <!-- Layer graticule -->
+        <!-- Layers -->
         <accordion close-others="oneAtATime">
           <accordion-group ng-repeat="layer in layers">
             <accordion-heading>
@@ -78,21 +78,21 @@
               <div class="pull-right">
                 <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>&nbsp;<span class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
                 &nbsp;&nbsp;&nbsp;
-                <i tooltip="Refresh the layer on the map" class="glyphicon glyphicon-refresh"></i>
-                <i tooltip="Remove the layer" class="glyphicon glyphicon-remove"></i>
+                <i tooltip="Refresh the layer on the map" ng-click="refreshLayerApplying($event, layer)" class="glyphicon glyphicon-refresh grey-icon"></i>
+                <i tooltip="Remove the layer" class="glyphicon glyphicon-remove grey-icon"></i>
               </div>
             </accordion-heading>
 
             <div ng-if="shouldDisplayGraticuleProperties(layer)" ng-controller="UpdateLayerCtrl">
               <div class="text-center">
                 <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayLayerPanel('properties')" ng-class="{active: isDisplayedLayerPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayLayerPanel('styles')"  ng-class="{active: isDisplayedLayerPanel('styles')}" class="btn btn-default">Styles</button>
+                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+                  <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Styles</button>
                 </div>
               </div>
 
               <!-- properties -->
-              <div ng-show="shouldDisplayLayerPanel('properties')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
                 <form name="layerForm" novalidate class="form-horizontal">
                   <field label="Name">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -105,18 +105,18 @@
                     </select>
                   </field>
                   <field label="Background">
-                    <input type="checkbox" ng-model="layer.display.background">
+                    <input class="checkbox" type="checkbox" ng-model="layer.display.background">
                   </field>
                   <field label="Lines">
-                    <input type="checkbox" ng-model="layer.display.lines">
+                    <input class="checkbox" type="checkbox" ng-model="layer.display.lines">
                   </field>
                   <field label="Border">
-                    <input type="checkbox"  ng-model="layer.display.border">
+                    <input class="checkbox" type="checkbox"  ng-model="layer.display.border">
                   </field>
                 </form>
               </div>
               <!-- styles -->
-              <div ng-show="shouldDisplayLayerPanel('styles')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('styles')" class="layer-description-area">
                 <form name="stylesForm" novalidate class="form-horizontal">
                   <!-- background -->
                   <field-multi-labels label1="background" label2="fill">
@@ -158,14 +158,14 @@
             <div ng-if="shouldDisplayGeoDataProperties(layer)" ng-controller="UpdateLayerCtrl">
               <div class="text-center">
                 <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayLayerPanel('properties')" ng-class="{active: isDisplayedLayerPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayLayerPanel('data')"  ng-class="{active: isDisplayedLayerPanel('data')}" class="btn btn-default">Data</button>
-                  <button type="button" ng-click="displayLayerPanel('styles')"  ng-class="{active: isDisplayedLayerPanel('styles')}" class="btn btn-default">Styles</button>
+                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+                  <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+                  <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Styles</button>
                 </div>
               </div>
 
               <!-- properties -->
-              <div ng-show="shouldDisplayLayerPanel('properties')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
                 <form name="layerForm" novalidate class="form-horizontal">
                   <field label="Name">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -181,7 +181,7 @@
                 </form>
               </div>
               <!-- data -->
-              <div ng-show="shouldDisplayLayerPanel('data')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
                 <form name="dataForm" novalidate class="form-horizontal">
                   <field label="URL">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -199,13 +199,13 @@
                         ng-model-options="{ updateOn: 'blur' }" />
                   </field>
                   <field label="Mesh">
-                    <input type="checkbox" ng-model="layer.data.mesh">
+                    <input class="checkbox" type="checkbox" ng-model="layer.data.mesh">
                   </field>
                 </form>
               </div>
               <!-- styles -->
               <div ng-if="shouldDisplayGeoDataStylesProperties(layer)">
-                <div ng-show="shouldDisplayLayerPanel('styles')" class="layer-description-area">
+                <div ng-show="shouldDisplayPanel('styles')" class="layer-description-area">
                   <form name="stylesForm" novalidate class="form-horizontal">
                     <field-multi-labels label1="path" label2="fill">
                       <input colorpicker class="form-control input-sm" name="scale" type="text" 
@@ -240,14 +240,14 @@
             <div ng-if="shouldDisplayDataFillProperties(layer)" ng-controller="UpdateLayerCtrl">
               <div class="text-center">
                 <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayLayerPanel('properties')" ng-class="{active: isDisplayedLayerPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayLayerPanel('data')"  ng-class="{active: isDisplayedLayerPanel('data')}" class="btn btn-default">Data</button>
-                  <button type="button" ng-click="displayLayerPanel('styles')"  ng-class="{active: isDisplayedLayerPanel('styles')}" class="btn btn-default">Display</button>
+                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+                  <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+                  <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Display</button>
                 </div>
               </div>
 
               <!-- properties -->
-              <div ng-show="shouldDisplayLayerPanel('properties')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
                 <form name="propertiesForm" novalidate class="form-horizontal">
                   <field label="Name">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -263,7 +263,7 @@
                 </form>
               </div>
               <!-- data -->
-              <div ng-show="shouldDisplayLayerPanel('data')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
                 <form name="dataForm" novalidate class="form-horizontal">
                   <field label="URL">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -278,7 +278,7 @@
                 </form>
               </div>
               <!-- display -->
-              <div ng-show="shouldDisplayLayerPanel('display')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
                 <form name="displayForm" novalidate class="form-horizontal">
                   <field label="Value">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -292,14 +292,14 @@
             <div ng-if="shouldDisplayDataObjectsProperties(layer)" ng-controller="UpdateLayerCtrl">
               <div class="text-center">
                 <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayLayerPanel('properties')" ng-class="{active: isDisplayedLayerPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayLayerPanel('data')"  ng-class="{active: isDisplayedLayerPanel('data')}" class="btn btn-default">Data</button>
-                  <button type="button" ng-click="displayLayerPanel('display')"  ng-class="{active: isDisplayedLayerPanel('display')}" class="btn btn-default">Display</button>
+                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+                  <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+                  <button type="button" ng-click="displayPanel('display')"  ng-class="{active: isDisplayedPanel('display')}" class="btn btn-default">Display</button>
                 </div>
               </div>
 
               <!-- properties -->
-              <div ng-show="shouldDisplayLayerPanel('properties')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
                 <form name="propertiesForm" novalidate class="form-horizontal">
                   <field label="Name">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -315,7 +315,7 @@
                 </form>
               </div>
               <!-- data -->
-              <div ng-show="shouldDisplayLayerPanel('data')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
                 <form name="dataForm" novalidate class="form-horizontal">
                   <field label="URL">
                     <input class="form-control input-sm" name="name" type="text" 
@@ -330,7 +330,7 @@
                 </form>
               </div>
               <!-- display -->
-              <div ng-show="shouldDisplayLayerPanel('display')" class="layer-description-area">
+              <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
                 <form name="displayForm" novalidate class="form-horizontal">
                   <field label="Shape">
                     <select class="form-control input-sm" name="type" ng-model="layer.display.shape.type">
@@ -372,9 +372,62 @@
       <!-- Sources -->
       <accordion-group is-open="status.open">
           <accordion-heading>
-              Sources
+              Sources <i tooltip="Import a source" ng-click="openImportSourceDialog($event)" class="pull-right glyphicon glyphicon-import grey-icon"></i>
           </accordion-heading>
-          This is just some content to illustrate fancy headings.
+
+        <!-- Layers -->
+        <accordion close-others="oneAtATime">
+          <accordion-group ng-repeat="source in linkedSources">
+            <accordion-heading>
+              {{source.name}}
+            </accordion-heading>
+
+            <div ng-controller="UpdateSourceCtrl">
+              <div class="text-center">
+                <div class="btn-group" role="group">
+                  <button type="button" ng-click="displayPanel('preview')" ng-class="{active: isDisplayedPanel('preview')}" class="btn btn-default">Preview</button>
+                  <button type="button" ng-click="displayPanel('properties')"  ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+                </div>
+              </div>
+
+              <!-- preview -->
+              <div ng-show="shouldDisplayPanel('preview')" class="layer-description-area">
+                <form name="previewSourceForm" novalidate class="form-horizontal">
+                  <field label="Structure">
+                    <textarea class="form-control input-sm" name="structure"
+                         row="5" disabled>{{source.structure}}</textarea>
+                  </field>
+                  <field label="Samples">
+                    <textarea class="form-control input-sm" name="name"
+                         row="5" disabled>{{source}}</textarea>
+                  </field>
+                </form>
+              </div>
+
+              <!-- properties -->
+              <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
+                <form name="previewSourceForm" novalidate class="form-horizontal">
+                  <field label="Name">
+                    <input class="form-control input-sm" name="name" type="text" 
+                         disabled value="{{source.name}}"/>
+                  </field>
+                  <field label="Data type">
+                    <input class="form-control input-sm" name="type" type="text"
+                         row="5" disabled value="{{source.type}}"/>
+                  </field>
+                  <field label="Data URL">
+                    <input class="form-control input-sm" name="originUrl" type="text"
+                         row="5" disabled value="{{source.url}}"/>
+                  </field>
+                  <field label="Origin URL">
+                    <input class="form-control input-sm" name="originUrl" type="text"
+                         row="5" disabled value="{{source.originUrl}}"/>
+                  </field>
+                </form>
+              </div>
+            </div>
+          </accordion-group>
+        </accordion>
       </accordion-group>
       <!-- End data sources -->
 

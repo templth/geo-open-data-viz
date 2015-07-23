@@ -1,0 +1,30 @@
+<!-- Header -->
+<div class="modal-header small">
+<h4>Add a map</h4>
+</div>
+
+<!-- Body -->
+<div class="modal-body">
+  <div class="text-center">
+    <div class="btn-group" role="group">
+      <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+    </div>
+  </div>
+
+  <!-- properties -->
+  <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
+    <form name="addLayerForm" novalidate class="form-horizontal">
+  	  <field label="Name">
+  	    <input class="form-control input-sm" name="name" type="text" 
+  	         required ng-model="mapToAdd.name"
+  	         ng-model-options="{ updateOn: 'blur' }" />
+  	  </field>
+    </form>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="modal-footer small">
+  <button class="btn btn-primary" ng-click="addMap()">Add</button>
+  <button class="btn" ng-click="cancel()">Cancel</button>
+</div>

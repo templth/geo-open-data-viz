@@ -9,8 +9,8 @@ angular.module('mapManager.source', [ 'mapManager.webapi' ])
         var deferred = $q.defer();
         $timeout(function() {
           deferred.resolve([
-          	{ id: 1, name:'test1', type: 'map' },
-            { id: 1, name:'test2', type: 'data' }
+            { id: '1', name: 'test1', type: 'map', url: 'http://', originUrl: 'http://' },
+            { id: '2', name: 'test2', type: 'data', url: 'http://', originUrl: 'http://' }
           ]);
         }, 500);
         return deferred.promise;

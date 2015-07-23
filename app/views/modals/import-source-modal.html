@@ -1,0 +1,44 @@
+<!-- Header -->
+<div class="modal-header small">
+<h4>Import a source</h4>
+</div>
+
+<!-- Body -->
+<div class="modal-body">
+  <form name="importSourceForm" novalidate class="form-horizontal">
+    <field label="Sources">
+      <select class="form-control input-sm" name="name" ng-model="selectedSource.id">
+        <option ng-repeat="source in sources" value="{{source.id}}">{{source.name}}</option>
+      </select>
+    </field>
+    <field label="Preview">
+      <input class="checkbox" type="checkbox" ng-model="preview.enabled">
+    </field>
+  </form>
+
+  <div ng-if="shouldDisplaySourcePreview()">
+    <fieldset>
+      <legend>Source preview</legend>
+      <form name="previewSourceForm" novalidate class="form-horizontal">
+        <field label="Name">
+          <input class="form-control input-sm" name="name" type="text" 
+               disabled value="{{sourcePreview.name}}"/>
+        </field>
+        <field label="Structure">
+          <textarea class="form-control input-sm" name="structure"
+               row="5" disabled>{{sourcePreview.structure}}</textarea>
+        </field>
+        <field label="Samples">
+          <textarea class="form-control input-sm" name="name"
+               row="5" disabled>{{sourcePreview}}</textarea>
+        </field>
+      </form>
+    </fieldset>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="modal-footer small">
+  <button class="btn btn-primary" ng-click="importSource()">Import</button>
+  <button class="btn" ng-click="cancel()">Cancel</button>
+</div>

@@ -2,10 +2,12 @@
 
 angular.module('mapManager.commons', [ 'mapManager.map',
                                 'mapManager.d3.services' ])
-  .service('commonsService', function(currentMapService, layerService, mapCreatorService) {
+  .service('commonsService', function(currentMapService,
+      layerService, mapCreatorService) {
     return {
-      registerCommonFunctionsInScope: function($scope,
+      registerCommonFunctionsInScope: function($scope, $modal,
             screenType, maps, sources) {
+        // Display global views
         $scope.shoudDisplayHome = function() {
           return (screenType === 'home');
         };
@@ -14,6 +16,59 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           return (screenType === 'map');
         };
 
+        $scope.screenType = screenType;
+
+        // Modals
+        $scope.openAddMapDialog = function() {
+          // See bug on backgrop:
+          // https://github.com/angular-ui/bootstrap/issues/3620
+          var modalInstance = $modal.open({
+            animation: false,
+            templateUrl: 'views/modals/add-map-modal.html',
+            controller: 'AddMapCtrl'
+          });
+
+          modalInstance.result.then(function(mapToAdd) {
+            $scope.maps.push(mapToAdd);
+          }, function() {
+            // $log.info('Modal dismissed at: ' + new Date());
+            console.log('Modal dismissed at: ' + new Date());
+          });
+        };
+
+        $scope.openAddSourceDialog = function() {
+          // See bug on backgrop:
+          // https://github.com/angular-ui/bootstrap/issues/3620
+          var modalInstance = $modal.open({
+            animation: false,
+            templateUrl: 'views/modals/add-source-modal.html',
+            controller: 'AddSourceCtrl'
+          });
+
+          modalInstance.result.then(function(sourceToAdd) {
+            $scope.sources.push(sourceToAdd);
+          }, function() {
+            // $log.info('Modal dismissed at: ' + new Date());
+            console.log('Modal dismissed at: ' + new Date());
+          });
+        };
+
+        // Global data
+        $scope.maps = maps;
+        $scope.sources = sources;
+      },
+
+      setCurrentMapInScope: function($scope, currentMap) {
+        $scope.properties = {
+          projection: currentMap.projection,
+          scale: currentMap.scale
+        };
+        $scope.layers = currentMapService.currentMap.layers;
+        $scope.linkedSources = currentMapService.currentMap.sources;
+        // $scope.messages = consoleService.messages;
+      },
+
+      registerCommonMapFunctionsInScope: function($scope) {
         $scope.shouldDisplayGraticuleProperties = function(layer) {
           return (layer.type === 'graticule');
         };
@@ -40,24 +95,6 @@ angular.module('mapManager.commons', [ 'mapManager.map',
             layer.display.shape.type === 'circle');
         };
 
-        $scope.screenType = screenType;
-
-        $scope.maps = maps;
-        console.log('maps = '+JSON.stringify(maps));
-        $scope.sources = sources;
-        console.log('sources = '+JSON.stringify(sources));
-      },
-
-      setCurrentMapInScope: function($scope, currentMap) {
-        $scope.properties = {
-          projection: currentMap.projection,
-          scale: currentMap.scale
-        };
-        $scope.layers = currentMapService.currentMap.layers;
-        // $scope.messages = consoleService.messages;
-      },
-
-      registerCommonMapFunctionsInScope: function($scope) {
         $scope.$watch('properties.projection', function(newValue, oldValue) {
           if (oldValue === newValue) {
             return;
@@ -90,6 +127,15 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           layer.applied = !layer.applied;
           $event.stopPropagation();
         };
+
+        $scope.refreshLayerApplying = function($event, layer) {
+          console.log('>> refreshLayerApplying');
+          var svg = currentMapService.currentMapContext.svg;
+          var path = currentMapService.currentMapContext.path;
+
+          layerService.refreshLayerApplying(svg, path, layer);
+          $event.stopPropagation();
+        };
       },
 
       registerCommonMapLayerFunctionsInScope: function($scope) {
@@ -112,21 +158,27 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         });
       },
 
-      registerCommonMapLayerPanelFunctionsInScope: function($scope) {
-        $scope.displayLayerPanel = function(panelName) {
+      registerCommonPanelFunctionsInScope: function($scope, defaultPanelName) {
+        if (defaultPanelName == null) {
+          defaultPanelName = 'properties';
+        }
+
+        $scope.displayPanel = function(panelName) {
           $scope.displayedPanel = panelName;
         };
 
-        $scope.shouldDisplayLayerPanel = function(panelName) {
+        $scope.shouldDisplayPanel = function(panelName) {
           return ($scope.displayedPanel === panelName);
         };
 
-        $scope.isDisplayedLayerPanel = function(panelName) {
+        $scope.isDisplayedPanel = function(panelName) {
           return ($scope.displayedPanel === panelName);
         };
 
-        $scope.displayLayerPanel('properties');
+        $scope.displayPanel(defaultPanelName);
+      },
 
+      registerCommonMapLayerPanelFunctionsInScope: function($scope) {
         $scope.shoudDisplayLayerMode = function() {
           return $scope.displayedLayerMode;
         };
@@ -144,6 +196,9 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
 
         $scope.displayedLayerMode = false;
+      },
+
+      registerCommonMapSourcePanelFunctionsInScope: function($scope) {
       }
     };
   });

@@ -203,6 +203,9 @@ angular.module('mapManager.d3.services', [
         }
       });
 
+      // Sort layers by rank
+      //layerService.sortLayers(layers);
+
       // Clear preloaded data
       // TODO
 
@@ -306,7 +309,7 @@ angular.module('mapManager.d3.services', [
     toggleLayerApplying: function(svg, path, layer) {
       if (layer.applied) {
         var layerElement = d3.select(document.getElementById(layer.id));
-        layerElement.remove();
+        layerElement.selectAll('*').remove();
       } else {
         this.createLayer(svg, path, layer);
       }
@@ -315,9 +318,24 @@ angular.module('mapManager.d3.services', [
     refreshLayerApplying: function(svg, path, layer) {
       if (layer.applied) {
         var layerElement = d3.select(document.getElementById(layer.id));
-        layerElement.remove();
+        layerElement.selectAll('*').remove();
         this.createLayer(svg, path, layer);
       }
+    },
+
+    getLayerElement: function(svg, layer) {
+      var layerElement = d3.select(document.getElementById(layer.id));
+      if (layerElement.empty()) {
+        var sel = d3.select(document.getElementById(layer.applyOn));
+        if (sel === null) {
+          sel = svg;
+        }
+
+        layerElement = sel.append('g')
+            .attr('id', layer.id);
+      }
+
+      return layerElement;
     },
 
     createGraticuleLayer: function(svg, path, layer) {
@@ -327,15 +345,9 @@ angular.module('mapManager.d3.services', [
         layer.id = 'graticuleLayer';
       }
 
-      var sel = d3.select(document.getElementById(layer.applyOn));
-      if (sel === null) {
-        sel = svg;
-      }
+      var layerElement = this.getLayerElement(svg, layer);
 
       var graticule = d3.geo.graticule();
-
-      var layerElement = sel.append('g')
-          .attr('id', layer.id);
 
       if (layer.display.background && layer.display.border) {
         layerElement.append('defs').append('path')
@@ -404,13 +416,7 @@ angular.module('mapManager.d3.services', [
     },
 
     createGeoDataLayer: function(svg, path, layer) {
-      var sel = d3.select(document.getElementById(layer.applyOn));
-      if (sel === null) {
-        sel = svg;
-      }
-
-      var layerElement = sel.append('g')
-          .attr('id', layer.id);
+      var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
         if (layer.data.mesh) {
@@ -552,13 +558,7 @@ angular.module('mapManager.d3.services', [
         'Creating data layer with identifier "' + layer.id + '"');
       var circle = d3.geo.circle();
 
-      var sel = d3.select(document.getElementById(layer.applyOn));
-      if (sel === null) {
-        sel = svg;
-      }
-
-      var layerElement = sel.append('g')
-        .attr('id', layer.id);
+      var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
         layerElement.selectAll('circle')
@@ -606,6 +606,23 @@ angular.module('mapManager.d3.services', [
       } else if (layer.type === 'geodata') {
         this.createGeoDataLayer(svg, path, layer);
       }
+    },
+
+    sortLayers: function(layers) {
+      var layerElts = d3.select(document.getElementById('layers'));
+      console.log('>> layerElts = '+layerElts.length);
+      console.log('>> layerElts = '+layerElts.attr('id'));
+      console.log('>> layerElts = '+layerElts.selectAll('g').length);
+      console.log('>> layerElts = '+layerElts.selectAll('g').attr('id'));
+      layerElts.selectAll('g').sort(function(layerElt1, layerElt2) {
+        console.log('layerElt1 = '+layerElt1);
+        console.log('layerElt2 = '+layerElt2);
+        var layer1 = _.find(layers, { id: layerElt1.attr('id')});
+        var layer2 = _.find(layers, { id: layerElt2.attr('id')});
+        console.log('layer1 = '+layer1);
+        console.log('layer2 = '+layer2);
+        return layer1.rank - layer2.rank;
+      });
     }
   };
 }])

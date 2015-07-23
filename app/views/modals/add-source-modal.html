@@ -1,0 +1,84 @@
+<!-- Header -->
+<div class="modal-header small">
+<h4>Add a source</h4>
+</div>
+
+<!-- Body -->
+<div class="modal-body">
+  <div class="text-center">
+    <div class="btn-group" role="group">
+      <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
+      <button type="button" ng-click="displayPanel('data')" ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+      <button type="button" ng-click="displayPanel('structure')" ng-class="{active: isDisplayedPanel('structure')}" class="btn btn-default">Struture</button>
+    </div>
+  </div>
+
+  <!-- properties -->
+  <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
+    <form name="addLayerForm" novalidate class="form-horizontal">
+  	  <field label="Name">
+  	    <input class="form-control input-sm" name="name" type="text" 
+  	         required ng-model="sourceToAdd.name"
+  	         ng-model-options="{ updateOn: 'blur' }" />
+  	  </field>
+  	  <field label="Type">
+  	    <select class="form-control input-sm" name="name" ng-model="sourceToAdd.type">
+  	      <option value="data">Data</option>
+  	      <option value="map">Map</option>
+  	    </select>
+  	  </field>
+    </form>
+  </div>
+
+  <!-- data -->
+  <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
+    <form name="addLayerForm" novalidate class="form-horizontal">
+  	  <field label="URL">
+  	    <div class="input-group">
+  	      <input class="form-control input-sm" name="url" type="text" 
+  	           required ng-model="sourceToAdd.url"
+  	           ng-model-options="{ updateOn: 'blur' }" />
+  	      <span class="input-group-addon"><a ng-click="loadData()">Load</a></span>
+  	    </div>
+  	  </field>
+  	  <field label="Data type">
+  	    <select class="form-control input-sm" name="name" ng-model="sourceToAdd.dataType">
+  	      <option value="csv">CSV</option>
+  	      <option value="tsv">TSV</option>
+  	      <option value="json">JSON</option>
+  	    </select>
+  	  </field>
+    </form>
+  </div>
+
+  <!-- structure -->
+  <div ng-show="shouldDisplayPanel('structure')" class="layer-description-area">
+    <form name="addLayerForm" novalidate class="form-horizontal">
+  	  <field label="Structure">
+        <textarea class="form-control input-sm" name="structure" type="text"
+             rows="4" 
+             required ng-model="sourceToAdd.structure"
+             ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+  	  </field>
+  	  <field label="Row number">
+        <input class="form-control input-sm" name="rowNumber" type="text" 
+             required ng-model="sourceToAdd.rowNumber"
+             ng-model-options="{ updateOn: 'blur' }" />
+  	  </field>
+  	  <field label="Sample">
+        <textarea class="form-control input-sm" name="sample" type="text" 
+             rows="10"
+             required ng-model="sourceToAdd.sample"
+             ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+  	  </field>
+    </form>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="modal-footer small">
+  <button class="btn btn-primary" ng-click="addSource()">Add</button>
+  <button class="btn" ng-click="cancel()">Cancel</button>
+</div>

@@ -51,6 +51,7 @@ angular.module('mapManager.map', [
               {
                 id: 'graticuleLayer',
                 type: 'graticule',
+                rank: 1,
                 name: 'Graticule',
                 applyOn: 'layers',
                 applied: true,
@@ -78,6 +79,7 @@ angular.module('mapManager.map', [
               {
                 id: 'worldLayer',
                 type: 'geodata',
+                rank: 2,
                 data: {
                   url: 'http://localhost:9000/scripts/json/continent.json',
                   rootObject: 'countries',
@@ -93,6 +95,7 @@ angular.module('mapManager.map', [
               {
                 id: 'usLayer',
                 type: 'geodata',
+                rank: 3,
                 data: {
                   url: 'http://localhost:9000/scripts/json/us-light.json',
                   rootObject: 'counties',
@@ -119,6 +122,7 @@ angular.module('mapManager.map', [
               {
                 id: 'usLayer1',
                 type: 'geodata',
+                rank: 4,
                 data: {
                   url: 'http://localhost:9000/scripts/json/us-light.json',
                   rootObject: 'counties',
@@ -146,6 +150,7 @@ angular.module('mapManager.map', [
               {
                 id: 'usLayer2',
                 type: 'geodata',
+                rank: 5,
                 data: {
                   url: 'http://localhost:9000/scripts/json/us-light.json',
                   rootObject: 'states',
@@ -174,6 +179,7 @@ angular.module('mapManager.map', [
                 id: 'layer1',
                 type: 'data',
                 mode: 'objects',
+                rank: 6,
                 data: {
                   url: 'http://localhost:9000/scripts/json/test.csv',
                   type: 'csv',
@@ -198,6 +204,7 @@ angular.module('mapManager.map', [
                 id: 'layer2',
                 type: 'data',
                 mode: 'fill',
+                rank: 7,
                 data: {
                   url: 'http://localhost:9000/scripts/json/unemployment.tsv',
                   type: 'tsv',

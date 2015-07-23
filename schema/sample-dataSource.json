@@ -4,6 +4,7 @@
   "category": "category",
   "source": "source",
   "tags": [ "tag1", "tag2" ],
+  "url": "url",
   "originUrl": "url",
   "imported": true,
   "importEntity": "myentity",
