@@ -15,14 +15,14 @@
 
   <!-- properties -->
   <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
-    <form name="addLayerForm" novalidate class="form-horizontal">
+    <form name="propertiesForm" novalidate class="form-horizontal">
   	  <field label="Name">
   	    <input class="form-control input-sm" name="name" type="text" 
   	         required ng-model="sourceToAdd.name"
   	         ng-model-options="{ updateOn: 'blur' }" />
   	  </field>
   	  <field label="Type">
-  	    <select class="form-control input-sm" name="name" ng-model="sourceToAdd.type">
+  	    <select class="form-control input-sm" name="type" ng-model="sourceToAdd.type">
   	      <option value="data">Data</option>
   	      <option value="map">Map</option>
   	    </select>
@@ -32,7 +32,7 @@
 
   <!-- data -->
   <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
-    <form name="addLayerForm" novalidate class="form-horizontal">
+    <form name="dataForm" novalidate class="form-horizontal">
   	  <field label="URL">
   	    <div class="input-group">
   	      <input class="form-control input-sm" name="url" type="text" 
@@ -42,7 +42,7 @@
   	    </div>
   	  </field>
   	  <field label="Data type">
-  	    <select class="form-control input-sm" name="name" ng-model="sourceToAdd.dataType">
+  	    <select class="form-control input-sm" name="dataType" ng-model="sourceToAdd.dataType">
   	      <option value="csv">CSV</option>
   	      <option value="tsv">TSV</option>
   	      <option value="json">JSON</option>
@@ -53,26 +53,37 @@
 
   <!-- structure -->
   <div ng-show="shouldDisplayPanel('structure')" class="layer-description-area">
-    <form name="addLayerForm" novalidate class="form-horizontal">
-  	  <field label="Structure">
-        <textarea class="form-control input-sm" name="structure" type="text"
-             rows="4" 
-             required ng-model="sourceToAdd.structure"
-             ng-model-options="{ updateOn: 'blur' }">
-        </textarea>
-  	  </field>
-  	  <field label="Row number">
-        <input class="form-control input-sm" name="rowNumber" type="text" 
-             required ng-model="sourceToAdd.rowNumber"
-             ng-model-options="{ updateOn: 'blur' }" />
-  	  </field>
-  	  <field label="Sample">
-        <textarea class="form-control input-sm" name="sample" type="text" 
-             rows="10"
-             required ng-model="sourceToAdd.sample"
-             ng-model-options="{ updateOn: 'blur' }">
-        </textarea>
-  	  </field>
+    <form name="structureForm" novalidate class="form-horizontal">
+      <div ng-if="shouldDisplaySample()">
+        <field label="Structure">
+          <textarea class="form-control input-sm" name="structure" type="text"
+               rows="4" 
+               required ng-model="sourceToAdd.structure"
+               ng-model-options="{ updateOn: 'blur' }">
+          </textarea>
+  	    </field>
+  	    <field label="Row number">
+          <input class="form-control input-sm" name="rowNumber" type="text" 
+               required ng-model="sourceToAdd.rowNumber"
+               ng-model-options="{ updateOn: 'blur' }" />
+  	    </field>
+  	    <field label="Sample">
+          <textarea class="form-control input-sm" name="sample" type="text" 
+               rows="10"
+               required ng-model="sourceToAdd.sample"
+               ng-model-options="{ updateOn: 'blur' }">
+          </textarea>
+  	    </field>
+      </div>
+      <div ng-if="!shouldDisplaySample()">
+        <field label="Structure">
+          <textarea class="form-control input-sm" name="structure" type="text"
+               rows="10" 
+               required ng-model="sourceToAdd.structure"
+               ng-model-options="{ updateOn: 'blur' }">
+          </textarea>
+        </field>
+      </div>
     </form>
   </div>
 </div>

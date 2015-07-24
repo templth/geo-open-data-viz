@@ -3,7 +3,7 @@
 angular.module('mapManager.commons', [ 'mapManager.map',
                                 'mapManager.d3.services' ])
   .service('commonsService', function(currentMapService,
-      layerService, mapCreatorService) {
+      layerService, mapCreatorService, toaster) {
     return {
       registerCommonFunctionsInScope: function($scope, $modal,
             screenType, maps, sources) {
@@ -30,6 +30,9 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           modalInstance.result.then(function(mapToAdd) {
             $scope.maps.push(mapToAdd);
+            toaster.pop('success', 'Map "' +
+              sourceToAdd.name + '"',
+              'Successfully added');
           }, function() {
             // $log.info('Modal dismissed at: ' + new Date());
             console.log('Modal dismissed at: ' + new Date());
@@ -47,6 +50,9 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           modalInstance.result.then(function(sourceToAdd) {
             $scope.sources.push(sourceToAdd);
+            toaster.pop('success', 'Source "' +
+              sourceToAdd.name + '"',
+              'Successfully added');
           }, function() {
             // $log.info('Modal dismissed at: ' + new Date());
             console.log('Modal dismissed at: ' + new Date());
@@ -63,6 +69,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           projection: currentMap.projection,
           scale: currentMap.scale
         };
+        $scope.mapName = currentMap.name;
         $scope.layers = currentMapService.currentMap.layers;
         $scope.linkedSources = currentMapService.currentMap.sources;
         // $scope.messages = consoleService.messages;
@@ -135,6 +142,10 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           layerService.refreshLayerApplying(svg, path, layer);
           $event.stopPropagation();
+        };
+
+        $scope.isLayerWithFillMode = function(layer) {
+          return (layer.type === 'data' && layer.mode === 'fill');
         };
       },
 

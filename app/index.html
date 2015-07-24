@@ -10,6 +10,7 @@
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap-select/bootstrap-select.css" />
     <link rel="stylesheet" href="bower_components/angular-bootstrap-colorpicker/css/colorpicker.css" />
+    <link rel="stylesheet" href="bower_components/AngularJS-Toaster/toaster.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -25,6 +26,21 @@
     <![DaData-->
 
     <div ng-view=""></div>
+
+    <toaster-container toaster-options="{
+        'closeButton': false,
+        'debug': false,
+        'position-class': 'toast-top-right',
+        'onclick': null,
+        'showDuration': '200',
+        'hideDuration': '1000',
+        'timeOut': '5000',
+        'extendedTimeOut': '1000',
+        'showEasing': 'swing',
+        'hideEasing': 'linear',
+        'showMethod': 'fadeIn',
+        'hideMethod': 'fadeOut'
+    }"></toaster-container>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <!--script>
@@ -55,6 +71,7 @@
     <script src="bower_components/bootstrap-select/bootstrap-select.js"></script>
     <script src="bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js"></script>
     <script src="bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js"></script>
+    <script src="bower_components/AngularJS-Toaster/toaster.js"></script>
     <script src="bower_components/lodash/lodash.js"></script>
     <!-- endbower -->
     <!-- endbuild -->

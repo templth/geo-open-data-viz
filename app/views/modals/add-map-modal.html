@@ -19,6 +19,12 @@
   	         required ng-model="mapToAdd.name"
   	         ng-model-options="{ updateOn: 'blur' }" />
   	  </field>
+      <field label="Type">
+        <select class="form-control input-sm" name="dataType" ng-model="mapToAdd.type">
+          <option value="d3">D3</option>
+          <option value="googlemaps">Google Maps</option>
+        </select>
+      </field>
     </form>
   </div>
 </div>

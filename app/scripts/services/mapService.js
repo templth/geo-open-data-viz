@@ -33,7 +33,7 @@ angular.module('mapManager.map', [
         // return mapResource.query().$promise;
         var deferred = $q.defer();
         $timeout(function() {
-          deferred.resolve([ { id: 1, name:'test' } ]);
+          deferred.resolve([ { id: 1, name: 'test' } ]);
         }, 500);
         return deferred.promise;
       },
@@ -43,6 +43,8 @@ angular.module('mapManager.map', [
         var deferred = $q.defer();
         $timeout(function() {
           deferred.resolve({
+            id: '1',
+            name: 'World',
             projection: 'orthographic',
             scale: 100,
             //projection: 'mercator',
@@ -201,6 +203,60 @@ angular.module('mapManager.map', [
                 visible: true
               },
               {
+                id: 'layer1a',
+                type: 'data',
+                mode: 'objects',
+                rank: 6,
+                data: {
+                  content: [],
+                  inline: '[{ rank:1, place: "New York", population: 8175133, lat: 40.71455, lon: -74.007124 }]',
+                  loaded: false
+                },
+                name: 'Cities (1)',
+                display: {
+                  shape: {
+                    type: 'circle',
+                    radius: 'd.population / 3000000',
+                    origin: '[ d.lon, d.lat ]',
+                    color: 'yellow',
+                    opacity: 0.75
+                  }
+                },
+                applyOn: 'layers',
+                applied: true,
+                visible: true
+              },
+              {
+                id: 'layer1b',
+                type: 'data',
+                mode: 'objects',
+                rank: 6,
+                data: {
+                  content: [],
+                  inline: '[{ rank:1, place: "New York", population: 8175133, lat: 40.71455, lon: -74.007124 }]',
+                  loaded: false
+                },
+                name: 'Cities (b)',
+                display: {
+                  shape: {
+                    type: 'image',
+                    /*radius: 'd.population / 3000000',*/
+                    origin: '[ d.lon, d.lat ]',
+                    /*color: 'yellow',*/
+                    opacity: 0.75
+                  },
+                  tooltip: {
+                    enabled: true,
+                    fromScale: 300,
+                    text: '"Value: "+value',
+                    event: 'click' // or over
+                  }
+                },
+                applyOn: 'layers',
+                applied: true,
+                visible: true
+              },
+              {
                 id: 'layer2',
                 type: 'data',
                 mode: 'fill',
@@ -220,6 +276,24 @@ angular.module('mapManager.map', [
                                 '#9e9ac8', '#756bb1', '#54278f' ]
                     },
                     value: 'd.rate'
+                  },
+                  legend: {
+                    enabled: true,
+                    label: '(d * 100) + " %"'
+                  },
+                  tooltip: {
+                    enabled: true,
+                    fromScale: 300,
+                    text: '"Value: "+value',
+                    event: 'click' // or over
+                  }
+                },
+                styles: {
+                  legend: {
+
+                  },
+                  tooltip: {
+
                   }
                 },
                 applyOn: 'usLayer',

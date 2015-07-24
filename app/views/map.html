@@ -1,6 +1,35 @@
 <div>
   <div class="col-md-8" id="map" map="map"></div>
   <div class="col-md-4">
+    <nav class="navbar navbar-default map-bar">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">{{mapName}}</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-left">
+            <li class="active"><a>D3</a></li>
+            <li class="divider-vertical"></li>
+            <li class="active"><a>View</a></li>
+            <li><a>Source</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a><i tooltip="Refresh the map" ng-click="" class="glyphicon glyphicon-refresh grey-icon"></i> Refresh</a></li>
+            <li><a><i tooltip="Export map structure" ng-click="" class="glyphicon glyphicon-export grey-icon"></i> Export</a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
     <accordion close-others="oneAtATime">
       <!-- Properties -->
       <accordion-group is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
@@ -25,45 +54,6 @@
       </accordion-group>
       <!-- End properties -->
 
-      <!-- Interactions -->
-      <accordion-group>
-        <accordion-heading>
-          Interactions
-        </accordion-heading>
-
-        <form name="interactionsForm" novalidate class="form-horizontal">
-          <field label="Move">
-            <input class="form-control input-sm" name="move" type="text" 
-                       placeholder="Move" required ng-model="session.username" />
-          </field>
-
-          <field label="Zoom">
-            <input class="form-control input-sm" name="scale" type="text" 
-                       placeholder="Scale" required ng-model="session.scale" />
-          </field>
-
-           <div class="form-group">
-             <button type="submit" class="btn btn-primary pull-right" 
-                          value="Login" title="Login">
-               <span>Login</span>
-             </button>
-          </div>
-        </form>
-      </accordion-group>
-      <!-- End interactions -->
-
-      <!-- Behaviors -->
-      <accordion-group>
-        <accordion-heading>
-          Behaviors
-        </accordion-heading>
-
-        Zoom and center on click
-        Auto rotation
-        Display all points (animation)
-      </accordion-group>
-      <!-- End Behaviors -->
-
       <!-- Layers -->
       <accordion-group>
         <accordion-heading>
@@ -76,7 +66,8 @@
             <accordion-heading>
               {{layer.name}}
               <div class="pull-right">
-                <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>&nbsp;<span class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
+                <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>
+                &nbsp;<span ng-if="!isLayerWithFillMode(layer)" class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
                 &nbsp;&nbsp;&nbsp;
                 <i tooltip="Refresh the layer on the map" ng-click="refreshLayerApplying($event, layer)" class="glyphicon glyphicon-refresh grey-icon"></i>
                 <i tooltip="Remove the layer" class="glyphicon glyphicon-remove grey-icon"></i>
@@ -430,6 +421,45 @@
         </accordion>
       </accordion-group>
       <!-- End data sources -->
+
+      <!-- Interactions -->
+      <accordion-group>
+        <accordion-heading>
+          Interactions
+        </accordion-heading>
+
+        <form name="interactionsForm" novalidate class="form-horizontal">
+          <field label="Move">
+            <input class="form-control input-sm" name="move" type="text" 
+                       placeholder="Move" required ng-model="session.username" />
+          </field>
+
+          <field label="Zoom">
+            <input class="form-control input-sm" name="scale" type="text" 
+                       placeholder="Scale" required ng-model="session.scale" />
+          </field>
+
+           <div class="form-group">
+             <button type="submit" class="btn btn-primary pull-right" 
+                          value="Login" title="Login">
+               <span>Login</span>
+             </button>
+          </div>
+        </form>
+      </accordion-group>
+      <!-- End interactions -->
+
+      <!-- Behaviors -->
+      <accordion-group>
+        <accordion-heading>
+          Behaviors
+        </accordion-heading>
+
+        Zoom and center on click
+        Auto rotation
+        Display all points (animation)
+      </accordion-group>
+      <!-- End Behaviors -->
 
       <!-- Console -->
       <accordion-group is-open="status.open">

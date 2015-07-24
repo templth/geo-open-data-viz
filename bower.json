@@ -16,6 +16,7 @@
     "topojson": "1.6.19",
     "angular-bootstrap-select": "0.0.5",
     "angular-bootstrap-colorpicker": "3.0.18",
+    "AngularJS-Toaster": "0.4.15",
     "lodash": "3.8.0"
   },
   "devDependencies": {

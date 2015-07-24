@@ -93,7 +93,7 @@ body {
 #map {
   background-color: #fff;
   border: 1px solid #ccc;
-  height: 500px;
+  height: 554px;
 }
 .background {
   fill: none;
@@ -160,4 +160,51 @@ input[type="checkbox"].checkbox {
 
 .modal-body legend {
   font-size: 1.1em;
+}
+
+/*.map-bar {
+  margin-bottom: 10px;
+}
+
+.map-bar .navbar-nav > li > a {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}*/
+
+.map-bar {
+  margin-bottom: 10px;
+}
+
+.map-bar .navbar-nav > li > a, .map-bar .navbar-brand {
+  padding-top:4px !important; 
+  padding-bottom:0 !important;
+  height: 28px;
+}
+
+.map-bar.navbar {
+  min-height:28px !important;
+}
+
+textarea {
+  overflow-x: wrap;
+}
+
+.map-bar.navbar .divider-vertical {
+  height: 28px;
+  margin: 0 9px;
+  border-left: 1px solid #f2f2f2;
+  border-right: 1px solid #ffffff;
+}
+
+div.tooltip {
+ position: absolute;
+ text-align: center;
+ width: 150px;
+ height: 25px;
+ padding: 2px;
+ font-size: 10px;
+ background: #FFFFE0;
+ border: 1px;
+ border-radius: 8px;
+ pointer-events: none;
 }

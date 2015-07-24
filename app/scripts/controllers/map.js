@@ -11,7 +11,7 @@ angular.module('mapManagerApp')
   .controller('MapCtrl', function($scope, $modal, currentMapService, layerService, //
                                   projectionService, consoleService, //
                                   mapCreatorService, map, maps, sources, //
-                                  commonsService) {
+                                  commonsService, toaster) {
     // Register common functions
     commonsService.registerCommonFunctionsInScope(
       $scope, $modal, 'map', maps, sources);
@@ -69,6 +69,10 @@ angular.module('mapManagerApp')
         console.log('>> $scope.linkedSources = '+$scope.linkedSources);
         console.log('>> selectedsource = '+JSON.stringify(selectedSource))
         $scope.linkedSources.push(selectedSource);
+
+        toaster.pop('success', 'Map "' +
+          currentMapService.currentMap.name + '"',
+          'Successfully imported source');
       }, function() {
         // $log.info('Modal dismissed at: ' + new Date());
         console.log('Modal dismissed at: ' + new Date());
@@ -81,10 +85,10 @@ angular.module('mapManagerApp')
   .controller('AddMapCtrl', function($scope, $modalInstance, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
 
-    $scope.mapToAdd = {};
+    $scope.mapToAdd = { type: 'd3' };
 
     $scope.addMap = function() {
-      $modalInstance.close(/*$scope.selected.item*/);
+      $modalInstance.close($scope.mapToAdd);
     };
 
     $scope.cancel = function() {
@@ -96,7 +100,11 @@ angular.module('mapManagerApp')
       $modalInstance, commonsService, topojsonService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
 
-    $scope.sourceToAdd = { name: 'test' };
+    $scope.shouldDisplaySample = function() {
+      return ($scope.sourceToAdd.type === 'data');
+    };
+
+    $scope.sourceToAdd = { name: 'test', type: 'data' };
 
     $scope.$watch('sourceToAdd.url', function(newValue, oldValue) {
       if (newValue === oldValue) {
@@ -137,15 +145,16 @@ angular.module('mapManagerApp')
             var sample = _.slice(data, 0, 5);
             $scope.sourceToAdd.sample = JSON.stringify(sample, null, 2);
           } else if ($scope.sourceToAdd.type === 'map') {
+            console.log('>> $scope.sourceToAdd.type === map');
             topojsonService.transformTopojson(data);
-            $scope.sourceToAdd.sample = JSON.stringify(data, null, 2);
+            $scope.sourceToAdd.structure = JSON.stringify(data, null, 2);
           }
         });
       }
     };
 
     $scope.addSource = function() {
-      $modalInstance.close(/*$scope.selected.item*/);
+      $modalInstance.close($scope.sourceToAdd);
     };
 
     $scope.cancel = function() {
@@ -210,6 +219,7 @@ angular.module('mapManagerApp')
     };
 
     $scope.importSource = function() {
+      $scope.sourcePreview = _.find(sources, 'id', $scope.selectedSource.id);
       $modalInstance.close($scope.sourcePreview);
     };
 

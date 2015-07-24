@@ -283,33 +283,22 @@ angular.module('mapManager.d3.services', [
     function($parse, currentMapService, consoleService) {
   return {
     toggleLayerVisibility: function(layer) {
-      if (layer.mode === 'fill') {
-        if (layer.visible) {
-          var sel = d3.select(document.getElementById(layer.applyOn));
-          sel.selectAll('path')
-            .style('fill', '#000');
-        } else {
-          this.createFillDataLayer(layer);
-        }
+      var layerElement = d3.select(document.getElementById(layer.id));
+      var visible = (layerElement.style('visibility') === 'visible');
+      if (visible) {
+        consoleService.logMessage('info',
+          'Hidden layer with id "' + layer.id + '"');
+        layerElement.style('visibility', 'hidden');
       } else {
-        var layerElement = d3.select(document.getElementById(layer.id));
-        var visible = (layerElement.style('visibility') === 'visible');
-        if (visible) {
-          consoleService.logMessage('info',
-            'Hidden layer with id "' + layer.id + '"');
-          layerElement.style('visibility', 'hidden');
-        } else {
-          consoleService.logMessage('info',
-            'Displayed layer with id "' + layer.id + '"');
-          layerElement.style('visibility', 'visible');
-        }
+        consoleService.logMessage('info',
+          'Displayed layer with id "' + layer.id + '"');
+        layerElement.style('visibility', 'visible');
       }
     },
 
     toggleLayerApplying: function(svg, path, layer) {
       if (layer.applied) {
-        var layerElement = d3.select(document.getElementById(layer.id));
-        layerElement.selectAll('*').remove();
+        this.deleteLayer(svg, path, layer);
       } else {
         this.createLayer(svg, path, layer);
       }
@@ -448,11 +437,11 @@ angular.module('mapManager.d3.services', [
           pathElements
             .attr('d', path);
           if (layer.styles.d != null) {
-            var strokeWidth = '1.5px';
+            var dStrokeWidth = '1.5px';
             if (layer.styles.d.strokeWidth != null) {
-              strokeWidth = layer.styles.d.strokeWidth;
+              dStrokeWidth = layer.styles.d.strokeWidth;
             }
-            pathElements.style('stroke-width', strokeWidth);
+            pathElements.style('stroke-width', dStrokeWidth);
           }
         } else {
           layerElement.selectAll('path')
@@ -472,78 +461,132 @@ angular.module('mapManager.d3.services', [
       }
     },
 
-    createFillDataLayer: function(layer) {
+    clearFillDataLayer: function(svg, layer) {
+      var sel = d3.select(document.getElementById(layer.applyOn));
+      sel.selectAll('path')
+         .style('fill', function(d) {
+        return '#000';
+      });
+      // TODO: the layer applied on should be reloaded
+      // refreshLayerApplying
+
+      svg.selectAll('.legend').remove();
+
+      d3.select(document.getElementById(
+        'tooltip-' + layer.id)).remove();
+    },
+
+    createFillDataLayer: function(svg, layer) {
       var value = $parse(layer.display.fill.value);
 
       function handleData(data) {
         //console.log('>> data = '+JSON.stringify(data));
         var values = {};
-        data.forEach(function(d) { values[d.id] = +value({d: d}); });
+        _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
 
         var color = d3.scale.threshold()
           .domain(layer.display.fill.threshold.values)
           .range(layer.display.fill.threshold.colors);
 
         var sel = d3.select(document.getElementById(layer.applyOn));
-        sel.selectAll('path')
+        var elements = sel.selectAll('path')
             .style('fill', function(d) {
           return color(values[d.id]);
         });
 
+        // Experimental: display tooltip
+
+        if (layer.display.tooltip && layer.display.tooltip.enabled) {
+          var tooltipText = $parse(layer.display.tooltip.text);
+
+          var tooltipDiv = d3.select('body').append('div')
+            .attr('id', 'tooltip-' + layer.id)
+            .attr('class', 'tooltip')
+            .style('opacity', 0);
+
+          var tooltipEvent = 'click';
+          if (layer.display.tooltip.event != null) {
+            tooltipEvent = layer.display.tooltip.event;
+
+            // TODO
+          }
+
+          elements.on('click', function(d) {
+            d3.select(this).transition().duration(300).style('opacity', 1);
+            tooltipDiv.transition().duration(300)
+               .style('opacity', 1);
+            tooltipDiv.text(function() {
+              console.log('>> ')
+              return tooltipText({d: d, value: values[d.id]});
+            })
+               .style('left', (d3.event.pageX) + 'px')
+               .style('top', (d3.event.pageY -30) + 'px');
+          });
+        }
+
+        /*elements.on('mouseover', function(d) {
+          d3.select(this).transition().duration(300).style('opacity', 1);
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 1);
+          tooltipDiv.text('d = '+values[d.id])
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY -30) + 'px');
+        })
+        .on('mouseout', function() {
+          d3.select(this)
+            .transition().duration(300)
+            .style('opacity', 0.8);
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 0);
+        });*/
+
         // Experimental: display axis
 
-        // A position encoding for the key only.
-        /*var x = d3.scale.linear()
-                  .domain([0, 1])
-                  .range([0, 240]);
+        if (layer.display.legend && layer.display.legend.enabled) {
+          var legendLabel = $parse(layer.display.legend.label);
 
-        var xAxis = d3.svg.axis()
-              .scale(x)
-              .orient('bottom')
-              .tickSize(13)
-              .tickValues(color.domain())
-              .tickFormat(function(d) {
-          return d;
-          // === .5 ? formatPercent(d) : formatNumber(100 * d);
-        });
+          var height = 500;
+          var legend = sel.selectAll('g.legend')
+            .data(layer.display.fill.threshold.values)
+            .enter()
+            .append('g')
+            .attr('class', 'legend');
 
-        var svg = mapService.currentMapContext.svg;
+          var ls_w = 20, ls_h = 20;
 
-        var width = 938;
-        var height = 500;
+          legend.append('rect')
+            .attr('x', 20)
+            .attr('y', function(d, i){ return height - (i*ls_h) - 2*ls_h;})
+            .attr('width', ls_w)
+            .attr('height', ls_h)
+            .style('fill', function(d, i) { return color(d); })
+            .style('opacity', 0.8);
 
-        var g = svg.append('g')
-                   .attr('class', 'key')
-                  .attr('transform', 'translate(' +
-                    (width - 240) / 2 + ',' + height / 2 + ')');
-
-        g.selectAll('rect')
-            .data(color.range().map(function(color) {
-          var d = color.invertExtent(color);
-          if (d[0] === null) {
-            d[0] = x.domain()[0];
-          }
-          if (d[1] === null) {
-            d[1] = x.domain()[1];
-          }
-          return d;
-        }))
-        .enter().append('rect')
-        .attr('height', 8)
-        .attr('x', function(d) { return x(d[0]); })
-        .attr('width', function(d) { return x(d[1]) - x(d[0]); })
-        .style('fill', function(d) { return color(d[0]); });
-
-        g.call(xAxis).append('text')
-        .attr('class', 'caption')
-        .attr('y', -6)
-        .text('Percentage');*/
+          legend.append('text')
+            .attr('x', 50)
+            .attr('y', function(d, i){ return height - (i*ls_h) - ls_h - 4;})
+            .text(function(d, i) {
+              return legendLabel({d: d, i: i});
+            });
+            /*function(d, i) {
+              console.log('d = '+JSON.stringify(d));
+              if (d < 0.1) {
+                return '' + (d * 100) + ' %';
+              } else {
+                return (d * 100) + ' %';
+              }
+            });*/
+        }
 
         // End Experimental: display axis
       }
 
       if (layer.data.loaded) {
         handleData(layer.data.content);
+      } else if (layer.data.inline != null &&
+          !_.isEmpty(layer.data.inline)) {
+        var data = $parse(layer.data.inline);
+        handleData(data());
       } else {
         var loadFct = getLoadFunction(layer.data.type);
         loadFct(layer.data.url, handleData);
@@ -561,7 +604,11 @@ angular.module('mapManager.d3.services', [
       var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
-        layerElement.selectAll('circle')
+        console.log('layer = '+layer.id+', '+JSON.stringify(data));
+        var values = {};
+        _.forEach(data, function(d) { values[d.id] = d; });
+
+        var elements = layerElement.selectAll('circle')
           .data(data)
           .enter()
           .append('path')
@@ -574,10 +621,85 @@ angular.module('mapManager.d3.services', [
           .attr('d', path)
           .style('fill', layer.display.shape.color)
           .style('opacity', layer.display.shape.opacity);
+
+        var tooltipDiv = d3.select('body').append('div')
+          .attr('id', 'tooltip-' + layer.id)
+          .attr('class', 'tooltip')
+          .style('opacity', 0);
+
+        elements.on('click', function(d) {
+          d3.select(this).transition().duration(300).style('opacity', 1);
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 1);
+          tooltipDiv.text('d = '+JSON.stringify(values[d.id]))
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY -30) + 'px');
+        });
+
+
       }
 
       if (layer.data.loaded) {
         handleData(layer.data.content);
+      } else if (layer.data.inline != null &&
+          !_.isEmpty(layer.data.inline)) {
+        var data = $parse(layer.data.inline);
+        handleData(data());
+      } else {
+        var loadFct = getLoadFunction(layer.data.type);
+        loadFct(layer.data.url, handleData);
+      }
+    },
+
+    // Experimental - Display image - Not working at the moment
+    createImageObjectsDataLayer: function(svg, path, layer) {
+      var origin = $parse(layer.display.shape.origin);
+      // var radius = $parse(layer.display.shape.radius);
+
+      consoleService.logMessage('info',
+        'Creating data layer with identifier "' + layer.id + '"');
+      var circle = d3.geo.circle();
+
+      var layerElement = this.getLayerElement(svg, layer);
+
+      function handleData(data) {
+        layerElement.selectAll('circle')
+          .data(data)
+          .enter()
+          .append('path')
+          .datum(function(d) {
+            console.log('layer.display.shape.origin = '+layer.display.shape.origin);
+            return circle.origin(origin({d: d}));
+          })
+          .attr('class', 'point')
+          .attr('d', path)
+          .append('image')
+          //.append('image')
+          .attr('xlink:href',function(d){
+            console.log('xlink:href');
+            //console.log(d.properties.name);
+            /*if (d.properties.name =='Rio de Janeiro'){return 'icon_51440.svg'}
+            else{
+            return ('icon_10684.svg')*/
+            return 'http://bl.ocks.org/mpmckenna8/raw/b87df1c44243aa1575cb/icon_51440.svg';
+          }/*}*/)
+          .attr('height', function(d){
+            return '19'
+          })
+          .attr('width', '29')
+
+// while adding an image to an svg these are the coordinates i think of the top left
+/*.attr('x', '-14.5')
+.attr('y', '-9.5')*/
+          /*.style('opacity', layer.display.shape.opacity)*/;
+      }
+
+      if (layer.data.loaded) {
+        handleData(layer.data.content);
+      } else if (layer.data.inline != null &&
+          !_.isEmpty(layer.data.inline)) {
+        var data = $parse(layer.data.inline);
+        handleData(data());
       } else {
         var loadFct = getLoadFunction(layer.data.type);
         loadFct(layer.data.url, handleData);
@@ -588,12 +710,13 @@ angular.module('mapManager.d3.services', [
       if (layer.display.shape) {
         if (layer.display.shape.type === 'circle') {
           this.createCircleObjectsDataLayer(svg, path, layer);
+        } else if (layer.display.shape.type === 'image') {
+          this.createImageObjectsDataLayer(svg, path, layer);
         }
       }
     },
 
     createLayer: function(svg, path, layer) {
-      console.log('createLayer');
       consoleService.logMessage('info', 'Creating layer of type "' +
         layer.type + '" with identifier "' + layer.id + '"');
 
@@ -602,9 +725,25 @@ angular.module('mapManager.d3.services', [
       } else if (layer.type === 'data' && layer.mode === 'objects') {
         this.createObjectsDataLayer(svg, path, layer);
       } else if (layer.type === 'data' && layer.mode === 'fill') {
-        this.createFillDataLayer(layer);
+        this.createFillDataLayer(svg, layer);
       } else if (layer.type === 'geodata') {
         this.createGeoDataLayer(svg, path, layer);
+      }
+    },
+
+    isLayerWithFillMode: function(layer) {
+      return (layer.type === 'data' && layer.mode === 'fill');
+    },
+
+    deleteLayer: function(svg, path, layer) {
+      consoleService.logMessage('info', 'Deleting layer of type "' +
+        layer.type + '" with identifier "' + layer.id + '"');
+
+      var layerElement = d3.select(document.getElementById(layer.id));
+      if (this.isLayerWithFillMode(layer)) {
+        this.clearFillDataLayer(svg, layer);
+      } else {
+        layerElement.selectAll('*').remove();
       }
     },
 
