@@ -476,23 +476,89 @@ angular.module('mapManager.d3.services', [
         'tooltip-' + layer.id)).remove();
     },
 
+    createTooltipEvents: function(elements, values, tooltipDiv,
+        tooltipText, showEvent, hideEvent) {
+      // Show tooltip
+      if (showEvent === 'click') {
+        elements.on('click', function(d) {
+          //d3.select(this).transition().duration(300).style('opacity', 1);
+          // TODO: enlighten borders rather
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 1);
+          tooltipDiv.html(function() {
+            // Workaround for circle shape where the data object is embedded
+            // within the generated geo path. See method createCircleObjectsDataLayer
+            // for more details
+            if (d.d !=null) {
+              return tooltipText({d: d.d, value: values[d.d.id]});
+            } else {
+              return tooltipText({d: d, value: values[d.id]});
+            }
+          })
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY - 30) + 'px');
+        });
+      } else if (showEvent === 'mouseOver') {
+        elements.on('mouseover', function(d) {
+          console.log('mouseover');
+          // TODO: enlighten borders rather
+          //d3.select(this).transition().duration(300).style('opacity', 1);
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 1);
+          tooltipDiv.text(function() {
+            return tooltipText({d: d, value: values[d.id]});
+          })
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY - 30) + 'px');
+        });
+      }
+
+      // Hide tooltip
+      if (hideEvent === 'mouseOut') {
+        elements.on('mouseout', function() {
+          console.log('mouseout');
+          /*d3.select(this)
+            .transition().duration(300)
+            .style('opacity', 0.8);*/
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 0);
+        });
+      }
+    },
+
     createFillDataLayer: function(svg, layer) {
+      var self = this;
       var value = $parse(layer.display.fill.value);
 
       function handleData(data) {
+        console.log('>> handleData - fill = '+JSON.stringify(layer.display.fill));
         //console.log('>> data = '+JSON.stringify(data));
         var values = {};
         _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
 
-        var color = d3.scale.threshold()
-          .domain(layer.display.fill.threshold.values)
-          .range(layer.display.fill.threshold.colors);
-
         var sel = d3.select(document.getElementById(layer.applyOn));
-        var elements = sel.selectAll('path')
-            .style('fill', function(d) {
-          return color(values[d.id]);
-        });
+
+        if (layer.display.fill.threshold != null) {
+          var color = d3.scale.threshold()
+            .domain(layer.display.fill.threshold.values)
+            .range(layer.display.fill.threshold.colors);
+
+          var elements = sel.selectAll('path')
+              .style('fill', function(d) {
+            return color(values[d.id]);
+          });
+        } else if (layer.display.fill.categorical != null) {
+          // See https://github.com/mbostock/d3/wiki/Ordinal-Scales#category10
+          console.log('>> categorical');
+          var color = d3.scale.category20();
+          var sel = d3.select(document.getElementById(layer.applyOn));
+          var elements = sel.selectAll('path')
+              .style('fill', function(d) {
+            //return color(d.color = d3.max(neighbors[i], function(n) { return countries[n].color; }) + 1 | 0);
+            console.log('>> d.id = '+values[d.id].color);
+            return color(values[d.id].color);
+          });
+        }
 
         // Experimental: display tooltip
 
@@ -504,41 +570,15 @@ angular.module('mapManager.d3.services', [
             .attr('class', 'tooltip')
             .style('opacity', 0);
 
-          var tooltipEvent = 'click';
-          if (layer.display.tooltip.event != null) {
-            tooltipEvent = layer.display.tooltip.event;
+          // Events
+          if (layer.behavior.tooltip.display != null) {
+            var showTooltipEvent = layer.behavior.tooltip.display;
+            var hideTooltipEvent = layer.behavior.tooltip.hide;
 
-            // TODO
+            self.createTooltipEvents(elements, values, tooltipDiv,
+                    tooltipText, showTooltipEvent, hideTooltipEvent);
           }
-
-          elements.on('click', function(d) {
-            d3.select(this).transition().duration(300).style('opacity', 1);
-            tooltipDiv.transition().duration(300)
-               .style('opacity', 1);
-            tooltipDiv.text(function() {
-              console.log('>> ')
-              return tooltipText({d: d, value: values[d.id]});
-            })
-               .style('left', (d3.event.pageX) + 'px')
-               .style('top', (d3.event.pageY -30) + 'px');
-          });
         }
-
-        /*elements.on('mouseover', function(d) {
-          d3.select(this).transition().duration(300).style('opacity', 1);
-          tooltipDiv.transition().duration(300)
-             .style('opacity', 1);
-          tooltipDiv.text('d = '+values[d.id])
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY -30) + 'px');
-        })
-        .on('mouseout', function() {
-          d3.select(this)
-            .transition().duration(300)
-            .style('opacity', 0.8);
-          tooltipDiv.transition().duration(300)
-             .style('opacity', 0);
-        });*/
 
         // Experimental: display axis
 
@@ -581,7 +621,9 @@ angular.module('mapManager.d3.services', [
         // End Experimental: display axis
       }
 
-      if (layer.data.loaded) {
+      if (layer.data == null) {
+        handleData();
+      } else if (layer.data.loaded) {
         handleData(layer.data.content);
       } else if (layer.data.inline != null &&
           !_.isEmpty(layer.data.inline)) {
@@ -594,6 +636,7 @@ angular.module('mapManager.d3.services', [
     },
 
     createCircleObjectsDataLayer: function(svg, path, layer) {
+      var self = this;
       var origin = $parse(layer.display.shape.origin);
       var radius = $parse(layer.display.shape.radius);
 
@@ -604,38 +647,128 @@ angular.module('mapManager.d3.services', [
       var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
-        console.log('layer = '+layer.id+', '+JSON.stringify(data));
+        if (layer.data.where != null) {
+          var dataWhere = $parse(layer.data.where);
+          data = _.filter(data, function(d) {
+            return dataWhere({d: d});
+          });
+        }
+
+        if (layer.data.order != null && layer.data.order.field) {
+          var field = layer.data.order.field;
+          var order = layer.data.order ? layer.data.order : true;
+          data = data.sort(function(a, b) {
+            if (order.ascending) {
+              return a[field] - b[field];
+            } else {
+              return b[field] - a[field];
+            }
+          });
+        }
+
+        var idName = layer.data.id ? layer.data.id : 'id';
+
         var values = {};
-        _.forEach(data, function(d) { values[d.id] = d; });
+        _.forEach(data, function(d) { values[d[idName]] = d; });
+
+        var sel = d3.select(document.getElementById(layer.applyOn));
 
         var elements = layerElement.selectAll('circle')
           .data(data)
           .enter()
           .append('path')
           .datum(function(d) {
-            return circle
-               .origin(origin({d: d}))
-               .angle(radius({d: d}))();
+            var orig = origin({d: d});
+            orig[0] = parseFloat(orig[0]);
+            orig[1] = parseFloat(orig[1]);
+            var rad = radius({d: d});
+            rad = parseFloat(rad);
+            var c = circle
+               .origin(orig)
+               .angle(rad)({d: d});
+            c.d = d;
+            return c;
+          })
+          .attr('id', function(d) {
+            return d.d.name;
           })
           .attr('class', 'point')
-          .attr('d', path)
-          .style('fill', layer.display.shape.color)
+          .attr('d', function(d) { return path(d); })
           .style('opacity', layer.display.shape.opacity);
 
-        var tooltipDiv = d3.select('body').append('div')
-          .attr('id', 'tooltip-' + layer.id)
-          .attr('class', 'tooltip')
-          .style('opacity', 0);
+        if (layer.display.shape.color != null) {
+          elements.style('fill', layer.display.shape.color)
+        } else if (layer.display.shape.threshold != null) {
+          var color = d3.scale.threshold()
+            .domain(layer.display.shape.threshold.values)
+            .range(layer.display.shape.threshold.colors);
 
-        elements.on('click', function(d) {
-          d3.select(this).transition().duration(300).style('opacity', 1);
-          tooltipDiv.transition().duration(300)
-             .style('opacity', 1);
-          tooltipDiv.text('d = '+JSON.stringify(values[d.id]))
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY -30) + 'px');
-        });
+          var value = $parse(layer.display.shape.value);
 
+          elements.style('fill', function(d) {
+            var val = value({
+              d: d.d,
+              parseDate: function(val) {
+                return new Date(val);
+              }
+            });
+            return color(parseFloat(val));
+          });
+        }
+
+        if (layer.display.tooltip && layer.display.tooltip.enabled) {
+          var tooltipText = $parse(layer.display.tooltip.text);
+
+          var tooltipDiv = d3.select('body').append('div')
+            .attr('id', 'tooltip-' + layer.id)
+            .attr('class', 'tooltip')
+            .style('opacity', 0);
+
+          // Events
+          if (layer.behavior.tooltip.display != null) {
+            var showTooltipEvent = layer.behavior.tooltip.display;
+            var hideTooltipEvent = layer.behavior.tooltip.hide;
+
+            self.createTooltipEvents(elements, values, tooltipDiv,
+                    tooltipText, showTooltipEvent, hideTooltipEvent);
+          }
+        }
+
+        if (layer.display.legend && layer.display.legend.enabled) {
+          var legendLabel = $parse(layer.display.legend.label);
+
+          var height = 500;
+          var legend = sel.selectAll('g.legend')
+            .data(layer.display.shape.threshold.values)
+            .enter()
+            .append('g')
+            .attr('class', 'legend');
+
+          var ls_w = 20, ls_h = 20;
+
+          legend.append('rect')
+            .attr('x', 20)
+            .attr('y', function(d, i){ return height - (i*ls_h) - 2*ls_h;})
+            .attr('width', ls_w)
+            .attr('height', ls_h)
+            .style('fill', function(d, i) { return color(d); })
+            .style('opacity', 0.8);
+
+          legend.append('text')
+            .attr('x', 50)
+            .attr('y', function(d, i){ return height - (i*ls_h) - ls_h - 4;})
+            .text(function(d, i) {
+              return legendLabel({d: d, i: i});
+            });
+            /*function(d, i) {
+              console.log('d = '+JSON.stringify(d));
+              if (d < 0.1) {
+                return '' + (d * 100) + ' %';
+              } else {
+                return (d * 100) + ' %';
+              }
+            });*/
+        }
 
       }
 

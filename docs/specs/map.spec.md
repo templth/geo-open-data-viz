@@ -7,7 +7,7 @@ TODO
 
 ### Graticule layer
 
-```json
+```
 {
   id: 'graticuleLayer',
   type: 'graticule',
@@ -42,7 +42,7 @@ TODO
 
 Simple:
 
-```json
+```
 {
   id: 'worldLayer',
   type: 'geodata',
@@ -63,7 +63,7 @@ Simple:
 
 With mesh
 
-```json
+```
 {
   id: 'usLayer2',
   type: 'geodata',
@@ -96,7 +96,7 @@ With mesh
 
 ### Data layer (shape)
 
-```json
+```
 {
   id: 'layer1',
   type: 'data',
@@ -132,7 +132,7 @@ With mesh
 
 ### Data layer (fill)
 
-```json
+```
 {
   id: 'layer2',
   type: 'data',
