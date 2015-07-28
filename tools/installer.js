@@ -249,10 +249,12 @@ apisparkService.loadApisparkConfiguration(function(configuration) {
     // Create folders in file store
     createFolderTask(configuration, 'Create folder "html" in file store',
       'html'),
-    createFolderTask(configuration, 'Create folder "js" in file store',
-      'js'),
-    createFolderTask(configuration, 'Create folder "css" in file store',
-      'css'),
+    createFolderTask(configuration, 'Create folder "scripts" in file store',
+      'scripts'),
+    createFolderTask(configuration, 'Create folder "styles" in file store',
+      'styles'),
+    createFolderTask(configuration, 'Create folder "images" in file store',
+      'images'),
 
     // Link web api with stores and generate its structure
 

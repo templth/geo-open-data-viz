@@ -20,8 +20,22 @@ function mergingAllMapElements(map) {
   return mergedMap;
 }
 
+function mergingAllSourceElements(sources) {
+  var mergedSource = {};
+
+  mergedSource = clone(sources[0]);
+
+  _.forEach(sources, function(source) {
+    _.merge(mergedSource, source);
+  });
+
+  console.log('>> '+JSON.stringify(mergedSource));
+
+  return mergedSource;
+}
+
 function readSampleMapData(callback) {
-  fs.readFile('schema/sample-map.json', 'utf8', function (err, data) {
+  fs.readFile('schema/sample-map.json', 'utf8', function(err, data) {
     if (err) {
       throw err;
     }
@@ -31,45 +45,31 @@ function readSampleMapData(callback) {
   });
 }
 
-function readSampleMapSourceData(callback) {
-  fs.readFile('schema/sample-mapSource.json', 'utf8', function (err, data) {
+function readSampleSourceData(callback) {
+  fs.readFile('schema/sample-source.json', 'utf8', function(err, data) {
     if (err) {
       throw err;
     }
 
-    callback(JSON.parse(data));
-  });
-}
-
-function readSampleDataSourceData(callback) {
-  fs.readFile('schema/sample-dataSource.json', 'utf8', function (err, data) {
-    if (err) {
-      throw err;
-    }
-
-    callback(JSON.parse(data));
+    var source = mergingAllSourceElements(JSON.parse(data));
+    callback(source);
   });
 }
 
 function readSampleData(callback) {
   async.parallel({
-  	map: function(callback) {
-  	  readSampleMapData(function(map) {
+    map: function(callback) {
+      readSampleMapData(function(map) {
         callback(null, map);
-  	  });
-  	},
-  	dataSource: function(callback) {
-  	  readSampleDataSourceData(function(dataSource) {
+      });
+    },
+    source: function(callback) {
+      readSampleSourceData(function(dataSource) {
         callback(null, dataSource);
-  	  });
-  	},
-  	mapSource: function(callback) {
-  	  readSampleMapSourceData(function(mapSource) {
-        callback(null, mapSource);
-  	  });
-  	}
+      });
+    }
   }, function(err, results) {
-    callback(results.map, results.mapSource, results.dataSource);
+    callback(results.map, results.source);
   });
 }
 
@@ -94,17 +94,27 @@ function initializeEntity(entity, name) {
   entity.properties = [];
 }
 
+// See http://stackoverflow.com/questions/3885817/how-to-check-that-a-number-is-float-or-integer
+
+function isInteger(value) {
+  return value % 1 === 0;
+}
+
 function getType(value) {
   if (_.isString(value)) {
-  	return 'String';
+    return 'String';
   } else if (_.isNumber(value)) {
-  	return 'Integer';
+    if (isInteger(value)) {
+      return 'Integer';
+    } else {
+      return 'Float';
+    }
   } else if (_.isBoolean(value)) {
-  	return 'Boolean';
+    return 'Boolean';
   } else if (_.isDate(value)) {
-  	return 'Date';
+    return 'Date';
   } else {
-  	return 'String';
+    return 'String';
   }
 }
 
@@ -133,21 +143,21 @@ function createCompositeType(props) {
 }
 
 function buildProperties(obj, element, level) {
-  for(var elt in obj) {
+  for (var elt in obj) {
     if (_.isArray(obj[elt])) {
       var firstObjElt = obj[elt][0];
-	  if (_.isObject(firstObjElt)) {
-	    // Composite type
-	    var property = createCompositeType({
-	   	  name: elt,
-	   	  list: true
-	    });
-	  	element.properties.push(property);
+      if (_.isObject(firstObjElt)) {
+        // Composite type
+        var property = createCompositeType({
+          name: elt,
+          list: true
+        });
+        element.properties.push(property);
 
-	  	// Add sub properties to composite
-	    buildProperties(obj[elt][0], property, level + 1);
-	  } else {
-	    // Primitive type
+        // Add sub properties to composite
+        buildProperties(obj[elt][0], property, level + 1);
+      } else {
+        // Primitive type
         var property = createPrimitiveType({
           name: elt,
           type: getType(firstObjElt),
@@ -158,22 +168,22 @@ function buildProperties(obj, element, level) {
       }
     } else if (isPrimitive(obj[elt])) {
       // Primitive type
-  	  var property = createPrimitiveType({
-  	  	name: elt,
-  	  	type: getType(obj[elt]),
-  	  	list: false,
-  	  	pk: isPk(elt, level)
-  	  });
-  	  element.properties.push(property);
+      var property = createPrimitiveType({
+        name: elt,
+        type: getType(obj[elt]),
+        list: false,
+        pk: isPk(elt, level)
+      });
+      element.properties.push(property);
     } else if (_.isObject(obj[elt])) {
-  	  // Composite type
+      // Composite type
       var property = createCompositeType({
-  	  	name: elt,
-  	  	list: false
-  	  });
-  	  element.properties.push(property);
+        name: elt,
+        list: false
+      });
+      element.properties.push(property);
 
-  	  // Add sub properties to composite
+      // Add sub properties to composite
       buildProperties(obj[elt], property, level + 1);
     }
   }
@@ -185,23 +195,26 @@ function buildEntity(obj, entity, name) {
 }
 
 // Create schema
-readSampleData(function(map, mapSource, dataSource) {
+readSampleData(function(map, source) {
   var entities = [];
+
+  var layer = map.layers[0];
+  map.layers = null;
 
   // Map entity
   var mapEntity = {};
   entities.push(mapEntity);
   buildEntity(map, mapEntity, 'Map');
 
-  // Map source entity
-  var mapSourceEntity = {};
-  entities.push(mapSourceEntity);
-  buildEntity(mapSource, mapSourceEntity, 'MapSource');
+  // Layer entity
+  var layerEntity = {};
+  entities.push(layerEntity);
+  buildEntity(layer, layerEntity, 'Layer');
 
-  // Data source entity
-  var dataSourceEntity = {};
-  entities.push(dataSourceEntity);
-  buildEntity(dataSource, dataSourceEntity, 'DataSource');
+  // Map source entity
+  var sourceEntity = {};
+  entities.push(sourceEntity);
+  buildEntity(source, sourceEntity, 'Source');
 
   // Serialize schema
   writeSchemaData({ entities: entities });

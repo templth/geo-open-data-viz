@@ -46,10 +46,10 @@ angular.module('mapManager.map', [
             id: '1',
             name: 'World',
             projection: 'orthographic',
-            scale: 220,
+            scale: 320,
             interactions: {
-              moving: 'mouveWheel',
-              zooming: 'drag'
+              moving: 'mouseMove',
+              zooming: 'mouseWheel'
             },
             layers: [
               {
@@ -122,10 +122,11 @@ angular.module('mapManager.map', [
                 data: {
                   url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
                   type: 'csv',
+                  source: 'meteoritesSource',
                   content: [],
                   loaded: false,
                   id: 'name',
-                  where: 'd.mass > 10000',
+                  where: 'd.mass > 100000',
                   order: {
                     field: 'mass',
                     ascending: false
@@ -139,6 +140,8 @@ angular.module('mapManager.map', [
                     origin: '[ d.reclong, d.reclat ]',
                     opacity: 0.75,
                     threshold: {
+                      paletteCode: 'YlOrRd',
+                      paletteReverse: false,
                       values: [ 1800, 1900, 1950, 2000, 2015 ],
                       colors: [ '#ffffb2', '#fed976', '#feb24c',
                                 '#fd8d3c', '#f03b20', '#bd0026' ]

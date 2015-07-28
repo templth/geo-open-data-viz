@@ -19,13 +19,432 @@
           "primaryKey": false
         },
         {
-          "name": "layers",
+          "name": "interactions",
           "type": "composite",
           "required": false,
-          "list": true,
+          "list": false,
           "properties": [
             {
-              "name": "id",
+              "name": "moving",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "zooming",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Layer",
+      "pkPolicy": "auto-generated",
+      "properties": [
+        {
+          "name": "id",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": true
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "applyOn",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "applied",
+          "type": "Boolean",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "visible",
+          "type": "Boolean",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "display",
+          "type": "composite",
+          "required": false,
+          "list": false,
+          "properties": [
+            {
+              "name": "background",
+              "type": "Boolean",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "lines",
+              "type": "Boolean",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "border",
+              "type": "Boolean",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "shape",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "type",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "radius",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "origin",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "fill",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "opacity",
+                  "type": "Float",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "threshold",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "paletteCode",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "paletteReverse",
+                      "type": "Boolean",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "values",
+                      "type": "Float",
+                      "required": false,
+                      "list": true,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "colors",
+                      "type": "String",
+                      "required": false,
+                      "list": true,
+                      "primaryKey": false
+                    }
+                  ]
+                },
+                {
+                  "name": "value",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "fill",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "threshold",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "values",
+                      "type": "Float",
+                      "required": false,
+                      "list": true,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "colors",
+                      "type": "String",
+                      "required": false,
+                      "list": true,
+                      "primaryKey": false
+                    }
+                  ]
+                },
+                {
+                  "name": "value",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "color",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "legend",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "enabled",
+                  "type": "Boolean",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "label",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "tooltip",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "enabled",
+                  "type": "Boolean",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "fromScale",
+                  "type": "Integer",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "text",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "event",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "styles",
+          "type": "composite",
+          "required": false,
+          "list": false,
+          "properties": [
+            {
+              "name": "background",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "fill",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "border",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "stroke",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "strokeWidth",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "lines",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "stroke",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "strokeWidth",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "strokeOpacity",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "path",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "fill",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "stroke",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "strokeLinejoin",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "strokeLinecap",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "d",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "strokeWidth",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "data",
+          "type": "composite",
+          "required": false,
+          "list": false,
+          "properties": [
+            {
+              "name": "url",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "rootObject",
               "type": "String",
               "required": false,
               "list": false,
@@ -39,337 +458,112 @@
               "primaryKey": false
             },
             {
-              "name": "name",
+              "name": "content",
               "type": "String",
               "required": false,
-              "list": false,
+              "list": true,
               "primaryKey": false
             },
             {
-              "name": "applyOn",
-              "type": "String",
-              "required": false,
-              "list": false,
-              "primaryKey": false
-            },
-            {
-              "name": "applied",
+              "name": "loaded",
               "type": "Boolean",
               "required": false,
               "list": false,
               "primaryKey": false
             },
             {
-              "name": "visible",
+              "name": "mesh",
               "type": "Boolean",
               "required": false,
               "list": false,
               "primaryKey": false
             },
             {
-              "name": "display",
-              "type": "composite",
-              "required": false,
-              "list": false,
-              "properties": [
-                {
-                  "name": "background",
-                  "type": "Boolean",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "lines",
-                  "type": "Boolean",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "border",
-                  "type": "Boolean",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "shape",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "type",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "radius",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "origin",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "fill",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "opacity",
-                      "type": "Integer",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                },
-                {
-                  "name": "fill",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "threshold",
-                      "type": "composite",
-                      "required": false,
-                      "list": false,
-                      "properties": [
-                        {
-                          "name": "values",
-                          "type": "Integer",
-                          "required": false,
-                          "list": true,
-                          "primaryKey": false
-                        },
-                        {
-                          "name": "colors",
-                          "type": "String",
-                          "required": false,
-                          "list": true,
-                          "primaryKey": false
-                        }
-                      ]
-                    },
-                    {
-                      "name": "value",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "color",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "styles",
-              "type": "composite",
-              "required": false,
-              "list": false,
-              "properties": [
-                {
-                  "name": "background",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "fill",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                },
-                {
-                  "name": "border",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "stroke",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "strokeWidth",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                },
-                {
-                  "name": "lines",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "stroke",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "strokeWidth",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "strokeOpacity",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                },
-                {
-                  "name": "path",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "fill",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "stroke",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "strokeLinejoin",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "strokeLinecap",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                },
-                {
-                  "name": "d",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "strokeWidth",
-                      "type": "String",
-                      "required": false,
-                      "list": false,
-                      "primaryKey": false
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "data",
-              "type": "composite",
-              "required": false,
-              "list": false,
-              "properties": [
-                {
-                  "name": "url",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "rootObject",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "type",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "content",
-                  "type": "String",
-                  "required": false,
-                  "list": true,
-                  "primaryKey": false
-                },
-                {
-                  "name": "loaded",
-                  "type": "Boolean",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "mesh",
-                  "type": "Boolean",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                }
-              ]
-            },
-            {
-              "name": "mode",
+              "name": "source",
               "type": "String",
               "required": false,
               "list": false,
               "primaryKey": false
+            },
+            {
+              "name": "id",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "where",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "order",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "field",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "ascending",
+                  "type": "Boolean",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "mode",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "rank",
+          "type": "Integer",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "behavior",
+          "type": "composite",
+          "required": false,
+          "list": false,
+          "properties": [
+            {
+              "name": "tooltip",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "display",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
             }
           ]
         }
       ]
     },
     {
-      "name": "MapSource",
+      "name": "Source",
       "pkPolicy": "auto-generated",
       "properties": [
         {
@@ -405,6 +599,13 @@
           "type": "String",
           "required": false,
           "list": true,
+          "primaryKey": false
+        },
+        {
+          "name": "url",
+          "type": "String",
+          "required": false,
+          "list": false,
           "primaryKey": false
         },
         {
@@ -429,63 +630,8 @@
           "primaryKey": false
         },
         {
-          "name": "structureFile",
+          "name": "structure",
           "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        }
-      ]
-    },
-    {
-      "name": "DataSource",
-      "pkPolicy": "auto-generated",
-      "properties": [
-        {
-          "name": "id",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": true
-        },
-        {
-          "name": "name",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "category",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "source",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "tags",
-          "type": "String",
-          "required": false,
-          "list": true,
-          "primaryKey": false
-        },
-        {
-          "name": "originUrl",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "imported",
-          "type": "Boolean",
           "required": false,
           "list": false,
           "primaryKey": false
@@ -498,17 +644,31 @@
           "primaryKey": false
         },
         {
-          "name": "structure",
+          "name": "sample",
           "type": "String",
           "required": false,
-          "list": true,
+          "list": false,
           "primaryKey": false
         },
         {
-          "name": "samples",
+          "name": "type",
           "type": "String",
           "required": false,
-          "list": true,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "dataType",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "rowNumber",
+          "type": "Integer",
+          "required": false,
+          "list": false,
           "primaryKey": false
         }
       ]

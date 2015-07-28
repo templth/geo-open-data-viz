@@ -39,6 +39,7 @@ module.exports = function(config) {
       'bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js',
       'bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js',
       'bower_components/AngularJS-Toaster/toaster.js',
+      'bower_components/angular-colorbrewer-selector/dist/angular-color-brewer-picker.min.js',
       'bower_components/lodash/lodash.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower

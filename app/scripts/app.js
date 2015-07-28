@@ -20,6 +20,7 @@ angular
     'ui.bootstrap',
     'toaster',
     'colorpicker.module',
+    'colorBrewer',
     'mapManager.form',
     'mapManager.console',
     'mapManager.map',
@@ -86,6 +87,11 @@ angular
   /*.config(function($provide) {
     $provide.decorator('$httpBackend', angular.mock.e2e.$httpBackendDecorator);
   })*/
+  .config(['$httpProvider', function($httpProvider) {
+    // See http://stackoverflow.com/questions/23823010/how-to-enable-cors-in-angularjs
+    $httpProvider.defaults.useXDomain = true;
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
+  }])
   .run(function($http) {
     var currentUser = {
       username: 'daf3b0cd-d8b8-49a7-85b5-47cdb47e8aad',

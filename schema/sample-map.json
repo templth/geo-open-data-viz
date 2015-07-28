@@ -1,6 +1,10 @@
 {
   "id": "myid",
   "projection": "orthographic",
+  "interactions": {
+    "moving": "mouseMove",
+    "zooming": "mouseWheel"
+  },
   "layers": [
     {
       "id": "graticuleLayer",
@@ -183,6 +187,58 @@
         }
       },
       "applyOn": "usLayer",
+      "applied": true,
+      "visible": true
+    },
+    {
+      "id": "meteorites",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "data": {
+        "url": "http://localhost:9000/scripts/json/Meteorite_Landings.csv",
+        "type": "csv",
+        "source": "meteoritesSource",
+        "id": "name",
+        "where": "d.mass > 100000",
+        "order": {
+          "field": "mass",
+          "ascending": false
+        }
+      },
+      "name": "Meteorites",
+      "display": {
+        "shape": {
+          "type": "circle",
+          "radius": "d.mass / 5000000",
+          "origin": "[ d.reclong, d.reclat ]",
+          "opacity": 0.75,
+          "threshold": {
+            "paletteCode": "YlOrRd",
+            "paletteReverse": false,
+            "values": [ 1800.45, 1900.44, 1950.44, 2000.34, 2015.34 ],
+            "colors": [ "#ffffb2", "#fed976", "#feb24c",
+                      "#fd8d3c", "#f03b20", "#bd0026" ]
+          },
+          "value": "parseDate(d.year).getFullYear()"
+        },
+        "legend": {
+          "enabled": true,
+          "label": "d"
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "'Name: '+d.name+'<br/>Year: '+d.year+'<br/>Mass (g): '+d.mass",
+          "event": "click"
+        }
+      },
+      "behavior": {
+        "tooltip": {
+          "display": "click"
+        }
+      },
+      "applyOn": "layers",
       "applied": true,
       "visible": true
     }

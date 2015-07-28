@@ -1,0 +1,109 @@
+{
+  id: '1',
+  name: 'World',
+  projection: 'orthographic',
+  scale: 320,
+  interactions: {
+    moving: 'mouveWheel',
+    zooming: 'drag'
+  },
+  layers: [
+    {
+      id: 'graticuleLayer',
+      type: 'graticule',
+      rank: 1,
+      name: 'Graticule',
+      applyOn: 'layers',
+      applied: true,
+      visible: true,
+      display: {
+        background: true,
+        lines: true,
+        border: true
+      },
+      styles: {
+        background: {
+          fill: '#a4bac7'
+        },
+        border: {
+          stroke: '#000',
+          strokeWidth: '3px'
+        },
+        lines: {
+          stroke: '#777',
+          strokeWidth: '.5px',
+          strokeOpacity: '.5'
+        }
+      }
+    },
+    {
+      id: 'worldLayer',
+      type: 'geodata',
+      rank: 2,
+      data: {
+        url: 'http://localhost:9000/scripts/json/continent.json',
+        rootObject: 'countries',
+        type: 'topojson',
+        content: [],
+        loaded: false
+      },
+      applyOn: 'layers',
+      name: 'World',
+      applied: true,
+      visible: true
+    },
+    {
+      id: 'meteorites',
+      type: 'data',
+      mode: 'objects',
+      rank: 6,
+      data: {
+        url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
+        type: 'csv',
+        content: [],
+        loaded: false,
+        id: 'name',
+        where: 'd.mass < 50000',
+        order: {
+          field: 'mass',
+          ascending: false
+        }
+      },
+      name: 'Meteorites',
+      display: {
+        shape: {
+          type: 'circle',
+          radius: 'd.mass / 50000',
+          origin: '[ d.reclong, d.reclat ]',
+          opacity: 0.75,
+          threshold: {
+            values: [ 1800, 1900, 1950, 2000, 2015 ],
+            colors: [ '#ffffb2', '#fed976', '#feb24c',
+                      '#fd8d3c', '#f03b20', '#bd0026' ]
+          },
+          value: 'parseDate(d.year).getFullYear()'
+        },
+        legend: {
+          enabled: true,
+          label: 'd'
+        },
+        tooltip: {
+          enabled: true,
+          fromScale: 300,
+          text: '"Name: "+d.name+"<br/>Year: "+d.year+"<br/>Mass (g): "+d.mass',
+          event: 'click' // or over
+        }
+      },
+      behavior: {
+        tooltip: {
+          display: 'click'
+          //display: 'mouseOver',
+          //hide: 'mouseOut'
+        }
+      },
+      applyOn: 'layers',
+      applied: true,
+      visible: true
+    }
+  ]
+}

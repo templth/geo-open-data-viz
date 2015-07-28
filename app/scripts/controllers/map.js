@@ -19,6 +19,10 @@ angular.module('mapManagerApp')
     // Set current map elements
     currentMapService.currentMap = map;
 
+    currentMapService.currentMapContext.properties = {
+      scale: map.scale
+    };
+
     // Set current map in scope
     commonsService.setCurrentMapInScope($scope, map);
 
@@ -162,10 +166,28 @@ angular.module('mapManagerApp')
     };
   })
 
+  .controller('UpdatePropertiesCtrl', function($scope, commonsService) {
+    commonsService.registerCommonPanelFunctionsInScope($scope, 'initial');
+  })
+
   .controller('UpdateLayerCtrl', function($scope, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
     commonsService.registerCommonMapLayerFunctionsInScope($scope);
     commonsService.registerCommonMapLayerPanelFunctionsInScope($scope);
+
+    if (!_.isNull($scope.layer.display) &&
+        !_.isUndefined($scope.layer.display) &&
+        !_.isNull($scope.layer.display.shape) &&
+        !_.isUndefined($scope.layer.display.shape)) {
+      $scope.properties.fillMode = (_.isNull($scope.layer.display.shape.threshold) ||
+        _.isUndefined($scope.layer.display.shape.threshold)) ? 'static' : 'threshold';
+
+      $scope.selectBrewColors = function(item, isReverse) {
+        $scope.layer.display.shape.threshold.paletteCode = item.name;
+        $scope.layer.display.shape.threshold.paletteReverse = isReverse;
+        $scope.layer.display.shape.threshold.colors = item.colors;
+      };
+    }
   })
 
   .controller('AddLayerCtrl', function($scope, $modalInstance, commonsService) {

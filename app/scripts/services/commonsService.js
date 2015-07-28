@@ -50,6 +50,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           modalInstance.result.then(function(sourceToAdd) {
             $scope.sources.push(sourceToAdd);
+            console.log(JSON.stringify(sourceToAdd, null, 2));
             toaster.pop('success', 'Source "' +
               sourceToAdd.name + '"',
               'Successfully added');
@@ -69,10 +70,19 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           projection: currentMap.projection,
           scale: currentMap.scale
         };
+        $scope.interactions = {
+          moving: currentMap.interactions.moving,
+          zooming: currentMap.interactions.zooming
+        };
         $scope.mapName = currentMap.name;
         $scope.layers = currentMapService.currentMap.layers;
         $scope.linkedSources = currentMapService.currentMap.sources;
         // $scope.messages = consoleService.messages;
+        $scope.currentProperties = currentMapService.currentMapContext.properties;
+        $scope.$watch('currentProperties.scale', function(newValue, oldValue) {
+          if (newValue === oldValue) { return; }
+          console.log('updated currentProperties.scale');
+        });
       },
 
       registerCommonMapFunctionsInScope: function($scope) {
@@ -126,7 +136,6 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
 
         $scope.toggleLayerApplying = function($event, layer) {
-          console.log('>> toggleLayerApplying');
           var svg = currentMapService.currentMapContext.svg;
           var path = currentMapService.currentMapContext.path;
 
@@ -136,7 +145,6 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
 
         $scope.refreshLayerApplying = function($event, layer) {
-          console.log('>> refreshLayerApplying');
           var svg = currentMapService.currentMapContext.svg;
           var path = currentMapService.currentMapContext.path;
 

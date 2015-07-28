@@ -10,7 +10,7 @@ exports = module.exports;
 // Utility functions
 
 function executeApiRequest(configuration, path, method, data, callback) {
-   console.log('>> url = '+configuration.baseUrl + 'api' + path);
+  // console.log('>> url = '+configuration.baseUrl + 'api' + path);
   var options = {
     url: configuration.baseUrl + 'api' + path,
     method: method,
@@ -73,7 +73,7 @@ function executeWebApiRequest(configuration, apiId,
         pass: access.token
       }
     };
-    console.log('url = ' + options.url);
+    // console.log('url = ' + options.url);
 
     if (data !== null) {
       options.json = data;
@@ -149,11 +149,15 @@ function createDependencyObject(webApi, store) {
   };
 }
 
-function createEndpointObject(protocol, domain) {
+function createEndpointObject(protocol, domain, api) {
   return {
     protocol: protocol,
-    domain: domain,
-    version: cells.api.id + '#1'
+    domain: {
+      id: domain.id
+    },
+    version: {
+      id: api + '#1'
+    }
   };
 }
 
@@ -194,34 +198,30 @@ exports.createCell = function(configuration, name, type, callback) {
 };
 
 exports.configureHttpEndpoint = function(configuration, cellId, callback) {
-  async.series([
+  async.waterfall([
     function(callback) {
-      console.log('>> configureHttpEndpoint 1');
-      executeApiRequest(configuration, '/apis/' + cellId + '/versions/endpoints/',
+      executeApiRequest(configuration, '/apis/' + cellId + '/versions/1/endpoints/',
           'GET', null, function(err, endpoints) {
         if (err == null) {
-          callback(err, (endpoints != null && endpoints.length === 1)
-            ? endpoints[0] : null);
+          callback(err, endpoints.endpoints[0]);
         } else {
           callback(err);
         }
       });
     },
     function(endpoint, callback) {
-      console.log('>> configureHttpEndpoint 2');
-      executeApiRequest(configuration, '/apis/' + cellId + '/versions/endpoints/' + endpoint.id,
+      executeApiRequest(configuration, '/apis/' + cellId + '/versions/1/endpoints/' + endpoint.id,
           'DELETE', null, function(err) {
         if (err == null) {
-          callback(err, endpoint.domain);
+          callback(err, endpoint);
         } else {
           callback(err);
         }
       });
     },
-    function(endpoint, callback) {
-      console.log('>> configureHttpEndpoint 3');
-      var endpoint = createEndpointObject('http', domain);
-      executeApiRequest(configuration, '/apis/' + cellId + '/versions/endpoints/',
+    function(oldEndpoint, callback) {
+      var endpoint = createEndpointObject('HTTP/1.1', oldEndpoint.domain, cellId);
+      executeApiRequest(configuration, '/apis/' + cellId + '/versions/1/endpoints/',
           'POST', endpoint, function(err, addedEndpoint) {
         if (err == null) {
           callback(err, addedEndpoint);
@@ -230,7 +230,9 @@ exports.configureHttpEndpoint = function(configuration, cellId, callback) {
         }
       });
     }
-  ]);
+  ], function(err) {
+    callback(err);
+  });
 };
 
 function checkDeployment(configuration, deploymentTask, callback) {

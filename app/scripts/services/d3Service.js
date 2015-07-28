@@ -100,7 +100,7 @@ function composedRotation(λ, ϕ, γ, δλ, δϕ) {
 
 function updateMapElements(projection, mapElements) {
   function cxFct(d) {
-    if (d != null) {
+    if (!_.isNull(d)) {
       return projection([d.lon, d.lat])[0];
     } else {
       return projection([0, 0])[0];
@@ -108,7 +108,7 @@ function updateMapElements(projection, mapElements) {
   }
 
   function cyFct(d) {
-    if (d != null) {
+    if (!_.isNull(d)) {
       return projection([d.lon, d.lat])[1];
     } else {
       return projection([0, 0])[1];
@@ -152,7 +152,7 @@ angular.module('mapManager.d3.services', [
   return {
     refreshMap: function(element) {
       console.log('refreshmap');
-      if (currentMapService.currentMapContext.svg != null) {
+      if (!_.isNull(currentMapService.currentMapContext.svg)) {
         console.log('remove svg');
         currentMapService.currentMapContext.svg.remove();
       }
@@ -168,7 +168,8 @@ angular.module('mapManager.d3.services', [
       var projection = projectionService.createProjection(
         currentMapService.currentMap.projection,
           {width: width, height: height});
-      if (projection != null && currentMapService.currentMap.scale != null) {
+      if (!_.isNull(projection) &&
+          !_.isNull(currentMapService.currentMap.scale)) {
         projection.scale(currentMapService.currentMap.scale);
       }
       var path = projectionService.configurePathWithProjection(projection);
@@ -203,21 +204,24 @@ angular.module('mapManager.d3.services', [
         }
       });
 
-      // Sort layers by rank
-      //layerService.sortLayers(layers);
-
       // Clear preloaded data
       // TODO
 
-      mapInteractionService.configureMoving(svg, 'mouseMove', {
-        type: currentMapService.currentMap.projection, raw: projection
-      }, [ {type: 'path'}, {type: 'circle'}]);
-      // this.configureMapResize(scope, element);
-      mapInteractionService.configureZooming(svg, 'mouseWheel', {
-        type: currentMapService.currentMap.projection, raw: projection}, {
-        width: '', height: ''
-      }, [{type: 'path'}, {type: 'circle'}]);
+      // Configure moving
+      var interactions = currentMapService.currentMap.interactions;
+      if (!_.isNull(interactions) && !_.isNull(interactions.moving)) {
+        mapInteractionService.configureMoving(svg, interactions.moving, {
+          type: currentMapService.currentMap.projection, raw: projection
+        }, [ {type: 'path'}, {type: 'circle'}]);
+      }
 
+      // Configure zooming
+      if (!_.isNull(interactions) && !_.isNull(interactions.zooming)) {
+        mapInteractionService.configureZooming(svg, interactions.zooming, {
+          type: currentMapService.currentMap.projection, raw: projection}, {
+          width: '', height: ''
+        }, [{type: 'path'}, {type: 'circle'}]);
+      }
     },
 
     updateProjection: function(newProjection) {
@@ -226,7 +230,6 @@ angular.module('mapManager.d3.services', [
     },
 
     updateScale: function(newScale) {
-      console.log('>> updateScale = '+newScale);
       currentMapService.currentMap.scale = newScale;
       this.refreshMap(currentMapService.currentMap.element);
     }
@@ -265,11 +268,11 @@ angular.module('mapManager.d3.services', [
 
     configurePathWithProjection: function(projection, path) {
       // Return path
-      if (path == null) {
+      if (_.isNull(path) || _.isUndefined(path)) {
         path = d3.geo.path();
       }
 
-      if (projection != null) {
+      if (!_.isNull(projection)) {
         return path.projection(projection);
       }
       return path;
@@ -306,8 +309,7 @@ angular.module('mapManager.d3.services', [
 
     refreshLayerApplying: function(svg, path, layer) {
       if (layer.applied) {
-        var layerElement = d3.select(document.getElementById(layer.id));
-        layerElement.selectAll('*').remove();
+        this.deleteLayer(svg, path, layer);
         this.createLayer(svg, path, layer);
       }
     },
@@ -469,11 +471,6 @@ angular.module('mapManager.d3.services', [
       });
       // TODO: the layer applied on should be reloaded
       // refreshLayerApplying
-
-      svg.selectAll('.legend').remove();
-
-      d3.select(document.getElementById(
-        'tooltip-' + layer.id)).remove();
     },
 
     createTooltipEvents: function(elements, values, tooltipDiv,
@@ -872,27 +869,26 @@ angular.module('mapManager.d3.services', [
       consoleService.logMessage('info', 'Deleting layer of type "' +
         layer.type + '" with identifier "' + layer.id + '"');
 
+      // Remove layer
       var layerElement = d3.select(document.getElementById(layer.id));
       if (this.isLayerWithFillMode(layer)) {
         this.clearFillDataLayer(svg, layer);
       } else {
         layerElement.selectAll('*').remove();
       }
+
+      // Remove legend and tooltip if any
+      var allLayersElement = d3.select(document.getElementById('layers'));
+      allLayersElement.selectAll('g.legend').remove();
+      d3.select(document.getElementById(
+        'tooltip-' + layer.id)).remove();
     },
 
     sortLayers: function(layers) {
       var layerElts = d3.select(document.getElementById('layers'));
-      console.log('>> layerElts = '+layerElts.length);
-      console.log('>> layerElts = '+layerElts.attr('id'));
-      console.log('>> layerElts = '+layerElts.selectAll('g').length);
-      console.log('>> layerElts = '+layerElts.selectAll('g').attr('id'));
       layerElts.selectAll('g').sort(function(layerElt1, layerElt2) {
-        console.log('layerElt1 = '+layerElt1);
-        console.log('layerElt2 = '+layerElt2);
         var layer1 = _.find(layers, { id: layerElt1.attr('id')});
         var layer2 = _.find(layers, { id: layerElt2.attr('id')});
-        console.log('layer1 = '+layer1);
-        console.log('layer2 = '+layer2);
         return layer1.rank - layer2.rank;
       });
     }
@@ -901,7 +897,7 @@ angular.module('mapManager.d3.services', [
 
 // Map interaction service
 
-.service('mapInteractionService', [ 'consoleService', function(consoleService) {
+.service('mapInteractionService', [ 'consoleService', 'currentMapService', function(consoleService, currentMapService) {
   return {
     // Moving
 
@@ -1001,18 +997,23 @@ angular.module('mapManager.d3.services', [
 
     configureMoving: function(svg, moveType, projection, mapElements) {
       if (projection.type === 'orthographic') {
-        consoleService.logMessage('info', 'Configuring moving for projection orthographic');
+        consoleService.logMessage('info',
+          'Configuring moving for projection orthographic');
         // Using mouseDown, mouseUp and mouveMove events
         if (moveType === 'mouseMove') {
+          console.log('11');
           consoleService.logMessage('info', 'Selected moving "mouse move"');
-          this.configureMovingWithMouseMoveForOrthographicProjection(svg, projection.raw, mapElements);
+          this.configureMovingWithMouseMoveForOrthographicProjection(
+            svg, projection.raw, mapElements);
         // Using drag events
         } else if (moveType === 'mouseDrag') {
           consoleService.logMessage('info', 'Selected moving "mouse drag"');
-          this.configureMovingWithMouseDragForOrthographicProjection(svg, projection.raw, mapElements);
-	  	}
+          this.configureMovingWithMouseDragForOrthographicProjection(
+            svg, projection.raw, mapElements);
+        }
       } else if (projection.type === 'mercator') {
-      	this.configureMovingForMercatorProjection(svg, projection.raw, mapElements);
+        this.configureMovingForMercatorProjection(
+          svg, projection.raw, mapElements);
       }
     },
 
@@ -1029,6 +1030,8 @@ angular.module('mapManager.d3.services', [
         projection/*.translate(d3.event.translate)*/.scale(d3.event.scale);
         // Update the map
         updateMapElements(projection, mapElements);
+        // Update current map context
+        currentMapService.currentMapContext.properties.scale = zoom.scale();
       });
 
       // Apply zoom behavior
@@ -1048,6 +1051,7 @@ angular.module('mapManager.d3.services', [
             d3.event.translate.join(',') + ')scale(' + d3.event.scale + ')');
         // Update the map
         //updateMapElements(projection, mapElements);
+        currentMapService.currentMapContext.properties.scale = zoom.scale();
       });
 
       // Apply zoom behavior
@@ -1066,12 +1070,12 @@ angular.module('mapManager.d3.services', [
 
            //.scaleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
-        consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
         //projection.translate(d3.event.translate).scale(d3.event.scale);
         svg.attr('transform', 'translate(' +
             d3.event.translate.join(',') + ')scale(' + d3.event.scale + ')');
         // Update the map
         //updateMapElements(projection, mapElements);
+        currentMapService.currentMapContext.properties.scale = zoom.scale();
       });
 
       // Apply zoom behavior
@@ -1086,14 +1090,14 @@ angular.module('mapManager.d3.services', [
         if (moveType === 'mouseWheel') {
           consoleService.logMessage('info', 'Selected zooming "mouse wheel"');
           this.configureZoomingWithMouseWheelForOrthographicProjection(svg, projection.raw, dimension, mapElements);
-	  	}
+        }
       } else if (projection.type === 'mercator') {
         consoleService.logMessage('info', 'Configuring zooming for projection mercator');
         // Using mouseDown, mouseUp and mouveMove events
         if (moveType === 'mouseWheel') {
           consoleService.logMessage('info', 'Selected zooming "mouse wheel"');
           this.configureZoomingWithMouseWheelForMercatorProjection(svg, projection.raw, dimension, mapElements);
-	  	}
+        }
       } else {
         this.configureDefaultZoomingWithMouseWheel(svg);
       }

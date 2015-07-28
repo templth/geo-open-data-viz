@@ -1,0 +1,43 @@
+[
+  {
+    "id": "myid",
+    "name": "name",
+    "category": "category",
+    "source": "source",
+    "tags": [ "tag1", "tag2" ],
+    "url": "url",
+    "originUrl": "originUrl",
+    "imported": true,
+    "importFile": "importFile",
+    "structure": "structureFile"
+  },
+  {
+    "id": "myid",
+    "name": "name",
+    "category": "category",
+    "source": "source",
+    "tags": [ "tag1", "tag2" ],
+    "url": "url",
+    "originUrl": "url",
+    "imported": true,
+    "importEntity": "myentity",
+    "structure": [ "col1", "col2" ],
+    "sample": [ "elt1", "elt2" ]
+  },
+  {
+    "name": "test",
+    "type": "data",
+    "url": "http://localhost:9000/scripts/json/unemployment.tsv",
+    "dataType": "tsv",
+    "structure": "[\n  \"id\",\n  \"rate\"\n]",
+    "rowNumber": 3218,
+    "sample": "[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]"
+  },
+  {
+    "name": "test",
+    "type": "map",
+    "url": "http://localhost:9000/scripts/json/continent.json",
+    "dataType": "json",
+    "structure": "{\n  \"type\": \"Topology\",\n  \"transform\": {\n}"
+  }
+]
