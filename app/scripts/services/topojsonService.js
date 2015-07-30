@@ -4,7 +4,6 @@ angular.module('mapManager.topojson.services', [])
   .service('topojsonService', function() {
     return {
       transformTopojson: function(obj) {
-        console.log('>> transformTopojson');
         var self = this;
         if (_.isArray(obj)) {
           _.forEach(obj, function(objElt) {

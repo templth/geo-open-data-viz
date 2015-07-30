@@ -29,6 +29,7 @@
     "grunt-usemin": "^3.0.0",
     "grunt-wiredep": "^2.0.0",
     "grunt-html2js": "0.3.2",
+    "grunt-ngdocs": "0.2.8",
     "jshint-stylish": "^1.0.0",
     "cheerio": "0.19.0",
     "karma-jasmine": "*",

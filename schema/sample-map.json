@@ -1,6 +1,13 @@
 {
   "id": "myid",
+  "name": "My map",
   "projection": "orthographic",
+  "type": "d3js",
+  "scale": 320,
+  "center": {
+    "lon": 60,
+    "lat": -30
+  },
   "interactions": {
     "moving": "mouseMove",
     "zooming": "mouseWheel"
@@ -121,6 +128,11 @@
         },
         "d": {
           "strokeWidth": "1.5px"
+        }
+      },
+      "behavior": {
+        "zoomBoundingBox": {
+          "display": "click"
         }
       },
       "applyOn": "layers",

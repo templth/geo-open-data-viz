@@ -17,7 +17,8 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav navbar-left">
-            <li class="active"><a>D3</a></li>
+            <li ng-if="mapType==='d3js'" class="active"><a>D3</a></li>
+            <li ng-if="mapType==='googlemaps'" class="active"><a>GMaps</a></li>
             <li class="divider-vertical"></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
@@ -56,14 +57,30 @@
                 <input class="form-control input-sm" name="scale" type="text" 
                            placeholder="Scale" required ng-model="properties.scale" />
               </field>
+              <field label="Center (lon)">
+                <input class="form-control input-sm" name="centerLon" type="text" 
+                           placeholder="Center (longitude)" required ng-model="properties.center.lon" />
+              </field>
+              <field label="Center (lat)">
+                <input class="form-control input-sm" name="centerLat" type="text" 
+                           placeholder="Center (latitude)" required ng-model="properties.center.lat" />
+              </field>
             </form>
           </div>
 
           <div ng-show="shouldDisplayPanel('current')" class="layer-description-area">
             <form name="propertiesForm" novalidate class="form-horizontal">
               <field label="Scale">
-                <input class="form-control input-sm" name="scale" type="text" 
+                <input disabled class="form-control input-sm" name="scale" type="text" 
                            placeholder="Scale" required ng-model="currentProperties.scale" />
+              </field>
+              <field label="Center (lon)">
+                <input disabled class="form-control input-sm" name="lon" type="text" 
+                           placeholder="Center (longitude)" required ng-model="currentProperties.center.lon" />
+              </field>
+              <field label="Center (lat)">
+                <input disabled class="form-control input-sm" name="lat" type="text" 
+                           placeholder="Center (latitude)" required ng-model="currentProperties.center.lat" />
               </field>
             </form>
           </div>
@@ -380,17 +397,11 @@
                            required ng-model="layer.display.shape.opacity"
                           ng-model-options="{ updateOn: 'blur' }" />
                     </field>
-                    <!--
-                    <field label="Color">
-                      <input colorpicker class="form-control input-sm" name="color" type="text" 
-                           required ng-model="layer.display.shape.color"
-                          ng-model-options="{ updateOn: 'blur' }" />
-                    </field>
-                    -->
                     <field label="Fill mode">
                       <select class="form-control input-sm" name="fillMode" ng-model="properties.fillMode">
                         <option value="static">Static</option>
                         <option value="threshold">Threshold</option>
+                        <option value="choropleth">Choropleth</option>
                       </select>
                     </field>
                     <div ng-if="properties.fillMode === 'static'">

@@ -2,9 +2,38 @@
 
 angular.module('mapManager.commons', [ 'mapManager.map',
                                 'mapManager.d3.services' ])
+  /**
+   * @ngdoc service
+   * @name mapManager.commons:commonsService
+   * @description
+   * Provide utility functions for controllers to register content
+   * into their associated scope.
+   */
   .service('commonsService', function(currentMapService,
       layerService, mapCreatorService, toaster) {
     return {
+      /**
+       * @ngdoc method
+       * @name registerCommonFunctionsInScope
+       * @methodOf mapManager.commons:commonsService
+       * @description
+       * Register common functions and elements into the scope of
+       * a controller.
+       * These functions are used by the generic parts of the
+       * layout:
+       *
+       * * Functions to select the screen to show
+       * * Functions to open modals to add elements
+       *
+       * Common elements registered within the scope are the
+       * list of maps and sources.
+       *
+       * @param {Object} $scope the current scope
+       * @param {Object} $modal the $modal service of Angular
+       * @param {string} screenType the screen type
+       * @param {Array} maps all the maps
+       * @param {Array} sources all the sources
+      */
       registerCommonFunctionsInScope: function($scope, $modal,
             screenType, maps, sources) {
         // Display global views
@@ -65,20 +94,33 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         $scope.sources = sources;
       },
 
+      /**
+       * @ngdoc method
+       * @name setCurrentMapInScope
+       * @methodOf mapManager.commons:commonsService
+       * @description
+       * Set the map elements into the current scope.
+       *
+       * @param {Object} $scope the current scope
+       * @param {Object} currentMap the select map
+      */
       setCurrentMapInScope: function($scope, currentMap) {
         $scope.properties = {
           projection: currentMap.projection,
-          scale: currentMap.scale
+          scale: currentMap.scale,
+          center: currentMap.center
         };
         $scope.interactions = {
           moving: currentMap.interactions.moving,
           zooming: currentMap.interactions.zooming
         };
         $scope.mapName = currentMap.name;
+        $scope.mapType = currentMap.type;
         $scope.layers = currentMapService.currentMap.layers;
         $scope.linkedSources = currentMapService.currentMap.sources;
         // $scope.messages = consoleService.messages;
-        $scope.currentProperties = currentMapService.currentMapContext.properties;
+        $scope.currentProperties =
+          currentMapService.currentMapContext.properties;
         $scope.$watch('currentProperties.scale', function(newValue, oldValue) {
           if (newValue === oldValue) { return; }
           console.log('updated currentProperties.scale');
@@ -117,7 +159,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
             return;
           }
 
-          mapCreatorService.updateProjection(newValue);
+          mapCreatorService.updateProjection($scope, newValue);
         });
 
         $scope.$watch('properties.scale', function(newValue, oldValue) {
@@ -125,7 +167,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
             return;
           }
 
-          mapCreatorService.updateScale(newValue);
+          mapCreatorService.updateScale($scope, newValue);
         });
 
         $scope.toggleLayerVisibility = function($event, layer) {

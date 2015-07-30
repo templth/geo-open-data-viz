@@ -442,10 +442,26 @@ module.exports = function (grunt) {
         src: ['app/views/**/*.html'],
         dest: 'app/scripts/templates.js'
       },
+    },
+
+    ngdocs: {
+      options: {
+        dest: 'docs/api',
+        html5Mode: false,
+        scripts: [
+          'bower_components/angular/angular.js',
+          'bower_components/angular-animate/angular-animate.js'
+        ]
+      },
+      api: {
+        src: ['app/**/*.js', '!app/**/*-spec.js'],
+        title: 'Docs'
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-html2js');
+  grunt.loadNpmTasks('grunt-ngdocs');
 
   grunt.registerTask('apisparkify', function() {
     var fs = require('fs');

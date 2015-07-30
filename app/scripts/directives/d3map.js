@@ -11,7 +11,7 @@ angular.module('mapManager.d3.directives', [ 'mapManager.map', 'mapManager.d3.se
       },
       link: function(scope, element) {
         currentMapService.currentMap.element = element;
-        mapCreatorService.createMap(element);
+        mapCreatorService.createMap(scope, element);
       }
     };
   }

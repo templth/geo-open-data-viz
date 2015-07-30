@@ -45,8 +45,13 @@ angular.module('mapManager.map', [
           deferred.resolve({
             id: '1',
             name: 'World',
+            type: 'd3js',
             projection: 'orthographic',
-            scale: 320,
+            scale: 420,
+            center: {
+              lon: 60,
+              lat: -30
+            },
             interactions: {
               moving: 'mouseMove',
               zooming: 'mouseWheel'
@@ -90,6 +95,13 @@ angular.module('mapManager.map', [
                   type: 'topojson',
                   content: [],
                   loaded: false
+                },
+                behavior: {
+                  zoomBoundingBox: {
+                    display: 'click'
+                    //display: 'mouseOver',
+                    //hide: 'mouseOut'
+                  }
                 },
                 applyOn: 'layers',
                 name: 'World',
@@ -156,7 +168,6 @@ angular.module('mapManager.map', [
                     enabled: true,
                     fromScale: 300,
                     text: '"Name: "+d.name+"<br/>Year: "+d.year+"<br/>Mass (g): "+d.mass',
-                    event: 'click' // or over
                   }
                 },
                 behavior: {
@@ -164,6 +175,35 @@ angular.module('mapManager.map', [
                     display: 'click'
                     //display: 'mouseOver',
                     //hide: 'mouseOut'
+                  }
+                },
+                applyOn: 'layers',
+                applied: true,
+                visible: true
+              },
+              {
+                id: 'test',
+                type: 'data',
+                mode: 'objects',
+                rank: 6,
+                data: {
+                  inline: '[{lon: 40.71455, lat: -74.007124}]',
+                  /*url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
+                  type: 'csv',
+                  source: 'meteoritesSource',
+                  content: [],
+                  loaded: false,
+                  id: 'name',
+                  where: 'd.mass > 100000',
+                  order: {
+                    field: 'mass',
+                    ascending: false
+                  }*/
+                },
+                name: 'Test',
+                display: {
+                  shape: {
+                    type: 'other'
                   }
                 },
                 applyOn: 'layers',

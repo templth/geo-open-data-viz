@@ -27,6 +27,7 @@ angular
     'mapManager.source',
     'mapManager.webapi',
     'mapManager.commons',
+    'mapManager.utilities',
     'mapManager.d3.services',
     'mapManager.topojson.services',
     'mapManager.d3.directives',

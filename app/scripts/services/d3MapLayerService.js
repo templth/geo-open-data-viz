@@ -98,38 +98,9 @@ function composedRotation(λ, ϕ, γ, δλ, δϕ) {
 
 // Utility function to update map
 
-function updateMapElements(projection, mapElements) {
-  function cxFct(d) {
-    if (!_.isNull(d)) {
-      return projection([d.lon, d.lat])[0];
-    } else {
-      return projection([0, 0])[0];
-    }
-  }
-
-  function cyFct(d) {
-    if (!_.isNull(d)) {
-      return projection([d.lon, d.lat])[1];
-    } else {
-      return projection([0, 0])[1];
-    }
-  }
-
-  for (var i = 0; i < mapElements.length; i++) {
-    var mapElement = mapElements[i];
-    if (mapElement.type === 'path') {
-      var path = d3.geo.path().projection(projection);
-      d3.selectAll('path').attr('d', path);
-    } else if (mapElement.type === 'circle') {
-      d3.selectAll('circle').attr('cx', cxFct)
-      .attr('cy', cyFct);
-    }
-  }
-}
-
 function getLoadFunction(type) {
   var loadFct = null;
-  if (type === 'json') {
+  if (type === 'json' || type === 'topojson') {
     loadFct = d3.json;
   } else if (type === 'csv') {
     loadFct = d3.csv;
@@ -141,150 +112,30 @@ function getLoadFunction(type) {
 
 // Service
 
-angular.module('mapManager.d3.services', [
-  'mapManager.map', 'mapManager.console' ])
-
-// Map creator service
-
-.service('mapCreatorService', [ 'currentMapService', 'mapInteractionService',
-    'layerService', 'projectionService', function(currentMapService,
-      mapInteractionService, layerService, projectionService) {
-  return {
-    refreshMap: function(element) {
-      console.log('refreshmap');
-      if (!_.isNull(currentMapService.currentMapContext.svg)) {
-        console.log('remove svg');
-        currentMapService.currentMapContext.svg.remove();
-      }
-
-      this.createMap(element);
-    },
-
-    createMap: function(element) {
-      var mWidth = element.width();
-      var width = 938;
-      var height = 500;
-
-      var projection = projectionService.createProjection(
-        currentMapService.currentMap.projection,
-          {width: width, height: height});
-      if (!_.isNull(projection) &&
-          !_.isNull(currentMapService.currentMap.scale)) {
-        projection.scale(currentMapService.currentMap.scale);
-      }
-      var path = projectionService.configurePathWithProjection(projection);
-
-      var svg = d3.select(element[0]).append('svg')
-          .attr('preserveAspectRatio', 'xMidYMid')
-          .attr('viewBox', '0 0 ' + width + ' ' + height)
-          .attr('width', mWidth)
-          .attr('height', mWidth * height / width);
-
-      svg.append('rect')
-          .attr('class', 'background')
-          .attr('width', width)
-          .attr('height', height);
-
-      var g = svg.append('g').attr('id', 'layers');
-
-      // Save current map context
-      currentMapService.currentMapContext.svg = svg;
-      currentMapService.currentMapContext.path = path;
-      currentMapService.currentMapContext.projection = projection;
-      currentMapService.currentMapContext.layers = g;
-
-      // Preload data
-      // TODO
-
-      // Create layers
-      var layers = currentMapService.currentMap.layers;
-      _.forEach(layers, function(layer) {
-        if (layer.applied) {
-          layerService.createLayer(svg, path, layer);
-        }
-      });
-
-      // Clear preloaded data
-      // TODO
-
-      // Configure moving
-      var interactions = currentMapService.currentMap.interactions;
-      if (!_.isNull(interactions) && !_.isNull(interactions.moving)) {
-        mapInteractionService.configureMoving(svg, interactions.moving, {
-          type: currentMapService.currentMap.projection, raw: projection
-        }, [ {type: 'path'}, {type: 'circle'}]);
-      }
-
-      // Configure zooming
-      if (!_.isNull(interactions) && !_.isNull(interactions.zooming)) {
-        mapInteractionService.configureZooming(svg, interactions.zooming, {
-          type: currentMapService.currentMap.projection, raw: projection}, {
-          width: '', height: ''
-        }, [{type: 'path'}, {type: 'circle'}]);
-      }
-    },
-
-    updateProjection: function(newProjection) {
-      currentMapService.currentMap.projection = newProjection;
-      this.refreshMap(currentMapService.currentMap.element);
-    },
-
-    updateScale: function(newScale) {
-      currentMapService.currentMap.scale = newScale;
-      this.refreshMap(currentMapService.currentMap.element);
-    }
-  };
-}])
-
-// Projection service
-
-.service('projectionService', [ function() {
-  return {
-    createMercatorProjection: function(configuration) {
-      var projection = d3.geo.mercator()
-          //.scale(150)
-          .translate([configuration.width / 2, configuration.height / 1.5]);
-      return projection;
-    },
-
-    createOrthographicProjection: function(/*configuration*/) {
-        var projection = d3.geo.orthographic()
-          .scale(248)
-          .clipAngle(90);
-
-        return projection;
-      },
-
-    createProjection: function(projectionType, configuration) {
-      var projection = null;
-      // Create projection
-      if (projectionType === 'orthographic') {
-        projection = this.createOrthographicProjection(configuration);
-      } else if (projectionType === 'mercator') {
-        projection = this.createMercatorProjection(configuration);
-      }
-      return projection;
-    },
-
-    configurePathWithProjection: function(projection, path) {
-      // Return path
-      if (_.isNull(path) || _.isUndefined(path)) {
-        path = d3.geo.path();
-      }
-
-      if (!_.isNull(projection)) {
-        return path.projection(projection);
-      }
-      return path;
-    }
-  };
-}])
+angular.module('mapManager.d3.services')
 
 // Layer service
 
-.service('layerService', [ '$parse', 'currentMapService', 'consoleService',
-    function($parse, currentMapService, consoleService) {
+/**
+ * @ngdoc service
+ * @name mapManager.d3.services:layerService
+ * @description
+ * Provide functions to create and manipulate layers of maps.
+ */
+.service('layerService', [ '$parse', 'currentMapService',
+    'consoleService', 'valueChecker',
+    function($parse, currentMapService, consoleService, valueChecker) {
   return {
+    /**
+     * @ngdoc method
+     * @name toggleLayerVisibility
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Toggle visibility of a specific layer without removing it
+     * from the SVG content.
+     *
+     * @param {Object} layer the layer
+    */
     toggleLayerVisibility: function(layer) {
       var layerElement = d3.select(document.getElementById(layer.id));
       var visible = (layerElement.style('visibility') === 'visible');
@@ -299,6 +150,16 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    /**
+     * @ngdoc method
+     * @name toggleLayerApplying
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Toggle applying of a specific layer. It actually removes it
+     * from the SVG content.
+     *
+     * @param {Object} layer the layer
+    */
     toggleLayerApplying: function(svg, path, layer) {
       if (layer.applied) {
         this.deleteLayer(svg, path, layer);
@@ -307,6 +168,16 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    /**
+     * @ngdoc method
+     * @name refreshLayerApplying
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Refresh applying of a specific layer. It actually removes
+     * and adds again the layer content within the SVG content.
+     *
+     * @param {Object} layer the layer
+    */
     refreshLayerApplying: function(svg, path, layer) {
       if (layer.applied) {
         this.deleteLayer(svg, path, layer);
@@ -314,11 +185,25 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    /**
+     * @ngdoc method
+     * @name getLayerElement
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Get an instance of the layer in the SVG content.
+     *
+     * It creates a new sub element with identifier the
+     * specified layer identifier under the element with
+     * identifier `layers`.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} layer the layer
+    */
     getLayerElement: function(svg, layer) {
       var layerElement = d3.select(document.getElementById(layer.id));
       if (layerElement.empty()) {
         var sel = d3.select(document.getElementById(layer.applyOn));
-        if (sel === null) {
+        if (valueChecker.isNull(sel)) {
           sel = svg;
         }
 
@@ -329,6 +214,94 @@ angular.module('mapManager.d3.services', [
       return layerElement;
     },
 
+    /**
+     * @ngdoc method
+     * @name loadDataForLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Actually handle data loading. It also supports preloaded
+     * and inline data.
+     *
+     * @param {Object} layerData actually the layer.data attribute
+     * @param {Function} handleData the function to actually handle data
+    */
+    loadDataForLayer: function(layerData, handleData) {
+      if (layerData.loaded) {
+        handleData(layerData.content);
+      } else if (valueChecker.isNotNullAndNotEmpty(layerData.inline)) {
+        var data = $parse(layerData.inline);
+        handleData(data());
+      } else {
+        var loadFct = getLoadFunction(layerData.type);
+        loadFct(layerData.url, handleData);
+      }
+    },
+
+    // Tooltips
+
+    createTooltipEvents: function(elements, values, tooltipDiv,
+        tooltipText, showEvent, hideEvent) {
+      // Show tooltip
+      if (showEvent === 'click') {
+        elements.on('click', function(d) {
+          //d3.select(this).transition().duration(300).style('opacity', 1);
+          // TODO: enlighten borders rather
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 1);
+          tooltipDiv.html(function() {
+            // Workaround for circle shape where the data object is embedded
+            // within the generated geo path. See method createCircleObjectsDataLayer
+            // for more details
+            if (valueChecker.isNotNull(d.d)) {
+              return tooltipText({d: d.d, value: values[d.d.id]});
+            } else {
+              return tooltipText({d: d, value: values[d.id]});
+            }
+          })
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY - 30) + 'px');
+        });
+      } else if (showEvent === 'mouseOver') {
+        elements.on('mouseover', function(d) {
+          console.log('mouseover');
+          // TODO: enlighten borders rather
+          //d3.select(this).transition().duration(300).style('opacity', 1);
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 1);
+          tooltipDiv.text(function() {
+            return tooltipText({d: d, value: values[d.id]});
+          })
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY - 30) + 'px');
+        });
+      }
+
+      // Hide tooltip
+      if (hideEvent === 'mouseOut') {
+        elements.on('mouseout', function() {
+          console.log('mouseout');
+          /*d3.select(this)
+            .transition().duration(300)
+            .style('opacity', 0.8);*/
+          tooltipDiv.transition().duration(300)
+             .style('opacity', 0);
+        });
+      }
+    },
+
+    // End tooltips
+
+    // Graticule layer
+
+    /**
+     * @ngdoc method
+     * @name createGraticuleLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} layer the layer
+    */
     createGraticuleLayer: function(svg, path, layer) {
       consoleService.logMessage('info',
         'Creating graticule layer with identifier "' + layer.id + '"');
@@ -406,17 +379,22 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    // End graticule layer
+
+    // Geo data layer
+
     createGeoDataLayer: function(svg, path, layer) {
       var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
+        var pathElements = null;
         if (layer.data.mesh) {
-          var pathElements = layerElement.append('path')
+          pathElements = layerElement.append('path')
             .datum(topojson.mesh(data,
               data.objects[layer.data.rootObject],
               function(a, b) { return a.id !== b.id; }));
 
-          if (layer.styles.lines != null) {
+          if (valueChecker.isNotNull(layer.styles.lines)) {
             var stroke = '#fff';
             var strokeWidth = '0.5px';
             var strokeOpacity = '0.5';
@@ -446,7 +424,7 @@ angular.module('mapManager.d3.services', [
             pathElements.style('stroke-width', dStrokeWidth);
           }
         } else {
-          layerElement.selectAll('path')
+          pathElements = layerElement.selectAll('path')
             .data(topojson.feature(data,
               data.objects[layer.data.rootObject]).features)
           .enter()
@@ -454,15 +432,53 @@ angular.module('mapManager.d3.services', [
           .attr('id', function(d) { return d.id; })
           .attr('d', path);
         }
+
+        if (!_.isUndefined(layer.behavior) &&
+            !_.isNull(layer.behavior) &&
+            !_.isUndefined(layer.behavior.zoomBoundingBox) &&
+            !_.isNull(layer.behavior.zoomBoundingBox)) {
+          // See http://bl.ocks.org/mbostock/4699541
+          pathElements.on('click', function(d) {
+            // TODO: make things generic
+            var width = 938;
+            var height = 500;
+
+            var bounds = path.bounds(d);
+            var dx = bounds[1][0] - bounds[0][0];
+            var dy = bounds[1][1] - bounds[0][1];
+            var x = (bounds[0][0] + bounds[1][0]) / 2;
+            var y = (bounds[0][1] + bounds[1][1]) / 2;
+            var scale = 0.9 / Math.max(dx / width, dy / height);
+            var translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+            g.transition()
+             .duration(750)
+             //.style("stroke-width", 1.5 / scale + "px")
+             .attr('transform', 'translate(' + translate +
+               ')scale(' + scale + ')');
+          });
+        }
       }
 
-      if (layer.data.loaded) {
-        handleData(layer.data.content);
-      } else {
-        d3.json(layer.data.url, handleData);
-      }
+      // Actually create the layer based on provided data
+      this.loadDataForLayer(layer.data, handleData);
     },
 
+    // End geo data layer
+
+    // Fill layer
+
+    /**
+     * @ngdoc method
+     * @name clearFillDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Clear a fill data layer by resfreshing the layer it
+     * applies on.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} layer the layer
+    */
     clearFillDataLayer: function(svg, layer) {
       var sel = d3.select(document.getElementById(layer.applyOn));
       sel.selectAll('path')
@@ -473,62 +489,11 @@ angular.module('mapManager.d3.services', [
       // refreshLayerApplying
     },
 
-    createTooltipEvents: function(elements, values, tooltipDiv,
-        tooltipText, showEvent, hideEvent) {
-      // Show tooltip
-      if (showEvent === 'click') {
-        elements.on('click', function(d) {
-          //d3.select(this).transition().duration(300).style('opacity', 1);
-          // TODO: enlighten borders rather
-          tooltipDiv.transition().duration(300)
-             .style('opacity', 1);
-          tooltipDiv.html(function() {
-            // Workaround for circle shape where the data object is embedded
-            // within the generated geo path. See method createCircleObjectsDataLayer
-            // for more details
-            if (d.d !=null) {
-              return tooltipText({d: d.d, value: values[d.d.id]});
-            } else {
-              return tooltipText({d: d, value: values[d.id]});
-            }
-          })
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY - 30) + 'px');
-        });
-      } else if (showEvent === 'mouseOver') {
-        elements.on('mouseover', function(d) {
-          console.log('mouseover');
-          // TODO: enlighten borders rather
-          //d3.select(this).transition().duration(300).style('opacity', 1);
-          tooltipDiv.transition().duration(300)
-             .style('opacity', 1);
-          tooltipDiv.text(function() {
-            return tooltipText({d: d, value: values[d.id]});
-          })
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY - 30) + 'px');
-        });
-      }
-
-      // Hide tooltip
-      if (hideEvent === 'mouseOut') {
-        elements.on('mouseout', function() {
-          console.log('mouseout');
-          /*d3.select(this)
-            .transition().duration(300)
-            .style('opacity', 0.8);*/
-          tooltipDiv.transition().duration(300)
-             .style('opacity', 0);
-        });
-      }
-    },
-
     createFillDataLayer: function(svg, layer) {
       var self = this;
       var value = $parse(layer.display.fill.value);
 
       function handleData(data) {
-        console.log('>> handleData - fill = '+JSON.stringify(layer.display.fill));
         //console.log('>> data = '+JSON.stringify(data));
         var values = {};
         _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
@@ -539,6 +504,15 @@ angular.module('mapManager.d3.services', [
           var color = d3.scale.threshold()
             .domain(layer.display.fill.threshold.values)
             .range(layer.display.fill.threshold.colors);
+
+          var elements = sel.selectAll('path')
+              .style('fill', function(d) {
+            return color(values[d.id]);
+          });
+        } else if (layer.display.fill.choropleth != null) {
+          var color = d3.scale.quantize()
+            .domain(layer.display.fill.choropleth.values)
+            .range(layer.display.fill.choropleth.colors);
 
           var elements = sel.selectAll('path')
               .style('fill', function(d) {
@@ -618,19 +592,11 @@ angular.module('mapManager.d3.services', [
         // End Experimental: display axis
       }
 
-      if (layer.data == null) {
-        handleData();
-      } else if (layer.data.loaded) {
-        handleData(layer.data.content);
-      } else if (layer.data.inline != null &&
-          !_.isEmpty(layer.data.inline)) {
-        var data = $parse(layer.data.inline);
-        handleData(data());
-      } else {
-        var loadFct = getLoadFunction(layer.data.type);
-        loadFct(layer.data.url, handleData);
-      }
+      // Actually create the layer based on provided data
+      this.loadDataForLayer(layer.data, handleData);
     },
+
+    // End fill layer
 
     createCircleObjectsDataLayer: function(svg, path, layer) {
       var self = this;
@@ -683,6 +649,7 @@ angular.module('mapManager.d3.services', [
             var c = circle
                .origin(orig)
                .angle(rad)({d: d});
+            // console.log('circle = '+JSON.stringify(c));
             c.d = d;
             return c;
           })
@@ -723,11 +690,14 @@ angular.module('mapManager.d3.services', [
 
           // Events
           if (layer.behavior.tooltip.display != null) {
-            var showTooltipEvent = layer.behavior.tooltip.display;
-            var hideTooltipEvent = layer.behavior.tooltip.hide;
+            if (layer.behavior.tooltip.display === 'always') {
+            } else {
+              var showTooltipEvent = layer.behavior.tooltip.display;
+              var hideTooltipEvent = layer.behavior.tooltip.hide;
 
-            self.createTooltipEvents(elements, values, tooltipDiv,
+              self.createTooltipEvents(elements, values, tooltipDiv,
                     tooltipText, showTooltipEvent, hideTooltipEvent);
+            }
           }
         }
 
@@ -769,17 +739,11 @@ angular.module('mapManager.d3.services', [
 
       }
 
-      if (layer.data.loaded) {
-        handleData(layer.data.content);
-      } else if (layer.data.inline != null &&
-          !_.isEmpty(layer.data.inline)) {
-        var data = $parse(layer.data.inline);
-        handleData(data());
-      } else {
-        var loadFct = getLoadFunction(layer.data.type);
-        loadFct(layer.data.url, handleData);
-      }
+      // Actually create the layer based on provided data
+      this.loadDataForLayer(layer.data, handleData);
     },
+
+
 
     // Experimental - Display image - Not working at the moment
     createImageObjectsDataLayer: function(svg, path, layer) {
@@ -824,16 +788,129 @@ angular.module('mapManager.d3.services', [
           /*.style('opacity', layer.display.shape.opacity)*/;
       }
 
-      if (layer.data.loaded) {
-        handleData(layer.data.content);
-      } else if (layer.data.inline != null &&
-          !_.isEmpty(layer.data.inline)) {
-        var data = $parse(layer.data.inline);
-        handleData(data());
-      } else {
-        var loadFct = getLoadFunction(layer.data.type);
-        loadFct(layer.data.url, handleData);
+      // Actually create the layer based on provided data
+      this.loadDataForLayer(layer.data, handleData);
+    },
+
+    // Caution: for testing only
+
+    createOtherObjectsDataLayer: function(svg, path, layer) {
+      var layerElement = this.getLayerElement(svg, layer);
+
+      function handleData(data) {
+        //The data for our line
+        var lineData = [ {lon: 40.71455, lat: -74.007124}, 
+                    {lon: 34.05349, lat: -118.245323}, 
+                    {lon: 45.37399, lat: -92.888759}, 
+                    {lon: 41.337462, lat: -75.733627}
+                ];
+                 /*[ { x: 1, y: 5},  { x: 20, y: 20},
+                 { x: 40, y: 10}, { x: 60, y: 40},
+                 { x: 80, y: 5},  { x: 100, y: 60} ];*/
+
+        //This is the accessor function we talked about above
+        var projection = currentMapService.currentMapContext.projection;
+        var lineFunction = d3.svg.line()
+                         .x(function(d) { console.log('d = '+JSON.stringify(d)); return projection([d.lon, d.lat])[0]/*d.lon*/; })
+                         .y(function(d) { console.log('d = '+JSON.stringify(d)); return projection([d.lon, d.lat])[1]/*d.lat*/; })
+                         .interpolate('linear');
+
+var places = {
+  HNL: [-157,9225, 21,318611111],
+  HKG: [113,914722222, 22,308888889],
+  SVO: [37,414722222, 55,972777778],
+  HAV: [-82,409166667, 22,989166667],
+  CCS: [-66,990555556, 10,603055556],
+  UIO: [-78,358611111, 0,113333333],
+  NY: [ -74.007124, 40.71455 ],
+  LA: [ -118.245323, 34.05349 ],
+  CO: [ -92.888759, 45.37399 ]
+  /*HNL: projection([40.71455, -74.007124]),
+  HKG: projection([34.05349,  -118.245323]),
+  SVO: projection([45.37399, -92.888759]),
+  HAV: projection([41.337462, -75.733627])/*,
+  CCS: [-66 - 59 / 60 - 26 / 3600, 10 + 36 / 60 + 11 / 3600],
+  UIO: [-78 - 21 / 60 - 31 / 3600, 0 + 06 / 60 + 48 / 3600]*/
+};
+
+// #1
+var route = {
+  // type: "MultiLineString",
+  type: "LineString",
+  coordinates: [
+    places.NY,
+    places.LA,
+    places.CO,
+    places.NY
+  ]
+};
+
+var line = d3.svg.line()
+    .x(function(d) { return d[0]; })
+    .y(function(d) { return d[1]; });
+
+layerElement.append("path")
+    .datum(route)
+    .attr("class", "route")
+    .attr("d", path)
+    .style('fill', 'red')
+    .style('opacity', '0.5')
+    .style('stroke', 'red')
+    .style('stroke-width', '3px');
+
+// #2
+/*var line = d3.svg.line()
+            .x(function(d) { console.log('>> line.x = '+d[0]); return projection(d)[0]; })
+            .y(function(d) { console.log('>> line.x = '+d[1]); return projection(d)[1]; });
+layerElement.append("path").datum([places.NY,
+    places.LA]).attr("d", line)
+    .style('fill', 'red')
+    .style('opacity', '0.5')
+    .style('stroke', 'red')
+    .style('stroke-width', '3px');*/
+
+// #3
+/*layerElement.append("polygon")
+    .attr("points", function() {
+      return [ places.NY,
+      places.LA, places.CO ].map(function(d) { return d.join(","); }).join(" ");
+    })
+    .style('fill', 'none')
+    .style('opacity', '0.5')
+    .style('stroke', 'red')
+    .style('stroke-width', '3px');*/
+
+
+        /*console.log('data = '+JSON.stringify(data));
+        layerElement.selectAll('path')
+          .data(data)
+          .enter()
+          .append('d') //, lineFunction(lineData))*/
+          /*                  .datum(function(d) {
+            console.log('1');
+            var orig = [ d.lon, d.lat ]; //origin({d: d});
+            orig[0] = parseFloat(orig[0]);
+            orig[1] = parseFloat(orig[1]);
+            //var rad = radius({d: d});
+            //rad = parseFloat(rad);
+            //var c = circle
+            //   .origin(orig)
+            //   .angle(rad)({d: d});
+            var c = { type: 'Polyline', coordinates: [ _.map(lineData, function(ld) { return [ld.lon, ld.lat]; })] };
+            c.d = d;
+            console.log('c = '+JSON.stringify(c));
+            return c;
+          })*/
+          //                  .attr('d', function(d) { console.log('d = '+JSON.stringify(d)); return path(d); })
+          /*.attr('d', lineFunction(lineData))
+                            .attr("stroke", "red")
+                            .attr("stroke-width", 200)
+                            .attr("fill", "none");*/
+
       }
+
+      // Actually create the layer based on provided data
+      this.loadDataForLayer(layer.data, handleData);
     },
 
     createObjectsDataLayer: function(svg, path, layer) {
@@ -842,10 +919,30 @@ angular.module('mapManager.d3.services', [
           this.createCircleObjectsDataLayer(svg, path, layer);
         } else if (layer.display.shape.type === 'image') {
           this.createImageObjectsDataLayer(svg, path, layer);
+        } else if (layer.display.shape.type === 'other') {
+          this.createOtherObjectsDataLayer(svg, path, layer);
         }
       }
     },
 
+    /**
+     * @ngdoc method
+     * @name createLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a specific layer.
+     *
+     * The following layer kinds are supported:
+     *
+     * * `graticule` - see {@link mapManager.d3.services:layerService.createGraticuleLayer createGraticuleLayer}
+     * * `geodata` - see {@link mapManager.d3.services:layerService.createGeoDataLayer createGeoDataLayer}
+     * * `fill` - see {@link mapManager.d3.services:layerService.createFillDataLayer createFillDataLayer}
+     * * `objects` - see {@link mapManager.d3.services:layerService.createObjectsDataLayer createObjectsDataLayer}
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
     createLayer: function(svg, path, layer) {
       consoleService.logMessage('info', 'Creating layer of type "' +
         layer.type + '" with identifier "' + layer.id + '"');
@@ -861,10 +958,36 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    /**
+     * @ngdoc method
+     * @name isLayerWithFillMode
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Check if a layer is of kind `fill`.
+     *
+     * @param {Object} layer the layer
+    */
     isLayerWithFillMode: function(layer) {
       return (layer.type === 'data' && layer.mode === 'fill');
     },
 
+    /**
+     * @ngdoc method
+     * @name deleteLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Delete a layer. This corresponds to remove the layer elements
+     * under the root layer element. This element still remains because
+     * of layer ordering issue.
+     *
+     * In the case of a layer of kind `fill`, the layer it's applied on
+     * is simply reinitialize / reloaded using the method
+     * {@link mapManager.d3.services:layerService.clearFillDataLayer clearFillDataLayer}
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
     deleteLayer: function(svg, path, layer) {
       consoleService.logMessage('info', 'Deleting layer of type "' +
         layer.type + '" with identifier "' + layer.id + '"');
@@ -884,6 +1007,15 @@ angular.module('mapManager.d3.services', [
         'tooltip-' + layer.id)).remove();
     },
 
+    /**
+     * @ngdoc method
+     * @name sortLayers
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Sort layer elements within the SVG content using the D3 method `sort`.
+     *
+     * @param {Object} layers the layers
+    */
     sortLayers: function(layers) {
       var layerElts = d3.select(document.getElementById('layers'));
       layerElts.selectAll('g').sort(function(layerElt1, layerElt2) {
@@ -891,216 +1023,6 @@ angular.module('mapManager.d3.services', [
         var layer2 = _.find(layers, { id: layerElt2.attr('id')});
         return layer1.rank - layer2.rank;
       });
-    }
-  };
-}])
-
-// Map interaction service
-
-.service('mapInteractionService', [ 'consoleService', 'currentMapService', function(consoleService, currentMapService) {
-  return {
-    // Moving
-
-    configureMovingWithMouseDragForOrthographicProjection: function(
-      svg, projection, mapElements) {
-      var m0, o0;
-      var drag = d3.behavior.drag()
-      .on('dragstart', function() {
-        console.log('>> dragstart');
-        // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html
-        // and updated for d3 v3
-        var proj = projection.rotate();
-        m0 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-        o0 = [-proj[0], -proj[1]];
-      })
-      .on('drag', function() {
-        console.log('>> dragend');
-        if (m0) {
-          var m1 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-          var o1 = [o0[0] + (m0[0] - m1[0]) / 4, o0[1] + (m1[1] - m0[1]) / 4];
-          projection.rotate([-o1[0], -o1[1]]);
-        }
-
-        // Update the map
-        updateMapElements(projection, mapElements);
-
-        console.log('>> drag');
-        var scale = projection.scale();
-        var clipAngle = projection.clipAngle();
-
-        consoleService.logMessage('debug', 'Updated scale to ' + scale);
-        consoleService.logMessage('debug', 'Updated clipAngle to ' + clipAngle);
-      });
-
-      svg.call(drag);
-    },
-
-    configureMovingWithMouseMoveForOrthographicProjection: function(
-      svg, projection, mapElements) {
-      var m0 = null;
-      var o0;
-      var o1;
-
-      function mousedown() {
-        // Remember where the mouse was pressed, in canvas coords
-        m0 = trackballAngles(projection, d3.mouse(svg[0][0]));
-        o0 = projection.rotate();
-        d3.event.preventDefault();
-      }
-
-      function mousemove() {
-        if (m0) {
-          var m1 = trackballAngles(projection, d3.mouse(svg[0][0]));
-          o1 = composedRotation(o0[0], o0[1], o0[2],
-            m1[0] - m0[0], m1[1] - m0[1]);
-
-          projection.rotate(o1);
-
-          // Update the map
-          updateMapElements(projection, mapElements);
-        }
-      }
-
-      function mouseup() {
-        if (m0) {
-          mousemove();
-          m0 = null;
-        }
-      }
-
-      svg.on('mousedown', mousedown)
-         .on('mousemove', mousemove)
-         .on('mouseup', mouseup);
-    },
-
-    configureMovingForMercatorProjection: function(/*svg, projection, mapElements*/) {
-      /*var m0, o0;
-      var drag = d3.behavior.drag()
-      .on('dragstart', function() {
-        console.log('>> dragstart');
-        // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html and updated for d3 v3
-        //m0 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-        m0 = projection.translate();
-      })
-      .on('drag', function() {
-        console.log('>> dragend');
-        if (m0) {
-          //var m1 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-          var m1 = d3.event.translate;
-          projection.translate([m1[0] - m0[0], m1[1] - m0[1]]);
-        }
-      });
-
-      svg.call(drag);*/
-      //svg.attr("transform", "translate(" + d3.event.translate + ")");
-    },
-
-    configureMoving: function(svg, moveType, projection, mapElements) {
-      if (projection.type === 'orthographic') {
-        consoleService.logMessage('info',
-          'Configuring moving for projection orthographic');
-        // Using mouseDown, mouseUp and mouveMove events
-        if (moveType === 'mouseMove') {
-          console.log('11');
-          consoleService.logMessage('info', 'Selected moving "mouse move"');
-          this.configureMovingWithMouseMoveForOrthographicProjection(
-            svg, projection.raw, mapElements);
-        // Using drag events
-        } else if (moveType === 'mouseDrag') {
-          consoleService.logMessage('info', 'Selected moving "mouse drag"');
-          this.configureMovingWithMouseDragForOrthographicProjection(
-            svg, projection.raw, mapElements);
-        }
-      } else if (projection.type === 'mercator') {
-        this.configureMovingForMercatorProjection(
-          svg, projection.raw, mapElements);
-      }
-    },
-
-    // Zooming
-
-    configureZoomingWithMouseWheelForOrthographicProjection: function(svg, projection, dimension, mapElements) {
-      // Configure zooming
-      var zoom = d3.behavior.zoom()
-           //.translate(projection.translate())
-           .scale(projection.scale())
-           //.saleExtent([dimension.height, 8 * dimension.height])
-           .on('zoom', function() {
-        consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
-        projection/*.translate(d3.event.translate)*/.scale(d3.event.scale);
-        // Update the map
-        updateMapElements(projection, mapElements);
-        // Update current map context
-        currentMapService.currentMapContext.properties.scale = zoom.scale();
-      });
-
-      // Apply zoom behavior
-      svg.call(zoom);
-    },
-
-    configureZoomingWithMouseWheelForMercatorProjection: function(svg/*, projection, dimension, mapElements*/) {
-      // Configure zooming
-      var zoom = d3.behavior.zoom()
-           /*.translate(projection.translate())
-           .scale(projection.scale())*/
-           //.scaleExtent([dimension.height, 8 * dimension.height])
-           .on('zoom', function() {
-        consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
-        //projection.translate(d3.event.translate).scale(d3.event.scale);
-        svg.attr('transform', 'translate(' + 
-            d3.event.translate.join(',') + ')scale(' + d3.event.scale + ')');
-        // Update the map
-        //updateMapElements(projection, mapElements);
-        currentMapService.currentMapContext.properties.scale = zoom.scale();
-      });
-
-      // Apply zoom behavior
-      svg.call(zoom);
-      svg.call(zoom.event);
-    },
-
-    configureDefaultZoomingWithMouseWheel: function(svg) {
-      // Configure zooming
-      var zoom = d3.behavior.zoom()
-           /*.translate(projection.translate())
-           .scale(projection.scale())*/
-           .translate([0, 0])
-    .scale(1)
-    .scaleExtent([1, 8])
-
-           //.scaleExtent([dimension.height, 8 * dimension.height])
-           .on('zoom', function() {
-        //projection.translate(d3.event.translate).scale(d3.event.scale);
-        svg.attr('transform', 'translate(' +
-            d3.event.translate.join(',') + ')scale(' + d3.event.scale + ')');
-        // Update the map
-        //updateMapElements(projection, mapElements);
-        currentMapService.currentMapContext.properties.scale = zoom.scale();
-      });
-
-      // Apply zoom behavior
-      svg.call(zoom);
-      svg.call(zoom.event);
-    },
-
-    configureZooming: function(svg, moveType, projection, dimension, mapElements) {
-      if (projection.type === 'orthographic') {
-        consoleService.logMessage('info', 'Configuring zooming for projection orthographic');
-        // Using mouseDown, mouseUp and mouveMove events
-        if (moveType === 'mouseWheel') {
-          consoleService.logMessage('info', 'Selected zooming "mouse wheel"');
-          this.configureZoomingWithMouseWheelForOrthographicProjection(svg, projection.raw, dimension, mapElements);
-        }
-      } else if (projection.type === 'mercator') {
-        consoleService.logMessage('info', 'Configuring zooming for projection mercator');
-        // Using mouseDown, mouseUp and mouveMove events
-        if (moveType === 'mouseWheel') {
-          consoleService.logMessage('info', 'Selected zooming "mouse wheel"');
-          this.configureZoomingWithMouseWheelForMercatorProjection(svg, projection.raw, dimension, mapElements);
-        }
-      } else {
-        this.configureDefaultZoomingWithMouseWheel(svg);
-      }
     }
   };
 }]);

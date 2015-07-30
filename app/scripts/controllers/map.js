@@ -1,13 +1,13 @@
 'use strict';
 
-/**
- * @ngdoc function
- * @name mapManagerApp.controller:MainCtrl
- * @description
- * # MainCtrl
- * Controller of the mapManagerApp
- */
 angular.module('mapManagerApp')
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:MapCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('MapCtrl', function($scope, $modal, currentMapService, layerService, //
                                   projectionService, consoleService, //
                                   mapCreatorService, map, maps, sources, //
@@ -20,13 +20,17 @@ angular.module('mapManagerApp')
     currentMapService.currentMap = map;
 
     currentMapService.currentMapContext.properties = {
-      scale: map.scale
+      scale: map.scale,
+      center: {
+        lon: map.center.lon,
+        lat: map.center.lat
+      }
     };
 
     // Set current map in scope
     commonsService.setCurrentMapInScope($scope, map);
 
-    // Add map functions in scipe
+    // Add map functions in scope
     commonsService.registerCommonMapFunctionsInScope($scope);
 
     // Modals
@@ -86,6 +90,13 @@ angular.module('mapManagerApp')
     };
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:AddMapCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('AddMapCtrl', function($scope, $modalInstance, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
 
@@ -100,6 +111,13 @@ angular.module('mapManagerApp')
     };
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:AddSourceCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('AddSourceCtrl', function($scope,
       $modalInstance, commonsService, topojsonService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
@@ -166,10 +184,24 @@ angular.module('mapManagerApp')
     };
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:UpdatePropertiesCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('UpdatePropertiesCtrl', function($scope, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope, 'initial');
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:UpdateLayerCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('UpdateLayerCtrl', function($scope, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
     commonsService.registerCommonMapLayerFunctionsInScope($scope);
@@ -190,6 +222,13 @@ angular.module('mapManagerApp')
     }
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:AddLayerCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('AddLayerCtrl', function($scope, $modalInstance, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
     commonsService.registerCommonMapLayerPanelFunctionsInScope($scope);
@@ -217,6 +256,13 @@ angular.module('mapManagerApp')
     });
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:ImportSourceCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('ImportSourceCtrl', function($scope,
       $modalInstance, commonsService, sources) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
@@ -250,6 +296,13 @@ angular.module('mapManagerApp')
     };
   })
 
+  /**
+   * @ngdoc function
+   * @name mapManagerApp.controller:UpdateSourceCtrl
+   * @description
+   * # MainCtrl
+   * Controller of the mapManagerApp
+   */
   .controller('UpdateSourceCtrl', function($scope, commonsService) {
     commonsService.registerCommonPanelFunctionsInScope($scope, 'preview');
   });
