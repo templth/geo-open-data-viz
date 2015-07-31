@@ -187,7 +187,7 @@ angular.module('mapManager.map', [
                 mode: 'objects',
                 rank: 6,
                 data: {
-                  inline: '[{lon: 40.71455, lat: -74.007124}]',
+                  inline: '[{ points: [ {lon: -74.007124, lat: 40.71455}, {lon: -118.245323, lat: 34.05349}, { lon: -92.888759, lat: 45.37399} ] }] ',
                   /*url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
                   type: 'csv',
                   source: 'meteoritesSource',
@@ -200,10 +200,18 @@ angular.module('mapManager.map', [
                     ascending: false
                   }*/
                 },
-                name: 'Test',
+                name: 'Test line',
                 display: {
                   shape: {
-                    type: 'other'
+                    type: 'line',
+                    value: 'd.points',
+                    pointValue: '[d.lon, d.lat]'
+                  }
+                },
+                styles: {
+                  lines: {
+                    stroke: '#f00',
+                    strokeWidth: '1px'
                   }
                 },
                 applyOn: 'layers',

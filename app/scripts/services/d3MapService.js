@@ -34,20 +34,65 @@ angular.module('mapManager.d3.services', [
 
 // Map creator service
 
+/**
+ * @ngdoc service
+ * @name mapManager.d3.services:mapCreatorService
+ * @description
+ * Provide functions to create and refresh map rendering.
+ */
 .service('mapCreatorService', [ 'currentMapService', 'mapInteractionService',
     'layerService', 'projectionService', function(currentMapService,
       mapInteractionService, layerService, projectionService) {
   return {
+    /**
+     * @ngdoc method
+     * @name refreshMap
+     * @methodOf mapManager.d3.services:mapCreatorService
+     * @description
+     * Refresh the map by recreating it. If a map is present, this removes
+     * the whole SVG content.
+     *
+     * The actual map creation is delegated to the method
+     * {@link mapManager.d3.services:mapCreatorService.createMap createMap}
+     *
+     * To drop the existing map, the attribute `svg` of
+     * `currentMapService.currentMapContext` is used.
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} element the DOM element to create the map on
+    */
     refreshMap: function($scope, element) {
-      console.log('refreshmap');
       if (!_.isNull(currentMapService.currentMapContext.svg)) {
-        console.log('remove svg');
         currentMapService.currentMapContext.svg.remove();
       }
 
       this.createMap($scope, element);
     },
 
+    /**
+     * @ngdoc method
+     * @name createMap
+     * @methodOf mapManager.d3.services:mapCreatorService
+     * @description
+     * Create the map using the provided map structure (see
+     * currentMapService.currentMap).
+     *
+     * Here are the different steps:
+     * The actual map creation is delegated to the method
+     * {@link mapManager.d3.services:mapCreatorService.createMap createMap}
+     *
+     * * {@link mapManager.d3.services:projectionService.createProjection createProjection}
+     * * configure scale
+     * * rotate to center (if projection orthographic)
+     * * {@link mapManager.d3.services:projectionService.configurePathWithProjection configurePathWithProjection}
+     * * set elements in currentMapService.currentMapContext
+     * * for each layer: layerService.createLayer
+     * * {@link mapManager.d3.services:mapInteractionService.configureMoving configureMoving}
+     * * {@link mapManager.d3.services:mapInteractionService.configureZooming configureZooming}
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} element the DOM element to create the map on
+    */
     createMap: function($scope, element) {
       var mWidth = element.width();
       var width = 938;
@@ -65,7 +110,8 @@ angular.module('mapManager.d3.services', [
 
       // Configure rotation
       if (!_.isNull(projection) &&
-          !_.isNull(currentMapService.currentMap.scale)) {
+          currentMapService.currentMap.projection === 'orthographic' &&
+          !_.isNull(currentMapService.currentMap.center)) {
         projection.rotate([ currentMapService.currentMap.center.lon,
           currentMapService.currentMap.center.lat ]);
       }
@@ -130,6 +176,10 @@ angular.module('mapManager.d3.services', [
 
     updateScale: function($scope, newScale) {
       currentMapService.currentMap.scale = newScale;
+      // TODO : to rather the following
+      // projection.scale(currentMapService.currentMap.scale);
+      // updateMapElements(projection, mapElements);
+
       this.refreshMap($scope, currentMapService.currentMap.element);
     }
   };

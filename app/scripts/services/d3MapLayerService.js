@@ -598,6 +598,19 @@ angular.module('mapManager.d3.services')
 
     // End fill layer
 
+    // Objects layer
+
+    /**
+     * @ngdoc method
+     * @name createCircleObjectsDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a circle layer.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
     createCircleObjectsDataLayer: function(svg, path, layer) {
       var self = this;
       var origin = $parse(layer.display.shape.origin);
@@ -743,10 +756,19 @@ angular.module('mapManager.d3.services')
       this.loadDataForLayer(layer.data, handleData);
     },
 
-
-
-    // Experimental - Display image - Not working at the moment
+    /**
+     * @ngdoc method
+     * @name createCircleObjectsDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a circle layer.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
     createImageObjectsDataLayer: function(svg, path, layer) {
+      // Experimental - Display image - Not working at the moment
       var origin = $parse(layer.display.shape.origin);
       // var radius = $parse(layer.display.shape.radius);
 
@@ -792,9 +814,50 @@ angular.module('mapManager.d3.services')
       this.loadDataForLayer(layer.data, handleData);
     },
 
-    // Caution: for testing only
+    /**
+     * @ngdoc method
+     * @name createLineObjectsDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a line based on an array of coordinates.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
+    createLineObjectsDataLayer: function(svg, path, layer) {
+      var layerElement = this.getLayerElement(svg, layer);
+      var value = $parse(layer.display.shape.value);
+      var pointValue = $parse(layer.display.shape.pointValue);
 
-    createOtherObjectsDataLayer: function(svg, path, layer) {
+      function handleData(data) {
+        layerElement.selectAll('path')
+          .data(data)
+          .enter()
+          .append('path')
+          .datum(function(d) {
+            var points = value({d: d});
+            var coordinates = [];
+            _.forEach(points, function(point) {
+              coordinates.push(pointValue({d: point}));
+            });
+            return {
+              type: 'LineString',
+              coordinates: coordinates,
+              d: d
+            };
+          })
+          .attr('d', path)
+          .style('fill', 'none')
+          .style('stroke', layer.styles.lines.stroke)
+          .style('stroke-width', layer.styles.lines.strokeWidth);
+      }
+
+      // Actually create the layer based on provided data
+      this.loadDataForLayer(layer.data, handleData);
+    },
+
+    createPolygonObjectsDataLayer: function(svg, path, layer) {
       var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
@@ -841,7 +904,8 @@ var route = {
     places.NY,
     places.LA,
     places.CO,
-    places.NY
+    places.SVO/*,
+    places.NY*/
   ]
 };
 
@@ -853,10 +917,11 @@ layerElement.append("path")
     .datum(route)
     .attr("class", "route")
     .attr("d", path)
-    .style('fill', 'red')
+    .style('fill', 'none')
+    //.style('fill', 'red')
     .style('opacity', '0.5')
     .style('stroke', 'red')
-    .style('stroke-width', '3px');
+    .style('stroke-width', '1px');
 
 // #2
 /*var line = d3.svg.line()
@@ -913,14 +978,34 @@ layerElement.append("path").datum([places.NY,
       this.loadDataForLayer(layer.data, handleData);
     },
 
+    /**
+     * @ngdoc method
+     * @name createObjectsDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a specific layer of type `objects`.
+     *
+     * The following layer sub kinds are supported:
+     *
+     * * `circle` - see {@link mapManager.d3.services:layerService.createGraticuleLayer createCircleObjectsDataLayer}
+     * * `image` - see {@link mapManager.d3.services:layerService.createImageObjectsDataLayer createImageObjectsDataLayer}
+     * * `line` - see {@link mapManager.d3.services:layerService.createLineObjectsDataLayer createLineObjectsDataLayer}
+     * * `polygon` - see {@link mapManager.d3.services:layerService.createPolygonObjectsDataLayer createPolygonObjectsDataLayer}
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
     createObjectsDataLayer: function(svg, path, layer) {
       if (layer.display.shape) {
         if (layer.display.shape.type === 'circle') {
           this.createCircleObjectsDataLayer(svg, path, layer);
         } else if (layer.display.shape.type === 'image') {
           this.createImageObjectsDataLayer(svg, path, layer);
-        } else if (layer.display.shape.type === 'other') {
-          this.createOtherObjectsDataLayer(svg, path, layer);
+        } else if (layer.display.shape.type === 'line') {
+          this.createLineObjectsDataLayer(svg, path, layer);
+        } else if (layer.display.shape.type === 'polygon') {
+          this.createPolygonObjectsDataLayer(svg, path, layer);
         }
       }
     },
@@ -957,6 +1042,8 @@ layerElement.append("path").datum([places.NY,
         this.createGeoDataLayer(svg, path, layer);
       }
     },
+
+    // End objects layer
 
     /**
      * @ngdoc method
