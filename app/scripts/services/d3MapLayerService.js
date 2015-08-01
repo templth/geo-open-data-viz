@@ -857,121 +857,55 @@ angular.module('mapManager.d3.services')
       this.loadDataForLayer(layer.data, handleData);
     },
 
+    /**
+     * @ngdoc method
+     * @name createPolygonObjectsDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a polygon based on an array of coordinates.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path element for the projection
+     * @param {Object} layer the layer
+    */
     createPolygonObjectsDataLayer: function(svg, path, layer) {
       var layerElement = this.getLayerElement(svg, layer);
+      var value = $parse(layer.display.shape.value);
+      var pointValue = $parse(layer.display.shape.pointValue);
 
       function handleData(data) {
-        //The data for our line
-        var lineData = [ {lon: 40.71455, lat: -74.007124}, 
-                    {lon: 34.05349, lat: -118.245323}, 
-                    {lon: 45.37399, lat: -92.888759}, 
-                    {lon: 41.337462, lat: -75.733627}
-                ];
-                 /*[ { x: 1, y: 5},  { x: 20, y: 20},
-                 { x: 40, y: 10}, { x: 60, y: 40},
-                 { x: 80, y: 5},  { x: 100, y: 60} ];*/
+        // TODO: add support for conditional background (threshold, ...)
 
-        //This is the accessor function we talked about above
-        var projection = currentMapService.currentMapContext.projection;
-        var lineFunction = d3.svg.line()
-                         .x(function(d) { console.log('d = '+JSON.stringify(d)); return projection([d.lon, d.lat])[0]/*d.lon*/; })
-                         .y(function(d) { console.log('d = '+JSON.stringify(d)); return projection([d.lon, d.lat])[1]/*d.lat*/; })
-                         .interpolate('linear');
-
-var places = {
-  HNL: [-157,9225, 21,318611111],
-  HKG: [113,914722222, 22,308888889],
-  SVO: [37,414722222, 55,972777778],
-  HAV: [-82,409166667, 22,989166667],
-  CCS: [-66,990555556, 10,603055556],
-  UIO: [-78,358611111, 0,113333333],
-  NY: [ -74.007124, 40.71455 ],
-  LA: [ -118.245323, 34.05349 ],
-  CO: [ -92.888759, 45.37399 ]
-  /*HNL: projection([40.71455, -74.007124]),
-  HKG: projection([34.05349,  -118.245323]),
-  SVO: projection([45.37399, -92.888759]),
-  HAV: projection([41.337462, -75.733627])/*,
-  CCS: [-66 - 59 / 60 - 26 / 3600, 10 + 36 / 60 + 11 / 3600],
-  UIO: [-78 - 21 / 60 - 31 / 3600, 0 + 06 / 60 + 48 / 3600]*/
-};
-
-// #1
-var route = {
-  // type: "MultiLineString",
-  type: "LineString",
-  coordinates: [
-    places.NY,
-    places.LA,
-    places.CO,
-    places.SVO/*,
-    places.NY*/
-  ]
-};
-
-var line = d3.svg.line()
-    .x(function(d) { return d[0]; })
-    .y(function(d) { return d[1]; });
-
-layerElement.append("path")
-    .datum(route)
-    .attr("class", "route")
-    .attr("d", path)
-    .style('fill', 'none')
-    //.style('fill', 'red')
-    .style('opacity', '0.5')
-    .style('stroke', 'red')
-    .style('stroke-width', '1px');
-
-// #2
-/*var line = d3.svg.line()
-            .x(function(d) { console.log('>> line.x = '+d[0]); return projection(d)[0]; })
-            .y(function(d) { console.log('>> line.x = '+d[1]); return projection(d)[1]; });
-layerElement.append("path").datum([places.NY,
-    places.LA]).attr("d", line)
-    .style('fill', 'red')
-    .style('opacity', '0.5')
-    .style('stroke', 'red')
-    .style('stroke-width', '3px');*/
-
-// #3
-/*layerElement.append("polygon")
-    .attr("points", function() {
-      return [ places.NY,
-      places.LA, places.CO ].map(function(d) { return d.join(","); }).join(" ");
-    })
-    .style('fill', 'none')
-    .style('opacity', '0.5')
-    .style('stroke', 'red')
-    .style('stroke-width', '3px');*/
-
-
-        /*console.log('data = '+JSON.stringify(data));
         layerElement.selectAll('path')
           .data(data)
           .enter()
-          .append('d') //, lineFunction(lineData))*/
-          /*                  .datum(function(d) {
-            console.log('1');
-            var orig = [ d.lon, d.lat ]; //origin({d: d});
-            orig[0] = parseFloat(orig[0]);
-            orig[1] = parseFloat(orig[1]);
-            //var rad = radius({d: d});
-            //rad = parseFloat(rad);
-            //var c = circle
-            //   .origin(orig)
-            //   .angle(rad)({d: d});
-            var c = { type: 'Polyline', coordinates: [ _.map(lineData, function(ld) { return [ld.lon, ld.lat]; })] };
-            c.d = d;
-            console.log('c = '+JSON.stringify(c));
-            return c;
-          })*/
-          //                  .attr('d', function(d) { console.log('d = '+JSON.stringify(d)); return path(d); })
-          /*.attr('d', lineFunction(lineData))
-                            .attr("stroke", "red")
-                            .attr("stroke-width", 200)
-                            .attr("fill", "none");*/
+          .append('path')
+          .datum(function(d) {
+            var points = value({d: d});
+            var coordinates = [];
+            _.forEach(points, function(point) {
+              coordinates.push(pointValue({d: point}));
+            });
 
+            // Check if the polygon is closed
+            if (coordinates.length > 2) {
+              if (coordinates[0][0] !== coordinates[1][0] &&
+                  coordinates[0][1] !== coordinates[1][1]) {
+                // Add a point to close the polygon
+                coordinates.push([ coordinates[0][0],
+                  coordinates[0][1] ]);
+              }
+            }
+            return {
+              type: 'LineString',
+              coordinates: coordinates,
+              d: d
+            };
+          })
+          .attr('d', path)
+          .style('fill', layer.styles.background.fill)
+          .style('stroke', layer.styles.lines.stroke)
+          .style('stroke-width', layer.styles.lines.strokeWidth);
       }
 
       // Actually create the layer based on provided data
