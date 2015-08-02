@@ -169,11 +169,37 @@ angular.module('mapManager.d3.services', [
       }
     },
 
+    /**
+     * @ngdoc method
+     * @name updateProjection
+     * @methodOf mapManager.d3.services:mapCreatorService
+     * @description
+     * Apply the new projection to the map.
+     *
+     * Actually the new projection is set within the current map
+     * object as string and the map is refreshed / recreated?
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} newProjection the new projection as string
+    */
     updateProjection: function($scope, newProjection) {
       currentMapService.currentMap.projection = newProjection;
       this.refreshMap($scope, currentMapService.currentMap.element);
     },
 
+    /**
+     * @ngdoc method
+     * @name updateProjection
+     * @methodOf mapManager.d3.services:mapCreatorService
+     * @description
+     * Apply the new projection to the map.
+     *
+     * Actually the new scale is set within the current map
+     * object as string and the map is refreshed / recreated?
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} newScale the new scale
+    */
     updateScale: function($scope, newScale) {
       currentMapService.currentMap.scale = newScale;
       // TODO : to rather the following
@@ -187,8 +213,23 @@ angular.module('mapManager.d3.services', [
 
 // Projection service
 
+/**
+ * @ngdoc service
+ * @name mapManager.d3.services:projectionService
+ * @description
+ * Provide functions to create and configure projections for a map.
+ */
 .service('projectionService', [ function() {
   return {
+    /**
+     * @ngdoc method
+     * @name createMercatorProjection
+     * @methodOf mapManager.d3.services:projectionService
+     * @description
+     * Create a mercator projection based on a configuration object.
+     *
+     * @param {Object} configuration the map configuration object
+    */
     createMercatorProjection: function(configuration) {
       var projection = d3.geo.mercator()
           //.scale(150)
@@ -196,6 +237,15 @@ angular.module('mapManager.d3.services', [
       return projection;
     },
 
+    /**
+     * @ngdoc method
+     * @name createOrthographicProjection
+     * @methodOf mapManager.d3.services:projectionService
+     * @description
+     * Create a orthographic projection based on a configuration object.
+     *
+     * @param {Object} configuration the map configuration object
+    */
     createOrthographicProjection: function(/*configuration*/) {
         var projection = d3.geo.orthographic()
           .scale(248)
@@ -204,6 +254,22 @@ angular.module('mapManager.d3.services', [
         return projection;
       },
 
+    /**
+     * @ngdoc method
+     * @name createProjection
+     * @methodOf mapManager.d3.services:projectionService
+     * @description
+     * Create a projection based on a projection type and a configuration
+     * object.
+     *
+     * The following projections are supported:
+     *
+     * * Orthographic. See {@link mapManager.d3.services:projectionService.createOrthographicProjection createOrthographicProjection}
+     * * Mercator. See {@link mapManager.d3.services:projectionService.createMercatorProjection createMercatorProjection}
+     *
+     * @param {String} projectionType the projection type
+     * @param {Object} configuration the map configuration object
+    */
     createProjection: function(projectionType, configuration) {
       var projection = null;
       // Create projection
@@ -215,6 +281,17 @@ angular.module('mapManager.d3.services', [
       return projection;
     },
 
+    /**
+     * @ngdoc method
+     * @name configurePathWithProjection
+     * @methodOf mapManager.d3.services:projectionService
+     * @description
+     * Configure paths of the map with a specified projection. The projection is
+     * creation using the method {@link mapManager.d3.services:projectionService.createProjection createProjection}
+     *
+     * @param {String} projectionType the projection type
+     * @param {Object} configuration the map configuration object
+    */
     configurePathWithProjection: function(projection, path) {
       // Return path
       if (_.isNull(path) || _.isUndefined(path)) {
@@ -229,11 +306,29 @@ angular.module('mapManager.d3.services', [
   };
 }])
 
+/**
+ * @ngdoc service
+ * @name mapManager.d3.services:mapInteractionService
+ * @description
+ * Provide functions to configure the interactions like map moving and zooming.
+ */
 .service('mapInteractionService', [ 'consoleService', 'currentMapService',
 	function(consoleService, currentMapService) {
   return {
     // Moving
 
+    /**
+     * @ngdoc method
+     * @name configureMovingWithMouseDragForOrthographicProjection
+     * @methodOf mapManager.d3.services:mapInteractionService
+     * @description
+     * Configure map moving for an orthographic projection using drag'n drop.
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} svg the global SVG element
+     * @param {Object} projection the current projection of the map
+     * @param {Object} mapElements the element kinds to update after moving
+    */
     configureMovingWithMouseDragForOrthographicProjection: function(
         $scope, svg, projection, mapElements) {
       var m0, o0;
@@ -268,6 +363,19 @@ angular.module('mapManager.d3.services', [
       svg.call(drag);
     },
 
+    /**
+     * @ngdoc method
+     * @name configureMovingWithMouseMoveForOrthographicProjection
+     * @methodOf mapManager.d3.services:mapInteractionService
+     * @description
+     * Configure map moving for an orthographic projection using the mouse
+     * move event.
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} svg the global SVG element
+     * @param {Object} projection the current projection of the map
+     * @param {Object} mapElements the element kinds to update after moving
+    */
     configureMovingWithMouseMoveForOrthographicProjection: function(
         $scope, svg, projection, mapElements) {
       var m0 = null;
@@ -312,6 +420,19 @@ angular.module('mapManager.d3.services', [
          .on('mouseup', mouseup);
     },
 
+    /**
+     * @ngdoc method
+     * @name configureMovingForMercatorProjection
+     * @methodOf mapManager.d3.services:mapInteractionService
+     * @description
+     * Configure map moving for an mercator projection using the mouse
+     * move event.
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} svg the global SVG element
+     * @param {Object} projection the current projection of the map
+     * @param {Object} mapElements the element kinds to update after moving
+    */
     configureMovingForMercatorProjection: function(/*$scope, svg, projection, mapElements*/) {
       /*var m0, o0;
       var drag = d3.behavior.drag()
@@ -334,6 +455,20 @@ angular.module('mapManager.d3.services', [
       //svg.attr("transform", "translate(" + d3.event.translate + ")");
     },
 
+    /**
+     * @ngdoc method
+     * @name configureMoving
+     * @methodOf mapManager.d3.services:mapInteractionService
+     * @description
+     * Configure map moving for a specific  projection using a specified mouse
+     * move event.
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} svg the global SVG element
+     * @param {String} moveType the kind of moving
+     * @param {Object} projection the current projection of the map
+     * @param {Object} mapElements the element kinds to update after moving
+    */
     configureMoving: function($scope, svg, moveType, projection, mapElements) {
       if (projection.type === 'orthographic') {
         consoleService.logMessage('info',
