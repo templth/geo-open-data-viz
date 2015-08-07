@@ -10,7 +10,8 @@ angular.module('mapManager.d3.directives', [ 'mapManager.map', 'mapManager.d3.se
         grouped: '='
       },
       link: function(scope, element) {
-        currentMapService.currentMap.element = element;
+        currentMapService.setCurrentMapElement(element);
+        currentMapService.setCurrentMapId('map1');
         mapCreatorService.createMap(scope, element);
       }
     };

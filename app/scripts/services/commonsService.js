@@ -116,11 +116,11 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
         $scope.mapName = currentMap.name;
         $scope.mapType = currentMap.type;
-        $scope.layers = currentMapService.currentMap.layers;
-        $scope.linkedSources = currentMapService.currentMap.sources;
+        $scope.layers = currentMap.layers;
+        $scope.linkedSources = currentMap.sources;
         // $scope.messages = consoleService.messages;
         $scope.currentProperties =
-          currentMapService.currentMapContext.properties;
+          currentMapService.getCurrentMapContext().properties;
         $scope.$watch('currentProperties.scale', function(newValue, oldValue) {
           if (newValue === oldValue) { return; }
           console.log('updated currentProperties.scale');
@@ -178,8 +178,8 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
 
         $scope.toggleLayerApplying = function($event, layer) {
-          var svg = currentMapService.currentMapContext.svg;
-          var path = currentMapService.currentMapContext.path;
+          var svg = currentMapService.getCurrentMapContext().svg;
+          var path = currentMapService.getCurrentMapContext().path;
 
           layerService.toggleLayerApplying(svg, path, layer);
           layer.applied = !layer.applied;
@@ -187,8 +187,8 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
 
         $scope.refreshLayerApplying = function($event, layer) {
-          var svg = currentMapService.currentMapContext.svg;
-          var path = currentMapService.currentMapContext.path;
+          var svg = currentMapService.getCurrentMapContext().svg;
+          var path = currentMapService.getCurrentMapContext().path;
 
           layerService.refreshLayerApplying(svg, path, layer);
           $event.stopPropagation();
@@ -212,8 +212,8 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           }
 
           var layer = $scope.layer;
-          var svg = currentMapService.currentMapContext.svg;
-          var path = currentMapService.currentMapContext.path;
+          var svg = currentMapService.getCurrentMapContext().svg;
+          var path = currentMapService.getCurrentMapContext().path;
 
           layerService.refreshLayerApplying(svg, path, layer);
         });

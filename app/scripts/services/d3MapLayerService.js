@@ -383,7 +383,64 @@ angular.module('mapManager.d3.services')
 
     // Geo data layer
 
+    /**
+     * @ngdoc method
+     * @name applyStylesForGeoDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Apply style on the geo data according to the configuration
+     * of the layer:
+     *
+     * * layer.styles.background for the background
+     * * layer.styles.lines for lines
+     *
+     * @param {Object} layer the layer
+     * @param {Object} pathElements the path elements to apply styles on
+    */
+    applyStylesForGeoDataLayer: function(layer, pathElements) {
+      if (valueChecker.isNotNull(layer.styles)) {
+        if (valueChecker.isNotNull(layer.styles.background)) {
+          var background = '#fff';
+          if (valueChecker.isNotNull(layer.styles.background.fill)) {
+            background = layer.styles.background.fill;
+          }
+          pathElements.style('fill', background);
+        }
+
+        if (valueChecker.isNotNull(layer.styles.lines)) {
+          var stroke = '#fff';
+          var strokeWidth = '0.5px';
+          var strokeOpacity = '0.5';
+          if (valueChecker.isNotNull(layer.styles.lines.stroke)) {
+            stroke = layer.styles.lines.stroke;
+          }
+          if (valueChecker.isNotNull(layer.styles.lines.strokeWidth)) {
+            strokeWidth = layer.styles.lines.strokeWidth;
+          }
+          if (valueChecker.isNotNull(layer.styles.lines.strokeOpacity)) {
+            strokeOpacity = layer.styles.lines.strokeOpacity;
+          }
+
+          pathElements.style('stroke', stroke);
+          pathElements.style('stroke-width', strokeWidth);
+          pathElements.style('stroke-opacity', strokeOpacity);
+        }
+      }
+    },
+
+    /**
+     * @ngdoc method
+     * @name applyStylesForGeoDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create a layer of type `geodata`.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+    */
     createGeoDataLayer: function(svg, path, layer) {
+      var self = this;
       var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
@@ -394,35 +451,10 @@ angular.module('mapManager.d3.services')
               data.objects[layer.data.rootObject],
               function(a, b) { return a.id !== b.id; }));
 
-          if (valueChecker.isNotNull(layer.styles.lines)) {
-            var stroke = '#fff';
-            var strokeWidth = '0.5px';
-            var strokeOpacity = '0.5';
-            if (layer.styles.lines.stroke != null) {
-              stroke = layer.styles.lines.stroke;
-            }
-            if (layer.styles.lines.strokeWidth != null) {
-              strokeWidth = layer.styles.lines.strokeWidth;
-            }
-            if (layer.styles.lines.strokeOpacity != null) {
-              strokeOpacity = layer.styles.lines.strokeOpacity;
-            }
-
-            pathElements.style('fill', 'none');
-            pathElements.style('stroke', stroke);
-            pathElements.style('stroke-width', strokeWidth);
-            pathElements.style('stroke-opacity', strokeOpacity);
-          }
+          self.applyStylesForGeoDataLayer(layer, pathElements);
 
           pathElements
             .attr('d', path);
-          if (layer.styles.d != null) {
-            var dStrokeWidth = '1.5px';
-            if (layer.styles.d.strokeWidth != null) {
-              dStrokeWidth = layer.styles.d.strokeWidth;
-            }
-            pathElements.style('stroke-width', dStrokeWidth);
-          }
         } else {
           pathElements = layerElement.selectAll('path')
             .data(topojson.feature(data,
@@ -431,17 +463,45 @@ angular.module('mapManager.d3.services')
           .append('path')
           .attr('id', function(d) { return d.id; })
           .attr('d', path);
+
+          self.applyStylesForGeoDataLayer(layer, pathElements);
         }
 
-        if (!_.isUndefined(layer.behavior) &&
+        // Experimental - ramdom fill color
+        // See http://bl.ocks.org/jczaplew/4444770
+        // See https://github.com/mbostock/topojson/wiki/API-Reference
+
+        /* var color = d3.scale.category20();
+        var countries = topojson.feature(data, data.objects[layer.data.rootObject]).features;
+        console.log('countries = '+countries.length);
+        var neighbors = topojson.neighbors(data.objects[layer.data.rootObject].geometries);
+        console.log('neighbors = '+neighbors.length);
+
+        pathElements.style('fill', function(d, i) {
+          //console.log('>> neighbors[i] = '+neighbors[i]);
+          var d = (d.color = d3.max(neighbors[i], function(n) {
+            console.log('  - countries[n] = '+countries[n].color);
+            return countries[n].color ? countries[n].color : 0;
+          }) + 1 | 0);
+          console.log('## d = '+d);
+          var c = color(d);
+          console.log('## c = '+c);
+          return c;
+        });*/
+
+        /*if (!_.isUndefined(layer.behavior) &&
             !_.isNull(layer.behavior) &&
             !_.isUndefined(layer.behavior.zoomBoundingBox) &&
-            !_.isNull(layer.behavior.zoomBoundingBox)) {
+            !_.isNull(layer.behavior.zoomBoundingBox)) {*/
           // See http://bl.ocks.org/mbostock/4699541
           pathElements.on('click', function(d) {
             // TODO: make things generic
             var width = 938;
             var height = 500;
+
+            console.log('path elements click');
+
+            //console.log('d = '+JSON.stringify(d));
 
             var bounds = path.bounds(d);
             var dx = bounds[1][0] - bounds[0][0];
@@ -451,13 +511,110 @@ angular.module('mapManager.d3.services')
             var scale = 0.9 / Math.max(dx / width, dy / height);
             var translate = [width / 2 - scale * x, height / 2 - scale * y];
 
-            g.transition()
+            /*g.transition()
              .duration(750)
              //.style("stroke-width", 1.5 / scale + "px")
              .attr('transform', 'translate(' + translate +
-               ')scale(' + scale + ')');
+               ')scale(' + scale + ')');*/
+
+            console.log('d.id = '+d.id);
+
+            var map2 = svg.append('g').attr('id','map2');
+
+            var rect2 = map2.append('rect')
+            .attr('class', 'background')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('id', 'rect2')
+            .style('fill', 'white')
+            .style('opacity', '0.75');
+
+            var layers2 = map2.append('g').attr('id','layers2');
+
+// see https://github.com/wbkd/d3-extended/blob/master/src/core/moveToFront.js
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+}
+
+            console.log('before');
+            console.log('>> with id = '+(d3.select('[id="124"]'/*+d.id*/)));
+            console.log('after');
+            var id = d.id;
+            var node = d3.select('[id="'+id+'"]'/*'#'+d.id*/).node();
+            console.log('clone');
+            var elt = d3.select(layers2.node().appendChild(node.cloneNode(true)));
+
+            map2.moveToFront();
+            elt.attr('id','cloned'+id);
+            elt.style('fill', 'red');
+            //map2.
+
+/*.attr("x", 0)
+  .attr("y", 0)
+  .attr("height", h)
+  .attr("width", w)
+  .style("stroke", bordercolor)
+  .style("fill", "none")
+  .style("stroke-width", border);*/
+
+            /*rect2.style('stroke','blue').style('stroke-width', '2').transition().attr('x', '200px').attr('y', '200px')
+            .duration(3000) // this is 1s
+            .delay(100);*/
+
+            //map2.transition().duration(3000).delay(100).attr('transform', 'translate(200,200)');
+            var bds = getBounds(path, d);
+            //var transf = d3.svg.transform().rotate(-54).scale(bds.scale);
+            elt.transition().duration(3000).delay(100)
+              .attr('transform', 'translate('+bds.translate[0]+','+bds.translate[1]+'),scale('+bds.scale+')')
+              .style('stroke-width', '0.2px')
+              /*.tween("rotate", function() {
+                var projection = d3.geo.orthographic()
+                     .scale(bds.scale)
+                     .clipAngle(90);
+
+                //var projection = currentMapService.getCurrentMapContext().projection;
+                var r = d3.interpolate(projection.rotate(), [2, -49]);
+                return function(t) {
+                  projection.rotate(r(t));
+                  map2.selectAll('path').attr('d', path);
+                };
+              })*/;
+
+            /*d3.select('#map1 path').transition().duration(3000).delay(100)
+              .attr('transform', 'scale(60)');*/
+              //d3.select('#map1').transition().duration(3000).delay(100).attr('transform', 'scale(60)');
+              //.tween("scale", function() {
+
+            function getBounds(path, d) {
+              var bounds = path.bounds(d);
+              var dx = bounds[1][0] - bounds[0][0];
+              var dy = bounds[1][1] - bounds[0][1];
+              var x = (bounds[0][0] + bounds[1][0]) / 2;
+              var y = (bounds[0][1] + bounds[1][1]) / 2;
+              var scale = 0.9 / Math.max(dx / width, dy / height);
+              var translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+              return {
+                translate: translate,
+                scale: scale
+              };
+            }
+
+            var projection1 = d3.geo.orthographic()
+                     .scale(248)
+                     .clipAngle(90);
+                     //.clipAngle(90)/*.rotate(0,0)*/;
+            var path1 = d3.geo.path().projection(projection1);
+            console.log('>> path1 = '+path1);
+            d3.selectAll('#map2 path')/*./*transition().duration(3000).delay(100).*//*attr('d', path1);*/
+             // this is 1s
+            ;
+            var bds = getBounds(path, d);
+            console.log('>> bounds = '+JSON.stringify(bds));
           });
-        }
+        //}
       }
 
       // Actually create the layer based on provided data
@@ -500,7 +657,7 @@ angular.module('mapManager.d3.services')
 
         var sel = d3.select(document.getElementById(layer.applyOn));
 
-        if (layer.display.fill.threshold != null) {
+        if (valueChecker.isNotNull(layer.display.fill.threshold)) {
           var color = d3.scale.threshold()
             .domain(layer.display.fill.threshold.values)
             .range(layer.display.fill.threshold.colors);
@@ -509,7 +666,7 @@ angular.module('mapManager.d3.services')
               .style('fill', function(d) {
             return color(values[d.id]);
           });
-        } else if (layer.display.fill.choropleth != null) {
+        } else if (valueChecker.isNotNull(layer.display.fill.choropleth)) {
           var color = d3.scale.quantize()
             .domain(layer.display.fill.choropleth.values)
             .range(layer.display.fill.choropleth.colors);
@@ -518,7 +675,7 @@ angular.module('mapManager.d3.services')
               .style('fill', function(d) {
             return color(values[d.id]);
           });
-        } else if (layer.display.fill.categorical != null) {
+        } else if (valueChecker.isNotNull(layer.display.fill.categorical)) {
           // See https://github.com/mbostock/d3/wiki/Ordinal-Scales#category10
           console.log('>> categorical');
           var color = d3.scale.category20();
@@ -804,9 +961,9 @@ angular.module('mapManager.d3.services')
           })
           .attr('width', '29')
 
-// while adding an image to an svg these are the coordinates i think of the top left
-/*.attr('x', '-14.5')
-.attr('y', '-9.5')*/
+          // while adding an image to an svg these are the coordinates i think of the top left
+          /*.attr('x', '-14.5')
+           .attr('y', '-9.5')*/
           /*.style('opacity', layer.display.shape.opacity)*/;
       }
 
@@ -1005,7 +1162,7 @@ angular.module('mapManager.d3.services')
      * is simply reinitialize / reloaded using the method
      * {@link mapManager.d3.services:layerService.clearFillDataLayer clearFillDataLayer}
      *
-     * @param {Object} svg the global SVG element
+     * @param {Object} svg the global SVG eletoggleLayerApplyingment
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */

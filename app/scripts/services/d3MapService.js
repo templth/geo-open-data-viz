@@ -56,17 +56,31 @@ angular.module('mapManager.d3.services', [
      * {@link mapManager.d3.services:mapCreatorService.createMap createMap}
      *
      * To drop the existing map, the attribute `svg` of
-     * `currentMapService.currentMapContext` is used.
+     * `currentMapService.getCurrentMapContext()` is used.
      *
      * @param {Object} $scope the scope of the controller that creates the map
      * @param {Object} element the DOM element to create the map on
     */
     refreshMap: function($scope, element) {
-      if (!_.isNull(currentMapService.currentMapContext.svg)) {
-        currentMapService.currentMapContext.svg.remove();
+      if (!_.isNull(currentMapService.getCurrentMapContext().svg)) {
+        currentMapService.getCurrentMapContext().svg.remove();
       }
 
       this.createMap($scope, element);
+    },
+
+    createSubMapStructure: function() {
+
+    },
+
+    createMainMapStructure: function(svg) {
+      // Create element for the map
+      var gMap = svg.append('g').attr('id', 'map1');
+
+      // Create element for layers
+      var gLayers = gMap.append('g').attr('id', 'layers');
+
+      return { gMap: gMap, gLayers: gLayers };
     },
 
     /**
@@ -85,7 +99,7 @@ angular.module('mapManager.d3.services', [
      * * configure scale
      * * rotate to center (if projection orthographic)
      * * {@link mapManager.d3.services:projectionService.configurePathWithProjection configurePathWithProjection}
-     * * set elements in currentMapService.currentMapContext
+     * * set elements in currentMapService.getCurrentMapContext()
      * * for each layer: layerService.createLayer
      * * {@link mapManager.d3.services:mapInteractionService.configureMoving configureMoving}
      * * {@link mapManager.d3.services:mapInteractionService.configureZooming configureZooming}
@@ -99,21 +113,21 @@ angular.module('mapManager.d3.services', [
       var height = 500;
 
       var projection = projectionService.createProjection(
-        currentMapService.currentMap.projection,
+        currentMapService.getCurrentMap().projection,
           {width: width, height: height});
 
       // Configure scale
       if (!_.isNull(projection) &&
-          !_.isNull(currentMapService.currentMap.scale)) {
-        projection.scale(currentMapService.currentMap.scale);
+          !_.isNull(currentMapService.getCurrentMap().scale)) {
+        projection.scale(currentMapService.getCurrentMap().scale);
       }
 
       // Configure rotation
       if (!_.isNull(projection) &&
-          currentMapService.currentMap.projection === 'orthographic' &&
-          !_.isNull(currentMapService.currentMap.center)) {
-        projection.rotate([ currentMapService.currentMap.center.lon,
-          currentMapService.currentMap.center.lat ]);
+          currentMapService.getCurrentMap().projection === 'orthographic' &&
+          !_.isNull(currentMapService.getCurrentMap().center)) {
+        projection.rotate([ currentMapService.getCurrentMap().center.lon,
+          currentMapService.getCurrentMap().center.lat ]);
       }
 
       var path = projectionService.configurePathWithProjection(projection);
@@ -129,15 +143,14 @@ angular.module('mapManager.d3.services', [
           .attr('width', width)
           .attr('height', height);
 
-      var g = svg.append('g').attr('id', 'layers');
+      // Create structure elements for the map (map and layers)
+      var mainMapElements = this.createMainMapStructure(svg);
 
       // Save current map context
-      currentMapService.currentMapContext.svg = svg;
-      currentMapService.currentMapContext.path = path;
-      currentMapService.currentMapContext.projection = projection;
-      currentMapService.currentMapContext.layers = g;
+      currentMapService.registerCurrentMapContext(svg, path, projection,
+        mainMapElements.gMap, mainMapElements.gLayers);
 
-      var layers = currentMapService.currentMap.layers;
+      var layers = currentMapService.getCurrentMap().layers;
 
       // Preload data
       // TODO
@@ -156,14 +169,14 @@ angular.module('mapManager.d3.services', [
       var interactions = currentMapService.currentMap.interactions;
       if (!_.isNull(interactions) && !_.isNull(interactions.moving)) {
         mapInteractionService.configureMoving($scope, svg, interactions.moving, {
-          type: currentMapService.currentMap.projection, raw: projection
+          type: currentMapService.getCurrentMap().projection, raw: projection
         }, [ {type: 'path'}, {type: 'circle'}, {type: 'LineString'}]);
       }
 
       // Configure zooming
       if (!_.isNull(interactions) && !_.isNull(interactions.zooming)) {
         mapInteractionService.configureZooming($scope, svg, interactions.zooming, {
-          type: currentMapService.currentMap.projection, raw: projection}, {
+          type: currentMapService.getCurrentMap().projection, raw: projection}, {
           width: '', height: ''
         }, [{type: 'path'}, {type: 'circle'}, {type: 'LineString'}]);
       }
@@ -183,8 +196,8 @@ angular.module('mapManager.d3.services', [
      * @param {Object} newProjection the new projection as string
     */
     updateProjection: function($scope, newProjection) {
-      currentMapService.currentMap.projection = newProjection;
-      this.refreshMap($scope, currentMapService.currentMap.element);
+      currentMapService.getCurrentMap().projection = newProjection;
+      this.refreshMap($scope, currentMapService.getCurrentMapElement());
     },
 
     /**
@@ -201,12 +214,12 @@ angular.module('mapManager.d3.services', [
      * @param {Object} newScale the new scale
     */
     updateScale: function($scope, newScale) {
-      currentMapService.currentMap.scale = newScale;
+      currentMapService.getCurrentMap().scale = newScale;
       // TODO : to rather the following
       // projection.scale(currentMapService.currentMap.scale);
       // updateMapElements(projection, mapElements);
 
-      this.refreshMap($scope, currentMapService.currentMap.element);
+      this.refreshMap($scope, currentMapService.getCurrentMapElement());
     }
   };
 }])
@@ -351,8 +364,8 @@ angular.module('mapManager.d3.services', [
 
           // Update current map context
           $scope.$apply(function() {
-            currentMapService.currentMapContext.properties.center.lon = o1[0];
-            currentMapService.currentMapContext.properties.center.lat = o1[1];
+            currentMapService.getCurrentMapContext().properties.center.lon = o1[0];
+            currentMapService.getCurrentMapContext().properties.center.lat = o1[1];
           });
 
           consoleService.logMessage('debug', 'Rotated to ' +
@@ -402,8 +415,8 @@ angular.module('mapManager.d3.services', [
 
           // Update current map context
           $scope.$apply(function() {
-            currentMapService.currentMapContext.properties.center.lon = o1[0];
-            currentMapService.currentMapContext.properties.center.lat = o1[1];
+            currentMapService.getCurrentMapContext().properties.center.lon = o1[0];
+            currentMapService.getCurrentMapContext().properties.center.lat = o1[1];
           });
         }
       }
@@ -507,7 +520,7 @@ angular.module('mapManager.d3.services', [
 
         // Update current map context
         $scope.$apply(function() {
-          currentMapService.currentMapContext.properties.scale = zoom.scale();
+          currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
         });
       });
 
@@ -532,7 +545,7 @@ angular.module('mapManager.d3.services', [
 
         // Update current map context
         $scope.$apply(function() {
-          currentMapService.currentMapContext.properties.scale = zoom.scale();
+          currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
         });
       });
 
@@ -561,7 +574,7 @@ angular.module('mapManager.d3.services', [
 
         // Update current map context
         $scope.$apply(function() {
-          currentMapService.currentMapContext.properties.scale = zoom.scale();
+          currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
         });
       });
 

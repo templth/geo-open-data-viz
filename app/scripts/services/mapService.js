@@ -5,9 +5,53 @@ angular.module('mapManager.map', [
 
   .service('currentMapService', function() {
     return {
-      currentMap: null,
+      currentMapId: 'map1',
+      currentMapNumber: 1,
+      currentMapElement: null,
 
+      currentMap: null,
       currentMapContext: {},
+
+      setCurrentMapElement: function(currentMapElement) {
+        this.currentMapElement = currentMapElement;
+      },
+
+      getCurrentMapElement: function() {
+        return this.currentMapElement;
+      },
+
+      setCurrentMapId: function(mapId) {
+        this.currentMapId = mapId;
+      },
+
+      getCurrentMap: function() {
+        return this.currentMap;
+      },
+
+      setCurrentMap: function(map) {
+        this.currentMap = map;
+      },
+
+      registerCurrentMapContext: function(svg, path,
+          projection, gMap, gLayers) {
+        if (this.currentMapContext[this.currentMapId] == null) {
+          this.currentMapContext[this.currentMapId] = {};
+        }
+
+        this.currentMapContext[this.currentMapId].svg = svg;
+        this.currentMapContext[this.currentMapId].path =  path;
+        this.currentMapContext[this.currentMapId].projection = projection;
+        this.currentMapContext[this.currentMapId].gMap = gMap;
+        this.currentMapContext[this.currentMapId].gLayers = gLayers;
+      },
+
+      getCurrentMapContext: function() {
+        if (this.currentMapContext[this.currentMapId] == null) {
+          this.currentMapContext[this.currentMapId] = {};
+        }
+
+        return this.currentMapContext[this.currentMapId];
+      },
 
       configureMapResize: function(scope, element) {
         scope.getElementDimensions = function() {
@@ -95,6 +139,16 @@ angular.module('mapManager.map', [
                   type: 'topojson',
                   content: [],
                   loaded: false
+                },
+                styles: {
+                  background: {
+                    fill: '#ff0000'
+                  },
+                  lines: {
+                    stroke: '#fff',
+                    strokeWidth: '1px',
+                    strokeOpacity: '1'
+                  }
                 },
                 behavior: {
                   zoomBoundingBox: {

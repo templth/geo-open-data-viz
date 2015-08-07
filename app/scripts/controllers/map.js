@@ -12,14 +12,15 @@ angular.module('mapManagerApp')
                                   projectionService, consoleService, //
                                   mapCreatorService, map, maps, sources, //
                                   commonsService, toaster) {
+
     // Register common functions
     commonsService.registerCommonFunctionsInScope(
       $scope, $modal, 'map', maps, sources);
 
     // Set current map elements
-    currentMapService.currentMap = map;
+    currentMapService.setCurrentMap(map);
 
-    currentMapService.currentMapContext.properties = {
+    currentMapService.getCurrentMapContext().properties = {
       scale: map.scale,
       center: {
         lon: map.center.lon,
