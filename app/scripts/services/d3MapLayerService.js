@@ -400,7 +400,7 @@ angular.module('mapManager.d3.services')
     applyStylesForGeoDataLayer: function(layer, pathElements) {
       if (valueChecker.isNotNull(layer.styles)) {
         if (valueChecker.isNotNull(layer.styles.background)) {
-          var background = '#fff';
+          var background = '#FBF5EF';
           if (valueChecker.isNotNull(layer.styles.background.fill)) {
             background = layer.styles.background.fill;
           }
@@ -451,7 +451,7 @@ angular.module('mapManager.d3.services')
               data.objects[layer.data.rootObject],
               function(a, b) { return a.id !== b.id; }));
 
-          self.applyStylesForGeoDataLayer(layer, pathElements);
+          // self.applyStylesForGeoDataLayer(layer, pathElements);
 
           pathElements
             .attr('d', path);

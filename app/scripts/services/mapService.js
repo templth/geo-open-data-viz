@@ -3,6 +3,12 @@
 angular.module('mapManager.map', [
   'mapManager.d3.services', 'mapManager.webapi' ])
 
+/**
+ * @ngdoc service
+ * @name mapManager.d3.services:currentMapService
+ * @description
+ * Provide functions regarding the currently displayed map.
+ */
   .service('currentMapService', function() {
     return {
       currentMapId: 'map1',

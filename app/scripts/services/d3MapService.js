@@ -583,6 +583,21 @@ angular.module('mapManager.d3.services', [
       svg.call(zoom.event);
     },
 
+    /**
+     * @ngdoc method
+     * @name configureZooming
+     * @methodOf mapManager.d3.services:mapInteractionService
+     * @description
+     * Configure map zooming for a specific  projection using a specified mouse
+     * move event.
+     *
+     * @param {Object} $scope the scope of the controller that creates the map
+     * @param {Object} svg the global SVG element
+     * @param {String} moveType the kind of moving
+     * @param {Object} projection the current projection of the map
+     * @param {Object} dimension the dimension of the display area
+     * @param {Object} mapElements the element kinds to update after moving
+    */
     configureZooming: function($scope, svg, moveType, projection, dimension, mapElements) {
       if (projection.type === 'orthographic') {
         consoleService.logMessage('info', 'Configuring zooming for projection orthographic');

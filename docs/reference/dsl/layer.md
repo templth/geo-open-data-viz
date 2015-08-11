@@ -1,14 +1,7 @@
-# Map DSL
 
-TODO: intro
+# Layer configuration parts
 
-## Maps
-
-## Layers
-
-### Layer configuration parts
-
-#### Generic informations
+## Generic informations
 
 Some hints allow to configure the map itself, initial display and
 its behavior.
@@ -36,9 +29,9 @@ Here is a sample configuration of these hints:
 }
 ```
 
-#### Display configuration
+## Display configuration
 
-Fill
+### Fill
 
 ```
 {
@@ -57,7 +50,7 @@ Fill
 }
 ```
 
-Shape
+### Shape
 
 ```
 {
@@ -118,7 +111,7 @@ a behavior for the layer to tell when and how the tooltip will be displayed.
 ```
 
 
-#### Data configuration
+## Data configuration
 
 Most of layers rely on data. This can be either geo data that represent
 shapes, lines... but also data sets that we need to apply on a map. Such data
@@ -163,7 +156,7 @@ Here is a sample configuration of the inline approach:
 }
 ```
 
-#### Styles configuration
+## Styles configuration
 
 This section provides configuration regarding styles to apply
 to parts of the layer. They are basically related to background,
@@ -193,7 +186,7 @@ Here is a sample configuration of styles for layers:
 }
 ```
 
-#### Behavior configuration
+## Behavior configuration
 
 ```
 {
@@ -223,7 +216,18 @@ Here is a sample configuration of styles for layers:
 }
 ```
 
-### Graticule layer
+# Layer kinds
+
+The layers leverage some of elements described in section "Generic informations" to
+configure themselves. Here are the list of supported layer kinds:
+
+| Layer kind      | Description                              |
+| --------------- | ---------------------------------------- |
+| Graticule       |
+
+Following sub sections describe the way to configure these layers.
+
+## Graticule layer
 
 ```
 {
@@ -256,7 +260,7 @@ Here is a sample configuration of styles for layers:
 }
 ```
 
-### Geodata layer
+## Geodata layer
 
 ```
 {
@@ -292,7 +296,7 @@ Here is a sample configuration of styles for layers:
 }
 ```
 
-### Fill layer
+## Fill layer
 
 ```
 {
@@ -326,10 +330,8 @@ Here is a sample configuration of styles for layers:
   },
   styles: {
     legend: {
-
     },
     tooltip: {
-
     }
   },
   behavior: {
@@ -345,7 +347,7 @@ Here is a sample configuration of styles for layers:
 }
 ```
 
-### Objects layer
+## Objects layer
 
 ```
 {
@@ -403,4 +405,16 @@ Here is a sample configuration of styles for layers:
 }
 ```
 
-## Sources
+# Layer variables
+
+## Defining variables
+
+TODO
+
+## Using variables
+
+TODO
+
+# Sub maps
+
+TODO
