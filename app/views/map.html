@@ -124,6 +124,11 @@
                          required ng-model="layer.name"
                          ng-model-options="{ updateOn: 'blur' }" />
                   </field>
+                  <field label="Type">
+                    <input class="form-control input-sm" name="type" type="text" 
+                         disabled ng-model="layer.type"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
                   <field label="Apply on layer">
                     <select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
                       <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
@@ -185,6 +190,7 @@
                 <div class="btn-group" role="group">
                   <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
                   <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+                  <button type="button" ng-click="displayPanel('display')"  ng-class="{active: isDisplayedPanel('display')}" class="btn btn-default">Display</button>
                   <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Styles</button>
                 </div>
               </div>
@@ -195,6 +201,11 @@
                   <field label="Name">
                     <input class="form-control input-sm" name="name" type="text" 
                          required ng-model="layer.name"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                  <field label="Type">
+                    <input class="form-control input-sm" name="type" type="text" 
+                         disabled ng-model="layer.type"
                          ng-model-options="{ updateOn: 'blur' }" />
                   </field>
                   <field label="Apply on layer">
@@ -228,34 +239,41 @@
                   </field>
                 </form>
               </div>
+              <!-- display -->
+              <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
+                <form name="dataForm" novalidate class="form-horizontal">
+                  <field label="URL">
+                    <input class="form-control input-sm" name="name" type="text" 
+                         required ng-model="layer.data.url"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                </form>
+              </div>
               <!-- styles -->
               <div ng-if="shouldDisplayGeoDataStylesProperties(layer)">
                 <div ng-show="shouldDisplayPanel('styles')" class="layer-description-area">
                   <form name="stylesForm" novalidate class="form-horizontal">
-                    <field-multi-labels label1="path" label2="fill">
+                    <!-- background -->
+                    <field-multi-labels label1="background" label2="fill">
                       <input colorpicker class="form-control input-sm" name="scale" type="text" 
-                           required ng-model="layer.styles.path.fill"
+                           required ng-model="layer.styles.background.fill"
                             ng-model-options="{ updateOn: 'blur' }" />
                     </field-multi-labels>
-                    <field-multi-labels label1="path" label2="stroke">
-                      <input colorpicker class="form-control input-sm" name="stroke" type="text" 
-                           required ng-model="layer.styles.path.stroke"
-                            ng-model-options="{ updateOn: 'blur' }" />
+                    <!-- lines -->
+                    <field-multi-labels label1="lines" label2="stroke">
+                      <input colorpicker class="form-control input-sm" name="scale" type="text" 
+                           placeholder="Scale" required ng-model="layer.styles.lines.stroke"
+                           ng-model-options="{ updateOn: 'blur' }" />
                     </field-multi-labels>
-                    <field-multi-labels label1="path" label2="strokeLinejoin">
-                      <input class="form-control input-sm" name="strokeLinejoin" type="text" 
-                           required ng-model="layer.styles.path.strokeLinejoin"
-                            ng-model-options="{ updateOn: 'blur' }" />
+                    <field-multi-labels label1="lines" label2="strokeWidth">
+                      <input class="form-control input-sm" name="scale" type="text" 
+                           placeholder="Scale" required ng-model="layer.styles.lines.strokeWidth"
+                           ng-model-options="{ updateOn: 'blur' }" />
                     </field-multi-labels>
-                    <field-multi-labels label1="path" label2="strokeLinecap">
-                      <input class="form-control input-sm" name="strokeLinecap" type="text" 
-                           required ng-model="layer.styles.path.strokeLinecap"
-                            ng-model-options="{ updateOn: 'blur' }" />
-                    </field-multi-labels>
-                    <field-multi-labels label1="d" label2="strokeWidth">
-                      <input class="form-control input-sm" name="strokeWidth" type="text" 
-                           required ng-model="layer.styles.d.strokeWidth"
-                            ng-model-options="{ updateOn: 'blur' }" />
+                    <field-multi-labels label1="lines" label2="strokeOpacity">
+                      <input class="form-control input-sm" name="scale" type="text" 
+                           placeholder="Scale" required ng-model="layer.styles.lines.strokeOpacity"
+                           ng-model-options="{ updateOn: 'blur' }" />
                     </field-multi-labels>
                   </form>
                 </div>
@@ -277,6 +295,16 @@
                   <field label="Name">
                     <input class="form-control input-sm" name="name" type="text" 
                          required ng-model="layer.name"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                  <field label="Type">
+                    <input class="form-control input-sm" name="type" type="text" 
+                         disabled ng-model="layer.type"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                  <field label="Mode">
+                    <input class="form-control input-sm" name="mode" type="text" 
+                         disabled ng-model="layer.mode"
                          ng-model-options="{ updateOn: 'blur' }" />
                   </field>
                   <field label="Apply on layer">
@@ -331,6 +359,16 @@
                          required ng-model="layer.name"
                          ng-model-options="{ updateOn: 'blur' }" />
                   </field>
+                  <field label="Type">
+                    <input class="form-control input-sm" name="type" type="text" 
+                         disabled ng-model="layer.type"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                  <field label="Mode">
+                    <input class="form-control input-sm" name="mode" type="text" 
+                         disabled ng-model="layer.mode"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
                   <field label="Apply on layer">
                     <input type="text" class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
                     <!-- select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
@@ -358,9 +396,12 @@
                         ng-model-options="{ updateOn: 'blur' }" />
                   </field>
                   <field label="Where">
-                    <input class="form-control input-sm" name="where" type="text" 
-                         required ng-model="layer.data.where"
-                        ng-model-options="{ updateOn: 'blur' }" />
+                    <div class="input-group">
+                      <input class="form-control input-sm" name="where" type="text" 
+                           required ng-model="layer.data.where"
+                           ng-model-options="{ updateOn: 'blur' }" />
+                      <span class="input-group-addon"><a ng-click="checkExpression('', layer.data.where)">Check</a></span>
+                    </div>
                   </field>
                   <field label="Sort field">
                     <input class="form-control input-sm" name="orderField" type="text" 
@@ -398,20 +439,20 @@
                           ng-model-options="{ updateOn: 'blur' }" />
                     </field>
                     <field label="Fill mode">
-                      <select class="form-control input-sm" name="fillMode" ng-model="properties.fillMode">
+                      <select class="form-control input-sm" name="fillMode" ng-model="layer.display.shape.fillMode">
                         <option value="static">Static</option>
                         <option value="threshold">Threshold</option>
                         <option value="choropleth">Choropleth</option>
                       </select>
                     </field>
-                    <div ng-if="properties.fillMode === 'static'">
+                    <div ng-if="layer.display.shape.fillMode === 'static'">
                       <field label="Color">
                         <input colorpicker class="form-control input-sm" name="color" type="text" 
                              required ng-model="layer.display.shape.color"
                             ng-model-options="{ updateOn: 'blur' }" />
                       </field>
                     </div>
-                      <div ng-if="properties.fillMode === 'threshold'">
+                      <div ng-if="layer.display.shape.fillMode === 'threshold'">
                       <field label="Palette">
                         <palette-picker
                           initial-name='{{layer.display.shape.threshold.paletteCode}}'

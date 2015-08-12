@@ -30,27 +30,37 @@
         </div>
         <nav id="bs-navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active">
+            <li {{#ifCond properties.category "home"}}class="active"{{/ifCond}}>
               <a href="/">Overview</a>
             </li>
-            <li>
-              <a href="/webui.html">Map Web UI</a>
+            <li {{#ifCond properties.category "webui"}}class="active"{{/ifCond}}>
+              <a href="/webui.html">Web UI</a>
             </li>
-            <li>
-              <a href="/dsl.html">Map DSL</a>
+            <li class="dropdown {{#ifCond properties.category "dsl"}}active{{/ifCond}}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">DSL <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="dsl-map.html">Map {{#ifCond properties.page "dsl-map"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+                <li><a href="dsl-layer.html">Layer {{#ifCond properties.page "dsl-layer"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+                <li><a href="dsl-source.html">Source {{#ifCond properties.page "dsl-source"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+              </ul>
             </li>
-            <li>
-              <a href="/webapi.html">Map Web API</a>
+            <li {{#ifCond properties.category "webapi"}}class="active"{{/ifCond}}>
+              <a href="/webapi.html">Web API</a>
             </li>
-            <li>
+            <li {{#ifCond properties.category "howtos"}}class="active"{{/ifCond}}>
               <a href="/howtos.html">Howtos</a>
             </li>
-            <li>
-              <a href="/tools.html">Tools</a>
+            <li class="dropdown {{#ifCond properties.category "tools"}}active{{/ifCond}}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tools <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="tools-map-managers.html">Map managers {{#ifCond properties.page "tools-map-managers"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+                <li><a href="tools-installing.html">Installing {{#ifCond properties.page "tools-installing"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+              </ul>
             </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li><a href="https://templth.wordpress.com/category/apispark/summer-of-api/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Blog');">Blog</a></li>
+            <li><a href="https://github.com/templth/geo-open-data-viz" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Github');">Github</a></li>
           </ul>
         </nav>
       </div>
@@ -60,8 +70,8 @@
     <!-- Docs page layout -->
     <div class="bs-docs-header" id="content" tabindex="-1" style="background-image:url(banner.png); background-repeat:no-repeat;background-position:100% 0%;background-size: cover; ">
       <div class="container" style="background-color: rgba(0, 0, 0, .5);">
-        <h1>Map DSL</h1>
-        <p>Configure maps using the JSON format and literal JavaScript objects.</p>
+        <h1>{{properties.title}}</h1>
+        <p>{{properties.description}}</p>
       </div>
     </div>
 
@@ -75,7 +85,10 @@
             <h{{properties.level}} id="{{generateSectionId title}}" class="page-header">{{title}}</h{{properties.level}}>
             {{/ifCond}}
             {{#ifCond type "para"}}
-            <p>{{content}}</p>
+            <p>{{{content}}}</p>
+            {{/ifCond}}
+            {{#ifCond type "table"}}
+            <p>{{{content}}}</p>
             {{/ifCond}}
             {{#ifCond type "inlinecode"}}
             <div class="highlight"><pre><code class="language-js" data-lang="js">{{trim content}}</code></pre></div>

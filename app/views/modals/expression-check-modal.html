@@ -1,0 +1,35 @@
+<!-- Header -->
+<div class="modal-header small">
+<h4>Check an expression</h4>
+</div>
+
+<!-- Body -->
+<div class="modal-body">
+  <form name="propertiesForm" novalidate class="form-horizontal">
+    <field label="Data">
+      <textarea row="5" class="form-control input-sm" name="data"
+         required ng-model="expression.data"
+         ng-model-options="{ updateOn: 'blur' }">
+      </textarea>
+    </field>
+    <field label="Expression">
+      <div class="input-group">
+        <input class="form-control input-sm" name="expression" type="text" 
+           required ng-model="expression.value"
+           ng-model-options="{ updateOn: 'blur' }" />
+        <span class="input-group-addon"><a ng-click="checkExpression()">Check</a></span>
+      </div>
+    </field>
+    <field label="Result">
+      <textarea row="5" class="form-control input-sm" name="result"
+         required ng-model="expression.result"
+         ng-model-options="{ updateOn: 'blur' }">
+      </textarea>
+    </field>
+  </form>
+</div>
+
+<!-- Footer -->
+<div class="modal-footer small">
+  <button class="btn" ng-click="cancel()">Cancel</button>
+</div>

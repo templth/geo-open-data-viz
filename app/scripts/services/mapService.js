@@ -146,6 +146,15 @@ angular.module('mapManager.map', [
                   content: [],
                   loaded: false
                 },
+                display: {
+                  fill: {
+                    categorical: {
+                      name: 'category20b',
+                      value: 'i'
+                    }/*,
+                    value: 'd.id === 840 || d.id === 250 ? "#ff0000" : "#000000"'*/
+                  }
+                },
                 styles: {
                   background: {
                     fill: '#ff0000'
@@ -198,7 +207,7 @@ angular.module('mapManager.map', [
                   content: [],
                   loaded: false,
                   id: 'name',
-                  where: 'd.mass > 100000',
+                  where: 'd.mass > 10000',
                   order: {
                     field: 'mass',
                     ascending: false

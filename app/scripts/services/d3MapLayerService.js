@@ -400,7 +400,7 @@ angular.module('mapManager.d3.services')
     applyStylesForGeoDataLayer: function(layer, pathElements) {
       if (valueChecker.isNotNull(layer.styles)) {
         if (valueChecker.isNotNull(layer.styles.background)) {
-          var background = '#FBF5EF';
+          var background = '#fff';
           if (valueChecker.isNotNull(layer.styles.background.fill)) {
             background = layer.styles.background.fill;
           }
@@ -424,6 +424,49 @@ angular.module('mapManager.d3.services')
           pathElements.style('stroke', stroke);
           pathElements.style('stroke-width', strokeWidth);
           pathElements.style('stroke-opacity', strokeOpacity);
+        }
+      }
+
+      if (valueChecker.isNotNull(layer.display) &&
+        valueChecker.isNotNull(layer.display.fill)) {
+
+        if (valueChecker.isNotNull(layer.display.fill.categorical) &&
+            valueChecker.isNotNull(layer.display.fill.categorical.value) &&
+            valueChecker.isNotNull(layer.display.fill.categorical.name)) {
+          var value = $parse(layer.display.fill.categorical.value);
+          // Experimental - ramdom fill color
+          // See http://bl.ocks.org/jczaplew/4444770
+          // See https://github.com/mbostock/topojson/wiki/API-Reference
+
+          // Supported values are: 10, 20, 20b, 20c
+          var color = d3.scale.category20();
+          if (valueChecker.isNotNull(layer.display.fill.categorical.name)) {
+            if (layer.display.fill.categorical.name === 'category10') {
+              color = d3.scale.category10();
+            } else if (layer.display.fill.categorical.name === 'category20') {
+              color = d3.scale.category20();
+            } else if (layer.display.fill.categorical.name === 'category20b') {
+              color = d3.scale.category20b();
+            } else if (layer.display.fill.categorical.name === 'category20c') {
+              color = d3.scale.category20c();
+            }
+          }
+          /*var countries = topojson.feature(data, data.objects[layer.data.rootObject]).features;
+          console.log('countries = '+countries.length);
+          var neighbors = topojson.neighbors(data.objects[layer.data.rootObject].geometries);
+          console.log('neighbors = '+neighbors.length);*/
+
+          pathElements.style('fill', function(d, i) {
+            return color(value({d: d, i: i}) % 20);
+          });
+        } else if (valueChecker.isNotNull(layer.display.fill.value)) {
+          console.log('3');
+          var value = $parse(layer.display.fill.value);
+
+          pathElements.style('fill', function(d, i) {
+            //console.log('d.id = '+d.id);
+            return value({d: d, i: i});
+          });
         }
       }
     },
@@ -451,7 +494,7 @@ angular.module('mapManager.d3.services')
               data.objects[layer.data.rootObject],
               function(a, b) { return a.id !== b.id; }));
 
-          // self.applyStylesForGeoDataLayer(layer, pathElements);
+          self.applyStylesForGeoDataLayer(layer, pathElements);
 
           pathElements
             .attr('d', path);
@@ -466,28 +509,6 @@ angular.module('mapManager.d3.services')
 
           self.applyStylesForGeoDataLayer(layer, pathElements);
         }
-
-        // Experimental - ramdom fill color
-        // See http://bl.ocks.org/jczaplew/4444770
-        // See https://github.com/mbostock/topojson/wiki/API-Reference
-
-        /* var color = d3.scale.category20();
-        var countries = topojson.feature(data, data.objects[layer.data.rootObject]).features;
-        console.log('countries = '+countries.length);
-        var neighbors = topojson.neighbors(data.objects[layer.data.rootObject].geometries);
-        console.log('neighbors = '+neighbors.length);
-
-        pathElements.style('fill', function(d, i) {
-          //console.log('>> neighbors[i] = '+neighbors[i]);
-          var d = (d.color = d3.max(neighbors[i], function(n) {
-            console.log('  - countries[n] = '+countries[n].color);
-            return countries[n].color ? countries[n].color : 0;
-          }) + 1 | 0);
-          console.log('## d = '+d);
-          var c = color(d);
-          console.log('## c = '+c);
-          return c;
-        });*/
 
         /*if (!_.isUndefined(layer.behavior) &&
             !_.isNull(layer.behavior) &&
@@ -651,7 +672,6 @@ d3.selection.prototype.moveToFront = function() {
       var value = $parse(layer.display.fill.value);
 
       function handleData(data) {
-        //console.log('>> data = '+JSON.stringify(data));
         var values = {};
         _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
 
@@ -819,7 +839,6 @@ d3.selection.prototype.moveToFront = function() {
             var c = circle
                .origin(orig)
                .angle(rad)({d: d});
-            // console.log('circle = '+JSON.stringify(c));
             c.d = d;
             return c;
           })

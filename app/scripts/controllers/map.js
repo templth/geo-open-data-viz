@@ -203,23 +203,50 @@ angular.module('mapManagerApp')
    * # MainCtrl
    * Controller of the mapManagerApp
    */
-  .controller('UpdateLayerCtrl', function($scope, commonsService) {
+  .controller('UpdateLayerCtrl', function($scope, $modal,
+                             commonsService, valueChecker) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
     commonsService.registerCommonMapLayerFunctionsInScope($scope);
     commonsService.registerCommonMapLayerPanelFunctionsInScope($scope);
 
-    if (!_.isNull($scope.layer.display) &&
-        !_.isUndefined($scope.layer.display) &&
-        !_.isNull($scope.layer.display.shape) &&
-        !_.isUndefined($scope.layer.display.shape)) {
-      $scope.properties.fillMode = (_.isNull($scope.layer.display.shape.threshold) ||
-        _.isUndefined($scope.layer.display.shape.threshold)) ? 'static' : 'threshold';
+    if (valueChecker.isNotNull($scope.layer.display) &&
+        valueChecker.isNotNull($scope.layer.display.shape)) {
+      if (valueChecker.isNotNull($scope.layer.display.shape.threshold)) {
+        $scope.layer.display.shape.fillMode = 'threshold';
+      } else if (valueChecker.isNotNull(
+        $scope.layer.display.shape.choropleth)) {
+        $scope.layer.display.shape.fillMode = 'choropleth';
+      } else {
+        $scope.layer.display.shape.fillMode = 'static';
+      }
 
       $scope.selectBrewColors = function(item, isReverse) {
         $scope.layer.display.shape.threshold.paletteCode = item.name;
         $scope.layer.display.shape.threshold.paletteReverse = isReverse;
         $scope.layer.display.shape.threshold.colors = item.colors;
       };
+
+      $scope.checkExpression = function(source, expression) {
+          var modalInstance = $modal.open({
+            animation: false,
+            templateUrl: 'views/modals/expression-check-modal.html',
+            controller: 'CheckExpressionCtrl',
+            resolve: {
+              source: function() {
+                return source;
+              },
+              expression: function() {
+                return expression;
+              }
+            }
+          });
+
+          modalInstance.result.then(function() {
+          }, function() {
+            // $log.info('Modal dismissed at: ' + new Date());
+            console.log('Modal dismissed at: ' + new Date());
+          });
+        };
     }
   })
 
