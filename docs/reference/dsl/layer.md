@@ -31,6 +31,22 @@ Here is a sample configuration of these hints:
 
 ## Display configuration
 
+The display section of layers allows to configure a set of elements that will
+be displayed on the map.
+
+| Feature               | Description                                                  |
+| --------------------- | -------------------------------------------------------------|
+| [Geo data](#geo-data) |                                                              |
+| [Fill](fill)          |                                                              |
+| [Shapes](#shape)      |                                                              |
+| [Colors](#colors)     |                                                              |
+| [Legend](#legend)     |                                                              |
+| [Tooltip](#tooltip)   |                                                              |
+
+### Geo data
+
+TODO
+
 ### Fill
 
 ```
@@ -51,6 +67,33 @@ Here is a sample configuration of these hints:
 ```
 
 ### Shape
+
+Supported shapes
+
+| Shape               | Description                                              |
+| ------------------- | -------------------------------------------------------- |
+| [Circle](#circle)   |                                                          |
+| [Polygon](#polygon) |                                                          |
+| [Line](#line)       |                                                          |
+
+#### Circle
+
+Here are the supported features for the circle shape:
+
+| Feature | Value       | Example                 | Description                                       |
+| ------- | ----------- | ----------------------- | ------------------------------------------------- |
+| Origin  | [Expr](#expressions)        | `\[ d.reclong, d.reclat \]` | Corresponds to the point where circles are positionned. Corresponding expressions need to leverage attributes in the dataset to define the position. |
+| Radius  | Val \| [Expr](#expressions) | `d.mass / 5000000` or `10`  | Corresponds to the radius of circles. It can be fixed or dependent of the attributes of the dataset. |
+| Color   | Val \| [Expr](#expressions) |                         | Corresponds to the color of circles. It can be the same for all circles or or dependent of the attributes of the dataset. Strategies like threshold or choropleth are supported. |
+| Opacity | Val         | `0.75`                    | Corresponds to the opacity of the elements. It's a value between `0` (transparent) and `1` (opaque) |
+
+The following sample describes the configuration of circles located using the attributes
+`reclong` (longitude) and `reclat` (latitude) with variable radius and color. Regarding
+colors, the threshold approach is chosen. In this case, an attribute `value` must be
+defined to select the color to display. The threshold approach can be transparently
+updated to a choropleth one.
+
+Here is a sample configuration of circles with variable radius and colors (threshold approach):
 
 ```
 {
@@ -75,9 +118,141 @@ Here is a sample configuration of these hints:
 }
 ```
 
-In most cases, we use a set of colors (threshold or cholore) to display data.
+Here is a sample configuration of circles with variable radius but fixed color:
+
+```
+{
+  (...)
+  display: {
+    shape: {
+      type: 'circle',
+      radius: 'd.mass / 5000000',
+      origin: '[ d.reclong, d.reclat ]',
+      opacity: 0.75,
+      color: '#ff0000'
+    }
+  }
+  (...)
+}
+```
+
+Here is a sample configuration of circles with variable radius but conditional colors:
+
+```
+{
+  (...)
+  display: {
+    shape: {
+      type: 'circle',
+      radius: 'd.mass / 5000000',
+      origin: '[ d.reclong, d.reclat ]',
+      opacity: 0.75,
+      color: 'd.id === 240 ? #ff0000 : #000000'
+    }
+  }
+  (...)
+}
+```
+
+#### Polygon
+
+TODO
+
+```
+{
+  (...)
+  display: {
+    shape: {
+      type: 'polygon',
+      value: 'd.points',
+      pointValue: '[d.lon, d.lat]'
+      threshold: {
+        paletteCode: 'YlOrRd',
+        paletteReverse: false,
+        values: [ 1800, 1900, 1950, 2000, 2015 ],
+        colors: [ '#ffffb2', '#fed976', '#feb24c',
+                  '#fd8d3c', '#f03b20', '#bd0026' ]
+      },
+      value: 'parseDate(d.year).getFullYear()'
+    }
+  }
+  (...)
+}
+```
+
+Here is a sample configuration of polygons with variable radius but fixed color:
+
+```
+{
+  (...)
+  display: {
+    shape: {
+      type: 'polygon',
+      value: 'd.points',
+      pointValue: '[d.lon, d.lat]'
+      color: '#ff0000'
+    }
+  }
+  (...)
+}
+```
+
+Here is a sample configuration of polygons with variable radius but conditional colors:
+
+```
+{
+  (...)
+  display: {
+    shape: {
+      type: 'polygon',
+      value: 'd.points',
+      pointValue: '[d.lon, d.lat]'
+      color: 'd.id === 240 ? #ff0000 : #000000'
+    }
+  }
+  (...)
+}
+```
+
+#### Line
+
+TODO
+
+```
+{
+  (...)
+  display: {
+    shape: {
+      type: 'line',
+      value: 'd.points',
+      pointValue: '[d.lon, d.lat]'
+    }
+  }
+  (...)
+}
+```
+
+### Colors
+
+#### Fixed
+
+TODO
+
+#### Conditional
+
+TODO
+
+#### Threshold
+
+TODO
+
+### Legend
+
+In most cases, we use a set of colors (threshold or choropleth) to display data.
 This really makes sense to define a legend in such cases to tell which values
-correspond to color.
+correspond to colors. In this case, we need to add a block `legend` within the `display`
+one. its attribute `label` is an expression. The element `d` corresponds to the
+current value of the element in the defined range.
 
 ```
 {
@@ -86,11 +261,29 @@ correspond to color.
     legend: {
       enabled: true,
       label: 'd'
-    },
+    }
   }
   (...)
 }
 ```
+
+We can have more advanced expressions. Here is an expression for the attribute `label`
+that displays pourcents.
+
+```
+{
+  (...)
+  display: {
+    legend: {
+      enabled: true,
+      label: '(d * 100) + " %"'
+    }
+  }
+  (...)
+}
+```
+
+### Tooltip
 
 In most cases, we need some more details about areas or shapes. In this case,
 having a tooltip is a good thing. In the case of tooltip, we need to configure
@@ -103,7 +296,7 @@ a behavior for the layer to tell when and how the tooltip will be displayed.
     tooltip: {
       enabled: true,
       fromScale: 300,
-      text: '"Name: "+d.name+"<br/>Year: "+d.year+"<br/>Mass (g): "+d.mass',
+      text: '"Name: "+d.name+"&lt;br/&gt;Year: "+d.year+"&lt;br/&gt;Mass (g): "+d.mass',
     }
   }
   (...)
@@ -418,3 +611,67 @@ TODO
 # Sub maps
 
 TODO
+
+# Expressions
+
+Expressions allow to define objects from a particular context. This allows to configure
+elements of maps like shapes and fill. Expressions are based on the ones from Angular and
+follow the JavaScript syntax. 
+
+See the following links for more details:
+
+* [https://docs.angularjs.org/guide/expression](https://docs.angularjs.org/guide/expression)
+* [http://teropa.info/blog/2014/03/23/angularjs-expressions-cheatsheet.html](http://teropa.info/blog/2014/03/23/angularjs-expressions-cheatsheet.html)
+
+## Literal expressions
+
+In the case of the application, expressions allow to create objects that be used to configure
+map elements. For this reason, they must correspond to values.
+
+Values can be built using literal syntax of JavaScript:
+
+```
+10
+10.2
+"a string"
+{
+  attr1: 10,
+  attr2: "a string"
+}
+[ 10, 11, 12 ]
+[ "s1", "s2", "s3"]
+[
+  {
+    attr1: 1,
+    attr2: "s1"
+  },
+  {
+    attr1: 2,
+    attr2: "s2"
+  }
+]
+```
+
+## Inline conditions
+
+Inline conditions are also supported, as described below:
+
+```
+d.val === 2 ? "#ff0000" : "#000000"
+```
+
+## Expression context
+
+| Element   | Description                                     |
+| --------- | ----------------------------------------------- |
+| d         | The current element of data                     |
+| i         | In the case of list, the current index          |
+| parseDate | Utility function to convert string to date      |
+
+Here is a sample of use of the context within expressions:
+
+```
+d.mass / 5000000
+[ d.reclong, d.reclat ]
+parseDate(d.year).getFullYear()
+```

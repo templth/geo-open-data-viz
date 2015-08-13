@@ -1,35 +1,70 @@
 <!-- Header -->
 <div class="modal-header small">
-<h4>Check an expression</h4>
+<h4>Check expression "{{expression.attribute}}"</h4>
 </div>
 
 <!-- Body -->
 <div class="modal-body">
-  <form name="propertiesForm" novalidate class="form-horizontal">
-    <field label="Data">
-      <textarea row="5" class="form-control input-sm" name="data"
-         required ng-model="expression.data"
-         ng-model-options="{ updateOn: 'blur' }">
-      </textarea>
-    </field>
-    <field label="Expression">
-      <div class="input-group">
-        <input class="form-control input-sm" name="expression" type="text" 
-           required ng-model="expression.value"
-           ng-model-options="{ updateOn: 'blur' }" />
-        <span class="input-group-addon"><a ng-click="checkExpression()">Check</a></span>
-      </div>
-    </field>
-    <field label="Result">
-      <textarea row="5" class="form-control input-sm" name="result"
-         required ng-model="expression.result"
-         ng-model-options="{ updateOn: 'blur' }">
-      </textarea>
-    </field>
+  <div class="text-center">
+    <div class="btn-group" role="group">
+      <button type="button" ng-click="displayPanel('structure')" ng-class="{active: isDisplayedPanel('structure')}" class="btn btn-default">Structure</button>
+      <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+      <button type="button" ng-click="displayPanel('expression')"  ng-class="{active: isDisplayedPanel('expression')}" class="btn btn-default">Expression</button>
+    </div>
+  </div>
+
+  <form name="expressionForm" novalidate class="form-horizontal">
+    <!-- structure -->
+    <div ng-show="shouldDisplayPanel('structure')" class="layer-description-area">
+      <field label="Structure">
+        <textarea row="10" class="form-control input-sm structure" name="structure"
+           disabled ng-model="expression.structure"
+           ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+      </field>
+    </div>
+    <!-- data -->
+    <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
+      <field label="rootObject">
+        <input class="form-control input-sm data" name="rootObject" type="text"
+           ng-model="expression.rootObject"
+           ng-model-options="{ updateOn: 'blur' }"/>
+      </field>
+      <field label="Data">
+        <textarea row="10" class="form-control input-sm data" name="data"
+           ng-model="expression.data"
+           ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+      </field>
+    </div>
+    <!-- expression -->
+    <div ng-show="shouldDisplayPanel('expression')" class="layer-description-area">
+      <field label="">
+        <textarea row="6" disabled class="form-control input-sm description" name="data">{{expression.description}}</textarea>
+      </field>
+      <field label="">
+        <textarea row="6" disabled class="form-control input-sm parameters" name="data">{{expression.parameters}}</textarea>
+      </field>
+      <field label="Expression">
+        <div class="input-group">
+          <input class="form-control input-sm" name="expression" type="text" 
+             required ng-model="expression.value"
+             ng-model-options="{ updateOn: 'blur' }" />
+          <span class="input-group-addon"><a ng-click="checkExpression()"><i tooltip="Execute the expression against the sample data" class="glyphicon glyphicon-check"></i></a></span>
+        </div>
+      </field>
+      <field label="Result">
+        <textarea row="6" class="form-control input-sm result" name="result"
+           disabled ng-model="expression.result"
+           ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+      </field>
+    </div>
   </form>
 </div>
 
 <!-- Footer -->
 <div class="modal-footer small">
+  <button class="btn btn-primary" ng-click="updateExpression()">Update</button>
   <button class="btn" ng-click="cancel()">Cancel</button>
 </div>

@@ -76,6 +76,25 @@ function extractStructureFromMarkdownML(markdownMl) {
   return markdownTree;
 }
 
+function formatElement(content, element) {
+  if (_.isString(element)) {
+    content.push(element);
+  } else if (_.isArray(element)) {
+    if (element[0] === 'inlinecode') {
+      content.push('<code>');
+      content.push(element[1]);
+      content.push('</code>');
+    }
+    if (element[0] === 'link') {
+      content.push('<a href="');
+      content.push(element[1].href);
+      content.push('">');
+      content.push(element[2]);
+      content.push('</a>');
+    }
+  }
+}
+
 function formatMarkdownML(markdownMl) {
   return _.map(markdownMl, function(item) {
     if (_.isString(item)) {
@@ -96,22 +115,7 @@ function formatMarkdownML(markdownMl) {
 
         _.forEach(item, function(element, i) {
           if (i > 0) {
-            if (_.isString(element)) {
-              content.push(element);
-            } else if (_.isArray(element)) {
-              if (element[0] === 'inlinecode') {
-                content.push('<code>');
-                content.push(element[1]);
-                content.push('</code>');
-              }
-              if (element[0] === 'link') {
-                content.push('<a href="');
-                content.push(element[1].href);
-                content.push('">');
-                content.push(element[2]);
-                content.push('</a>');
-              }
-            }
+            formatElement(content, element);
           }
         });
         return {
@@ -124,6 +128,29 @@ function formatMarkdownML(markdownMl) {
           content: item[1][1]
         };
       }
+    } else if (item[0] === 'bulletlist') {
+      var content = [ '<ul>' ];
+
+      _.forEach(item, function(elt1, i1) {
+        if (i1 > 0) {
+          content.push('<li>');
+          _.forEach(elt1, function(elt2, i2) {
+            if (i2 > 0) {
+              formatElement(content, elt2);
+            }
+          });
+          content.push('</li>');
+        }
+      });
+
+      content.push('</ul>');
+
+      console.log('>> content = '+content);
+
+      return {
+        type: 'list',
+        content: content.join('')
+      };
     } else if (item[0] === 'table') {
       var thead = item[1];
       var tbody = item[2];
@@ -136,7 +163,11 @@ function formatMarkdownML(markdownMl) {
           // Do nothing
         } else if (_.isArray(element)) {
           content.push('<th>');
-          content.push(element[2]);
+          _.forEach(element, function(elt, i) {
+            if (i > 1) {
+              formatElement(content, elt);
+            }
+          });
           content.push('</th>');
         }
       });
@@ -149,7 +180,11 @@ function formatMarkdownML(markdownMl) {
             // Do nothing
           } else if (_.isArray(tdElement)) {
             content.push('<td>');
-            content.push(tdElement[2]);
+            _.forEach(tdElement, function(elt, i) {
+              if (i > 1) {
+                formatElement(content, elt);
+              }
+            });
             content.push('</td>');
           }
         });

@@ -192,6 +192,7 @@
                   <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
                   <button type="button" ng-click="displayPanel('display')"  ng-class="{active: isDisplayedPanel('display')}" class="btn btn-default">Display</button>
                   <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Styles</button>
+                  <button type="button" ng-click="displayPanel('behavior')"  ng-class="{active: isDisplayedPanel('behavior')}" class="btn btn-default">Behavior</button>
                 </div>
               </div>
 
@@ -242,10 +243,18 @@
               <!-- display -->
               <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
                 <form name="dataForm" novalidate class="form-horizontal">
-                  <field label="URL">
+                  <field label="Tooltip">
                     <input class="form-control input-sm" name="name" type="text" 
                          required ng-model="layer.data.url"
                          ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                  <field label="Tooltip text">
+                    <div class="input-group">
+                      <input class="form-control input-sm" name="tooltipText" type="text" 
+                           required ng-model="layer.display.tooltip.text"
+                           ng-model-options="{ updateOn: 'blur' }" />
+                      <span class="input-group-addon"><a ng-click="checkExpression(layer.display.tooltip, 'text', linkedSources, '15', layer.data.rootObject, layer.display.tooltip.text, 'Define the content of the tooltip text.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+                    </div>
                   </field>
                 </form>
               </div>
@@ -277,6 +286,16 @@
                     </field-multi-labels>
                   </form>
                 </div>
+              </div>
+              <!-- display -->
+              <div ng-show="shouldDisplayPanel('behavior')" class="layer-description-area">
+                <form name="dataForm" novalidate class="form-horizontal">
+                  <field label="URL">
+                    <input class="form-control input-sm" name="name" type="text" 
+                         required ng-model="layer.data.url"
+                         ng-model-options="{ updateOn: 'blur' }" />
+                  </field>
+                </form>
               </div>
             </div>
 
@@ -400,7 +419,7 @@
                       <input class="form-control input-sm" name="where" type="text" 
                            required ng-model="layer.data.where"
                            ng-model-options="{ updateOn: 'blur' }" />
-                      <span class="input-group-addon"><a ng-click="checkExpression('', layer.data.where)">Check</a></span>
+                      <span class="input-group-addon"><a ng-click="checkExpression(layer.data, 'where', linkedSources, '15', '', layer.data.where, 'Filter a collection. The expression must return true or false. If the returned value is false, the element will be removed from the collection.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
                     </div>
                   </field>
                   <field label="Sort field">
@@ -424,14 +443,20 @@
                   </field>
                   <div ng-if="shouldDisplayDataCircleProperties(layer)">
                     <field label="Radius">
-                      <input class="form-control input-sm" name="radius" type="text" 
-                           required ng-model="layer.display.shape.radius"
-                          ng-model-options="{ updateOn: 'blur' }" />
+                      <div class="input-group">
+                        <input class="form-control input-sm" name="radius" type="text" 
+                             required ng-model="layer.display.shape.radius"
+                             ng-model-options="{ updateOn: 'blur' }" />
+                        <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'radius', linkedSources, '15', '', layer.display.shape.radius, 'Define shape radius. The expression must return a number.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+                      </div>
                     </field>
                     <field label="Origin">
-                      <input class="form-control input-sm" name="origin" type="text" 
-                           required ng-model="layer.display.shape.origin"
-                          ng-model-options="{ updateOn: 'blur' }" />
+                      <div class="input-group">
+                        <input class="form-control input-sm" name="origin" type="text" 
+                             required ng-model="layer.display.shape.origin"
+                             ng-model-options="{ updateOn: 'blur' }" />
+                        <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'radius', linkedSources, '15', '', layer.display.shape.origin, 'Define shape origin. The expression must return an array with two values (longitude and latitude).')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+                      </div>
                     </field>
                     <field label="Opacity">
                       <input class="form-control input-sm" name="opacity" type="text" 
@@ -480,9 +505,12 @@
                             ng-model-options="{ updateOn: 'blur' }" />
                       </field>
                       <field label="Value">
-                        <input class="form-control input-sm" name="value" type="text" 
-                             required ng-model="layer.display.shape.value"
-                            ng-model-options="{ updateOn: 'blur' }" />
+                        <div class="input-group">
+                          <input class="form-control input-sm" name="value" type="text" 
+                               required ng-model="layer.display.shape.value"
+                               ng-model-options="{ updateOn: 'blur' }" />
+                          <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'value', linkedSources, '15', layer.display.shape.value, 'Define value. The expression must return a number that will be used define the color of the shape.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+                        </div>
                       </field>
                     </div>
                   </div>

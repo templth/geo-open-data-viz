@@ -143,6 +143,7 @@ angular.module('mapManager.map', [
                   url: 'http://localhost:9000/scripts/json/continent.json',
                   rootObject: 'countries',
                   type: 'topojson',
+                  source: '15',
                   content: [],
                   loaded: false
                 },
@@ -153,6 +154,11 @@ angular.module('mapManager.map', [
                       value: 'i'
                     }/*,
                     value: 'd.id === 840 || d.id === 250 ? "#ff0000" : "#000000"'*/
+                  },
+                  tooltip: {
+                    enabled: true,
+                    fromScale: 300,
+                    text: '"Name: "+d.properties.name',
                   }
                 },
                 styles: {
@@ -166,10 +172,15 @@ angular.module('mapManager.map', [
                   }
                 },
                 behavior: {
-                  zoomBoundingBox: {
+                  /*zoomBoundingBox: {
                     display: 'click'
                     //display: 'mouseOver',
                     //hide: 'mouseOut'
+                  }*/
+                  tooltip: {
+                    //display: 'click'
+                    display: 'mouseOver',
+                    hide: 'mouseOut'
                   }
                 },
                 applyOn: 'layers',
@@ -203,7 +214,7 @@ angular.module('mapManager.map', [
                 data: {
                   url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
                   type: 'csv',
-                  source: 'meteoritesSource',
+                  source: '15',
                   content: [],
                   loaded: false,
                   id: 'name',

@@ -38,7 +38,7 @@
   	      <input class="form-control input-sm" name="url" type="text" 
   	           required ng-model="sourceToAdd.url"
   	           ng-model-options="{ updateOn: 'blur' }" />
-  	      <span class="input-group-addon"><a ng-click="loadData()">Load</a></span>
+  	      <span class="input-group-addon"><a ng-click="loadData()"><i class="glyphicon glyphicon-download"></i></a></span>
   	    </div>
   	  </field>
   	  <field label="Data type">
@@ -54,7 +54,7 @@
   <!-- structure -->
   <div ng-show="shouldDisplayPanel('structure')" class="layer-description-area">
     <form name="structureForm" novalidate class="form-horizontal">
-      <div ng-if="shouldDisplaySample()">
+      <div ng-if="shouldDisplayStructure()">
         <field label="Structure">
           <textarea class="form-control input-sm" name="structure" type="text"
                rows="4" 
@@ -75,11 +75,11 @@
           </textarea>
   	    </field>
       </div>
-      <div ng-if="!shouldDisplaySample()">
-        <field label="Structure">
-          <textarea class="form-control input-sm" name="structure" type="text"
+      <div ng-if="!shouldDisplayStructure()">
+        <field label="Sample">
+          <textarea class="form-control input-sm" name="sample" type="text"
                rows="10" 
-               required ng-model="sourceToAdd.structure"
+               required ng-model="sourceToAdd.sample"
                ng-model-options="{ updateOn: 'blur' }">
           </textarea>
         </field>

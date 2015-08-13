@@ -79,7 +79,6 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           modalInstance.result.then(function(sourceToAdd) {
             $scope.sources.push(sourceToAdd);
-            console.log(JSON.stringify(sourceToAdd, null, 2));
             toaster.pop('success', 'Source "' +
               sourceToAdd.name + '"',
               'Successfully added');
@@ -199,7 +198,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         };
       },
 
-      registerCommonMapLayerFunctionsInScope: function($scope) {
+      registerCommonMapLayerFunctionsInScope: function($scope, $modal) {
         $scope.$watch('layer.name', function(newValue, oldValue) {
         	console.log('newValue = '+newValue);
         	console.log('oldValue = '+oldValue);
@@ -217,6 +216,45 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           layerService.refreshLayerApplying(svg, path, layer);
         });
+
+        $scope.checkExpression = function(domain, attribute, linkedSources,
+                                        source, rootObject, expression, description) {
+          var modalInstance = $modal.open({
+            animation: false,
+            templateUrl: 'views/modals/expression-check-modal.html',
+            controller: 'CheckExpressionCtrl',
+            resolve: {
+              sourceId: function() {
+                return source;
+              },
+              expression: function() {
+                return expression;
+              },
+              description: function() {
+                return description;
+              },
+              linkedSources: function() {
+                return linkedSources;
+              },
+              domain: function() {
+                return domain;
+              },
+              attribute: function() {
+                return attribute;
+              },
+              rootObject: function() {
+                return rootObject;
+              }
+            }
+          });
+
+          modalInstance.result.then(function(expression) {
+            domain[attribute] = expression;
+          }, function() {
+            // $log.info('Modal dismissed at: ' + new Date());
+            console.log('Modal dismissed at: ' + new Date());
+          });
+        };
       },
 
       registerCommonPanelFunctionsInScope: function($scope, defaultPanelName) {
@@ -260,6 +298,33 @@ angular.module('mapManager.commons', [ 'mapManager.map',
       },
 
       registerCommonMapSourcePanelFunctionsInScope: function($scope) {
+      }
+    };
+  })
+
+  /**
+   * @ngdoc service
+   * @name mapManager.commons:commonsService
+   * @description
+   * Provide utility functions for controllers to register content
+   * into their associated scope.
+   */
+  .service('expressionService', function() {
+    return {
+      getExpressionParameterDescriptions: function() {
+        return 'd: the current element in the collection\n' +
+          'i: the index of the current element in the collection\n' +
+          'parseDate: utility function to convert a string to a date object';
+      },
+
+      getExpressionContext: function(d, i) {
+        return {
+          d: d,
+          i: i,
+          parseDate: function(val) {
+            return new Date(val);
+          }
+        };
       }
     };
   });

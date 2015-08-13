@@ -90,6 +90,9 @@
             {{#ifCond type "table"}}
             <p>{{{content}}}</p>
             {{/ifCond}}
+            {{#ifCond type "list"}}
+            <p>{{{content}}}</p>
+            {{/ifCond}}
             {{#ifCond type "inlinecode"}}
             <div class="highlight"><pre><code class="language-js" data-lang="js">{{trim content}}</code></pre></div>
             {{/ifCond}}

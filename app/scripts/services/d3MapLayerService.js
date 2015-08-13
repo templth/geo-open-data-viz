@@ -123,8 +123,8 @@ angular.module('mapManager.d3.services')
  * Provide functions to create and manipulate layers of maps.
  */
 .service('layerService', [ '$parse', 'currentMapService',
-    'consoleService', 'valueChecker',
-    function($parse, currentMapService, consoleService, valueChecker) {
+    'consoleService', 'valueChecker', 'expressionService',
+    function($parse, currentMapService, consoleService, valueChecker, expressionService) {
   return {
     /**
      * @ngdoc method
@@ -226,15 +226,52 @@ angular.module('mapManager.d3.services')
      * @param {Function} handleData the function to actually handle data
     */
     loadDataForLayer: function(layerData, handleData) {
+      var self = this;
       if (layerData.loaded) {
-        handleData(layerData.content);
+        handleData(this.filterDataForLayer(layerData.content));
       } else if (valueChecker.isNotNullAndNotEmpty(layerData.inline)) {
         var data = $parse(layerData.inline);
-        handleData(data());
+        handleData(self.filterDataForLayer(layerData, data()));
       } else {
         var loadFct = getLoadFunction(layerData.type);
-        loadFct(layerData.url, handleData);
+        loadFct(layerData.url, function(data) {
+          handleData(self.filterDataForLayer(layerData, data));
+        });
       }
+    },
+
+    /**
+     * @ngdoc method
+     * @name filterDataForLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Filter data according to the specified configuration.
+     *
+     * @param {Object} layerData actually the layer.data attribute
+     * @param {Object} data the data to filter
+    */
+    filterDataForLayer: function(layerData, data) {
+      if (valueChecker.isNotNull(layerData.where)) {
+        var dataWhere = $parse(layerData.where);
+        data = _.filter(data, function(d, i) {
+          return dataWhere(expressionService.getExpressionContext(d, i));
+        });
+      }
+
+      if (valueChecker.isNotNull(layerData.order) &&
+          valueChecker.isNotNull(layerData.order.field)) {
+        var field = layerData.order.field;
+        var order = layerData.order ? layerData.order : true;
+        data = data.sort(function(a, b) {
+          if (order.ascending) {
+            return a[field] - b[field];
+          } else {
+            return b[field] - a[field];
+          }
+        });
+      }
+
+      return data;
     },
 
     // Tooltips
@@ -253,9 +290,17 @@ angular.module('mapManager.d3.services')
             // within the generated geo path. See method createCircleObjectsDataLayer
             // for more details
             if (valueChecker.isNotNull(d.d)) {
-              return tooltipText({d: d.d, value: values[d.d.id]});
+              var context = { d: d.d };
+              if (valueChecker.isNotNull(values)) {
+                context.value = values[d.d.id];
+              }
+              return tooltipText(context);
             } else {
-              return tooltipText({d: d, value: values[d.id]});
+              var context = { d: d };
+              if (valueChecker.isNotNull(values)) {
+                context.value = values[d.id];
+              }
+              return tooltipText(context);
             }
           })
              .style('left', (d3.event.pageX) + 'px')
@@ -263,13 +308,24 @@ angular.module('mapManager.d3.services')
         });
       } else if (showEvent === 'mouseOver') {
         elements.on('mouseover', function(d) {
-          console.log('mouseover');
           // TODO: enlighten borders rather
           //d3.select(this).transition().duration(300).style('opacity', 1);
           tooltipDiv.transition().duration(300)
              .style('opacity', 1);
-          tooltipDiv.text(function() {
-            return tooltipText({d: d, value: values[d.id]});
+          tooltipDiv.html(function() {
+            if (valueChecker.isNotNull(d.d)) {
+              var context = { d: d.d };
+              if (valueChecker.isNotNull(values)) {
+                context.value = values[d.d.id];
+              }
+              return tooltipText(context);
+            } else {
+              var context = { d: d };
+              if (valueChecker.isNotNull(values)) {
+                context.value = values[d.id];
+              }
+              return tooltipText(context);
+            }
           })
              .style('left', (d3.event.pageX) + 'px')
              .style('top', (d3.event.pageY - 30) + 'px');
@@ -388,11 +444,14 @@ angular.module('mapManager.d3.services')
      * @name applyStylesForGeoDataLayer
      * @methodOf mapManager.d3.services:layerService
      * @description
-     * Apply style on the geo data according to the configuration
+     * Apply styles on the geo data according to the configuration
      * of the layer:
      *
      * * layer.styles.background for the background
      * * layer.styles.lines for lines
+     *
+     * Regarding the background color, random colors can be applied
+     * based on the element `layer.display.fill`.
      *
      * @param {Object} layer the layer
      * @param {Object} pathElements the path elements to apply styles on
@@ -434,7 +493,7 @@ angular.module('mapManager.d3.services')
             valueChecker.isNotNull(layer.display.fill.categorical.value) &&
             valueChecker.isNotNull(layer.display.fill.categorical.name)) {
           var value = $parse(layer.display.fill.categorical.value);
-          // Experimental - ramdom fill color
+          // Experimental - random fill color
           // See http://bl.ocks.org/jczaplew/4444770
           // See https://github.com/mbostock/topojson/wiki/API-Reference
 
@@ -460,11 +519,9 @@ angular.module('mapManager.d3.services')
             return color(value({d: d, i: i}) % 20);
           });
         } else if (valueChecker.isNotNull(layer.display.fill.value)) {
-          console.log('3');
           var value = $parse(layer.display.fill.value);
 
           pathElements.style('fill', function(d, i) {
-            //console.log('d.id = '+d.id);
             return value({d: d, i: i});
           });
         }
@@ -508,6 +565,7 @@ angular.module('mapManager.d3.services')
           .attr('d', path);
 
           self.applyStylesForGeoDataLayer(layer, pathElements);
+          self.configureTooltip(layer, pathElements);
         }
 
         /*if (!_.isUndefined(layer.behavior) &&
@@ -515,7 +573,7 @@ angular.module('mapManager.d3.services')
             !_.isUndefined(layer.behavior.zoomBoundingBox) &&
             !_.isNull(layer.behavior.zoomBoundingBox)) {*/
           // See http://bl.ocks.org/mbostock/4699541
-          pathElements.on('click', function(d) {
+          pathElements.on('dblclick', function(d) {
             // TODO: make things generic
             var width = 938;
             var height = 500;
@@ -667,6 +725,36 @@ d3.selection.prototype.moveToFront = function() {
       // refreshLayerApplying
     },
 
+    applyStylesForFillLayer: function(layer, layerElement, values) {
+      var styleHints = {};
+
+      if (valueChecker.isNotNull(layer.display.fill.threshold)) {
+        var tColor = d3.scale.threshold()
+          .domain(layer.display.fill.threshold.values)
+          .range(layer.display.fill.threshold.colors);
+        styleHints.color = tColor;
+
+        var tElements = layerElement.selectAll('path')
+            .style('fill', function(d) {
+          return tColor(values[d.id]);
+        });
+        styleHints.elements = tElements;
+      } else if (valueChecker.isNotNull(layer.display.fill.choropleth)) {
+        var cColor = d3.scale.quantize()
+          .domain(layer.display.fill.choropleth.values)
+          .range(layer.display.fill.choropleth.colors);
+        styleHints.color = cColor;
+
+        var cElements = layerElement.selectAll('path')
+            .style('fill', function(d) {
+          return cColor(values[d.id]);
+        });
+        styleHints.elements = cElements;
+      }
+
+      return styleHints;
+    },
+
     createFillDataLayer: function(svg, layer) {
       var self = this;
       var value = $parse(layer.display.fill.value);
@@ -677,96 +765,11 @@ d3.selection.prototype.moveToFront = function() {
 
         var sel = d3.select(document.getElementById(layer.applyOn));
 
-        if (valueChecker.isNotNull(layer.display.fill.threshold)) {
-          var color = d3.scale.threshold()
-            .domain(layer.display.fill.threshold.values)
-            .range(layer.display.fill.threshold.colors);
+        var styleHints = self.applyStylesForFillLayer(
+          layer, sel, values);
 
-          var elements = sel.selectAll('path')
-              .style('fill', function(d) {
-            return color(values[d.id]);
-          });
-        } else if (valueChecker.isNotNull(layer.display.fill.choropleth)) {
-          var color = d3.scale.quantize()
-            .domain(layer.display.fill.choropleth.values)
-            .range(layer.display.fill.choropleth.colors);
-
-          var elements = sel.selectAll('path')
-              .style('fill', function(d) {
-            return color(values[d.id]);
-          });
-        } else if (valueChecker.isNotNull(layer.display.fill.categorical)) {
-          // See https://github.com/mbostock/d3/wiki/Ordinal-Scales#category10
-          console.log('>> categorical');
-          var color = d3.scale.category20();
-          var sel = d3.select(document.getElementById(layer.applyOn));
-          var elements = sel.selectAll('path')
-              .style('fill', function(d) {
-            //return color(d.color = d3.max(neighbors[i], function(n) { return countries[n].color; }) + 1 | 0);
-            console.log('>> d.id = '+values[d.id].color);
-            return color(values[d.id].color);
-          });
-        }
-
-        // Experimental: display tooltip
-
-        if (layer.display.tooltip && layer.display.tooltip.enabled) {
-          var tooltipText = $parse(layer.display.tooltip.text);
-
-          var tooltipDiv = d3.select('body').append('div')
-            .attr('id', 'tooltip-' + layer.id)
-            .attr('class', 'tooltip')
-            .style('opacity', 0);
-
-          // Events
-          if (layer.behavior.tooltip.display != null) {
-            var showTooltipEvent = layer.behavior.tooltip.display;
-            var hideTooltipEvent = layer.behavior.tooltip.hide;
-
-            self.createTooltipEvents(elements, values, tooltipDiv,
-                    tooltipText, showTooltipEvent, hideTooltipEvent);
-          }
-        }
-
-        // Experimental: display axis
-
-        if (layer.display.legend && layer.display.legend.enabled) {
-          var legendLabel = $parse(layer.display.legend.label);
-
-          var height = 500;
-          var legend = sel.selectAll('g.legend')
-            .data(layer.display.fill.threshold.values)
-            .enter()
-            .append('g')
-            .attr('class', 'legend');
-
-          var ls_w = 20, ls_h = 20;
-
-          legend.append('rect')
-            .attr('x', 20)
-            .attr('y', function(d, i){ return height - (i*ls_h) - 2*ls_h;})
-            .attr('width', ls_w)
-            .attr('height', ls_h)
-            .style('fill', function(d, i) { return color(d); })
-            .style('opacity', 0.8);
-
-          legend.append('text')
-            .attr('x', 50)
-            .attr('y', function(d, i){ return height - (i*ls_h) - ls_h - 4;})
-            .text(function(d, i) {
-              return legendLabel({d: d, i: i});
-            });
-            /*function(d, i) {
-              console.log('d = '+JSON.stringify(d));
-              if (d < 0.1) {
-                return '' + (d * 100) + ' %';
-              } else {
-                return (d * 100) + ' %';
-              }
-            });*/
-        }
-
-        // End Experimental: display axis
+        self.configureTooltip(layer, styleHints.elements, values);
+        self.configureLegend(layer, sel, styleHints);
       }
 
       // Actually create the layer based on provided data
@@ -776,6 +779,139 @@ d3.selection.prototype.moveToFront = function() {
     // End fill layer
 
     // Objects layer
+
+    /**
+     * @ngdoc method
+     * @name applyStylesForGeoDataLayer
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Apply styles on the geo data according to the configuration
+     * of the layer:
+     *
+     * * layer.styles.background for the background
+     * * layer.styles.lines for lines
+     *
+     * Regarding the background color, random colors can be applied
+     * based on the element `layer.display.fill`.
+     *
+     * @param {Object} layer the layer
+     * @param {Object} pathElements the path elements to apply styles on
+    */
+    applyStylesForShapeLayer: function(layer, pathElements) {
+      var styleHints = {};
+
+      if (valueChecker.isNotNull(layer.styles) &&
+          valueChecker.isNotNull(layer.styles.lines)) {
+        if (valueChecker.isNotNull(layer.styles.lines.stroke)) {
+          pathElements.style('stroke', layer.styles.lines.stroke);
+        }
+        if (valueChecker.isNotNull(layer.styles.lines.strokeWidth)) {
+          pathElements.style('stroke-width', layer.styles.lines.strokeWidth);
+        }
+      }
+
+      if (valueChecker.isNotNull(layer.display) &&
+          valueChecker.isNotNull(layer.display.shape)) {
+        if (valueChecker.isNotNull(layer.display.shape.opacity)) {
+          pathElements.style('opacity', layer.display.shape.opacity);
+        }
+
+        if (valueChecker.isNotNull(layer.display.shape.color)) {
+          pathElements.style('fill', layer.display.shape.color);
+        } else if (valueChecker.isNotNull(layer.display.shape.threshold)) {
+          var tColor = d3.scale.threshold()
+              .domain(layer.display.shape.threshold.values)
+              .range(layer.display.shape.threshold.colors);
+          styleHints.color = tColor;
+
+          var tValue = $parse(layer.display.shape.value);
+
+          pathElements.style('fill', function(d, i) {
+              var val = tValue(expressionService.getExpressionContext(d.d, i));
+              return tColor(parseFloat(val));
+            });
+        } else if (valueChecker.isNotNull(layer.display.shape.choropleth)) {
+          var cColor = d3.scale.choropleth()
+              .domain(layer.display.shape.choropleth.values)
+              .range(layer.display.shape.choropleth.colors);
+          styleHints.color = cColor;
+
+          var cValue = $parse(layer.display.shape.value);
+
+          pathElements.style('fill', function(d, i) {
+            var val = cValue(expressionService.getExpressionContext(d.d, i));
+            return cColor(parseFloat(val));
+          });
+        }
+      }
+
+      return styleHints;
+    },
+
+    configureLegend: function(layer, layerElement, styleHints) {
+      if (valueChecker.isNotNull(layer.display.legend) &&
+            layer.display.legend.enabled) {
+        var legendLabel = $parse(layer.display.legend.label);
+
+        layerElement.append('rect')
+            .attr('x', 10)
+            .attr('y', 350)
+            .attr('width', 100)
+            .attr('height', 150)
+            .style('fill', '#fff')
+            .style('opacity', '0.7');
+
+        var height = 500;
+        var legend = layerElement.selectAll('g.legend')
+            .data(layer.display.shape.threshold.values)
+            .enter()
+            .append('g')
+            .attr('class', 'legend');
+
+        var ls_w = 20, ls_h = 20;
+
+        legend.append('rect')
+            .attr('x', 20)
+            .attr('y', function(d, i){ return height - (i*ls_h) - 2*ls_h;})
+            .attr('width', ls_w)
+            .attr('height', ls_h)
+            .style('fill', function(d, i) { return styleHints.color(d); })
+            .style('opacity', 0.8);
+
+        legend.append('text')
+            .attr('x', 50)
+            .attr('y', function(d, i){ return height - (i*ls_h) - ls_h - 4;})
+            .text(function(d, i) {
+              return legendLabel({d: d, i: i});
+            });
+      }
+    },
+
+    configureTooltip: function(layer, layerElements, values) {
+      if (valueChecker.isNotNull(layer.display.tooltip) &&
+          layer.display.tooltip.enabled) {
+        var tooltipText = $parse(layer.display.tooltip.text);
+
+        var tooltipDiv = d3.select('body').append('div')
+          .attr('id', 'tooltip-' + layer.id)
+          .attr('class', 'tooltip')
+          .style('opacity', 0);
+
+        // Events
+        if (valueChecker.isNotNull(layer.behavior) &&
+            valueChecker.isNotNull(layer.behavior.tooltip) &&
+            valueChecker.isNotNull(layer.behavior.tooltip.display)) {
+          if (layer.behavior.tooltip.display === 'always') {
+          } else {
+            var showTooltipEvent = layer.behavior.tooltip.display;
+            var hideTooltipEvent = layer.behavior.tooltip.hide;
+
+            this.createTooltipEvents(layerElements, values, tooltipDiv,
+                  tooltipText, showTooltipEvent, hideTooltipEvent);
+          }
+        }
+      }
+    },
 
     /**
      * @ngdoc method
@@ -800,25 +936,6 @@ d3.selection.prototype.moveToFront = function() {
       var layerElement = this.getLayerElement(svg, layer);
 
       function handleData(data) {
-        if (layer.data.where != null) {
-          var dataWhere = $parse(layer.data.where);
-          data = _.filter(data, function(d) {
-            return dataWhere({d: d});
-          });
-        }
-
-        if (layer.data.order != null && layer.data.order.field) {
-          var field = layer.data.order.field;
-          var order = layer.data.order ? layer.data.order : true;
-          data = data.sort(function(a, b) {
-            if (order.ascending) {
-              return a[field] - b[field];
-            } else {
-              return b[field] - a[field];
-            }
-          });
-        }
-
         var idName = layer.data.id ? layer.data.id : 'id';
 
         var values = {};
@@ -830,8 +947,8 @@ d3.selection.prototype.moveToFront = function() {
           .data(data)
           .enter()
           .append('path')
-          .datum(function(d) {
-            var orig = origin({d: d});
+          .datum(function(d, i) {
+            var orig = origin(expressionService.getExpressionContext(d, i));
             orig[0] = parseFloat(orig[0]);
             orig[1] = parseFloat(orig[1]);
             var rad = radius({d: d});
@@ -846,86 +963,12 @@ d3.selection.prototype.moveToFront = function() {
             return d.d.name;
           })
           .attr('class', 'point')
-          .attr('d', function(d) { return path(d); })
-          .style('opacity', layer.display.shape.opacity);
+          .attr('d', function(d) { return path(d); });
 
-        if (layer.display.shape.color != null) {
-          elements.style('fill', layer.display.shape.color)
-        } else if (layer.display.shape.threshold != null) {
-          var color = d3.scale.threshold()
-            .domain(layer.display.shape.threshold.values)
-            .range(layer.display.shape.threshold.colors);
+        var styleHints = self.applyStylesForShapeLayer(layer, elements);
 
-          var value = $parse(layer.display.shape.value);
-
-          elements.style('fill', function(d) {
-            var val = value({
-              d: d.d,
-              parseDate: function(val) {
-                return new Date(val);
-              }
-            });
-            return color(parseFloat(val));
-          });
-        }
-
-        if (layer.display.tooltip && layer.display.tooltip.enabled) {
-          var tooltipText = $parse(layer.display.tooltip.text);
-
-          var tooltipDiv = d3.select('body').append('div')
-            .attr('id', 'tooltip-' + layer.id)
-            .attr('class', 'tooltip')
-            .style('opacity', 0);
-
-          // Events
-          if (layer.behavior.tooltip.display != null) {
-            if (layer.behavior.tooltip.display === 'always') {
-            } else {
-              var showTooltipEvent = layer.behavior.tooltip.display;
-              var hideTooltipEvent = layer.behavior.tooltip.hide;
-
-              self.createTooltipEvents(elements, values, tooltipDiv,
-                    tooltipText, showTooltipEvent, hideTooltipEvent);
-            }
-          }
-        }
-
-        if (layer.display.legend && layer.display.legend.enabled) {
-          var legendLabel = $parse(layer.display.legend.label);
-
-          var height = 500;
-          var legend = sel.selectAll('g.legend')
-            .data(layer.display.shape.threshold.values)
-            .enter()
-            .append('g')
-            .attr('class', 'legend');
-
-          var ls_w = 20, ls_h = 20;
-
-          legend.append('rect')
-            .attr('x', 20)
-            .attr('y', function(d, i){ return height - (i*ls_h) - 2*ls_h;})
-            .attr('width', ls_w)
-            .attr('height', ls_h)
-            .style('fill', function(d, i) { return color(d); })
-            .style('opacity', 0.8);
-
-          legend.append('text')
-            .attr('x', 50)
-            .attr('y', function(d, i){ return height - (i*ls_h) - ls_h - 4;})
-            .text(function(d, i) {
-              return legendLabel({d: d, i: i});
-            });
-            /*function(d, i) {
-              console.log('d = '+JSON.stringify(d));
-              if (d < 0.1) {
-                return '' + (d * 100) + ' %';
-              } else {
-                return (d * 100) + ' %';
-              }
-            });*/
-        }
-
+        self.configureTooltip(layer, elements, values);
+        self.configureLegend(layer, layerElement, styleHints);
       }
 
       // Actually create the layer based on provided data

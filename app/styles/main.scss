@@ -208,3 +208,20 @@ div.tooltip {
  border-radius: 8px;
  pointer-events: none;
 }
+
+.form-group-sm textarea.form-control.description {
+  height: 70px;
+}
+
+.form-group-sm textarea.form-control.parameters {
+  height: 50px;
+}
+
+.form-group-sm textarea.form-control.structure,
+.form-group-sm textarea.form-control.data {
+  height: 300px;
+}
+
+.form-group-sm textarea.form-control.result {
+  height: 200px;
+}

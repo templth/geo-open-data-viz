@@ -71,12 +71,9 @@ angular.module('mapManagerApp')
       });
 
       modalInstance.result.then(function(selectedSource) {
-        console.log('>> $scope.linkedSources = '+$scope.linkedSources);
         if ($scope.linkedSources == null) {
           $scope.linkedSources = [];
         }
-        console.log('>> $scope.linkedSources = '+$scope.linkedSources);
-        console.log('>> selectedsource = '+JSON.stringify(selectedSource))
         $scope.linkedSources.push(selectedSource);
 
         toaster.pop('success', 'Map "' +
@@ -123,11 +120,11 @@ angular.module('mapManagerApp')
       $modalInstance, commonsService, topojsonService) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
 
-    $scope.shouldDisplaySample = function() {
+    $scope.shouldDisplayStructure = function() {
       return ($scope.sourceToAdd.type === 'data');
     };
 
-    $scope.sourceToAdd = { name: 'test', type: 'data' };
+    $scope.sourceToAdd = { id: '15', name: 'test', type: 'data' };
 
     $scope.$watch('sourceToAdd.url', function(newValue, oldValue) {
       if (newValue === oldValue) {
@@ -168,9 +165,13 @@ angular.module('mapManagerApp')
             var sample = _.slice(data, 0, 5);
             $scope.sourceToAdd.sample = JSON.stringify(sample, null, 2);
           } else if ($scope.sourceToAdd.type === 'map') {
-            console.log('>> $scope.sourceToAdd.type === map');
             topojsonService.transformTopojson(data);
-            $scope.sourceToAdd.structure = JSON.stringify(data, null, 2);
+            _.forEach(data.objects, function(object, key) {
+              if (object.type === 'GeometryCollection') {
+                object.geometries = _.slice(object.geometries, 0, 5);
+              }
+            });
+            $scope.sourceToAdd.sample = JSON.stringify(data, null, 2);
           }
         });
       }
@@ -206,7 +207,7 @@ angular.module('mapManagerApp')
   .controller('UpdateLayerCtrl', function($scope, $modal,
                              commonsService, valueChecker) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
-    commonsService.registerCommonMapLayerFunctionsInScope($scope);
+    commonsService.registerCommonMapLayerFunctionsInScope($scope, $modal);
     commonsService.registerCommonMapLayerPanelFunctionsInScope($scope);
 
     if (valueChecker.isNotNull($scope.layer.display) &&
@@ -225,28 +226,6 @@ angular.module('mapManagerApp')
         $scope.layer.display.shape.threshold.paletteReverse = isReverse;
         $scope.layer.display.shape.threshold.colors = item.colors;
       };
-
-      $scope.checkExpression = function(source, expression) {
-          var modalInstance = $modal.open({
-            animation: false,
-            templateUrl: 'views/modals/expression-check-modal.html',
-            controller: 'CheckExpressionCtrl',
-            resolve: {
-              source: function() {
-                return source;
-              },
-              expression: function() {
-                return expression;
-              }
-            }
-          });
-
-          modalInstance.result.then(function() {
-          }, function() {
-            // $log.info('Modal dismissed at: ' + new Date());
-            console.log('Modal dismissed at: ' + new Date());
-          });
-        };
     }
   })
 
@@ -299,7 +278,7 @@ angular.module('mapManagerApp')
     $scope.layerToAdd = {};
     $scope.sources = sources;
     $scope.preview = { enabled: false };
-    $scope.selectedSource = { id: ''};
+    $scope.selectedSource = { id: '' };
     $scope.sourcePreview = {};
 
     $scope.$watch('selectedSource.id', function(newValue, oldValue) {
