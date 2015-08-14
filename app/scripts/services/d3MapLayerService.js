@@ -1,115 +1,5 @@
 'use strict';
 
-/*function interpolatedProjection(a, b) {
-  function raw(λ, φ) {
-    var pa = a([λ *= 180 / Math.PI, φ *= 180 / Math.PI]);
-    var pb = b([λ, φ]);
-    return [(1 - α) * pa[0] + α * pb[0], (α - 1) * pa[1] - α * pb[1]];
-  }
-
-  var projection = d3.geo.projection(raw).scale(1);
-  var center = projection.center;
-  var translate = projection.translate;
-  var α;
-
-  projection.alpha = function(_) {
-    if (!arguments.length) {
-      return α;
-    }
-
-    α = +_;
-    var ca = a.center();
-    var cb = b.center();
-    var ta = a.translate();
-    var tb = b.translate();
-    center([(1 - α) * ca[0] + α * cb[0], (1 - α) * ca[1] + α * cb[1]]);
-    translate([(1 - α) * ta[0] + α * tb[0], (1 - α) * ta[1] + α * tb[1]]);
-    return projection;
-  };
-
-  delete projection.scale;
-  delete projection.translate;
-  delete projection.center;
-  return projection.alpha(0);
-}*/
-
-// Utility function for moving (from http://bl.ocks.org/patricksurry/5721459)
-
-function trackballAngles(projection, pt) {
-  var r = projection.scale();
-  var c = projection.translate();
-  var x = pt[0] - c[0];
-  var y = -(pt[1] - c[1]);
-  var ss = x * x + y * y;
-
-  var z = r * r > 2 * ss ? Math.sqrt(r * r - ss) : r * r / 2 / Math.sqrt(ss);
-
-  var lambda = Math.atan2(x, z) * 180 / Math.PI;
-  var phi = Math.atan2(y, z) * 180 / Math.PI;
-  return [lambda, phi];
-}
-
-function composedRotation(λ, ϕ, γ, δλ, δϕ) {
-  var γ_, ϕ_, λ_;
-  λ = Math.PI / 180 * λ;
-  ϕ = Math.PI / 180 * ϕ;
-  γ = Math.PI / 180 * γ;
-  δλ = Math.PI / 180 * δλ;
-  δϕ = Math.PI / 180 * δϕ;
-
-  var sλ = Math.sin(λ);
-  var sϕ = Math.sin(ϕ);
-  var sγ = Math.sin(γ);
-  var sδλ = Math.sin(δλ);
-  var sδϕ = Math.sin(δϕ);
-  var cλ = Math.cos(λ);
-  var cϕ = Math.cos(ϕ);
-  var cγ = Math.cos(γ);
-  var cδλ = Math.cos(δλ);
-  var cδϕ = Math.cos(δϕ);
-
-  var m00 = -sδλ * sλ * cϕ + (sγ * sλ * sϕ + cγ * cλ) * cδλ;
-  var m01 = -sγ * cδλ * cϕ - sδλ * sϕ;
-  // var m02 = sδλ * cλ * cϕ - (sγ * sϕ * cλ - sλ * cγ) * cδλ;
-  var m10 = -sδϕ * sλ * cδλ * cϕ - (sγ * sλ * sϕ + cγ * cλ) * sδλ * sδϕ -
-    (sλ * sϕ * cγ - sγ * cλ) * cδϕ;
-  var m11 = sδλ * sδϕ * sγ * cϕ - sδϕ * sϕ * cδλ + cδϕ * cγ * cϕ;
-  // var m12 = sδϕ * cδλ * cλ * cϕ + (sγ * sϕ * cλ - sλ * cγ) * sδλ * sδϕ +
-  //  (sϕ * cγ * cλ + sγ * sλ) * cδϕ;
-  var m20 = -sλ * cδλ * cδϕ * cϕ - (sγ * sλ * sϕ + cγ * cλ) * sδλ * cδϕ +
-    (sλ * sϕ * cγ - sγ * cλ) * sδϕ;
-  var m21 = sδλ * sγ * cδϕ * cϕ - sδϕ * cγ * cϕ - sϕ * cδλ * cδϕ;
-  var m22 = cδλ * cδϕ * cλ * cϕ + (sγ * sϕ * cλ - sλ * cγ) * sδλ * cδϕ -
-    (sϕ * cγ * cλ + sγ * sλ) * sδϕ;
-
-  if (m01 !== 0 || m11 !== 0) {
-    γ_ = Math.atan2(-m01, m11);
-    ϕ_ = Math.atan2(-m21, Math.sin(γ_) === 0 ?
-      m11 / Math.cos(γ_) : -m01 / Math.sin(γ_));
-    λ_ = Math.atan2(-m20, m22);
-  } else {
-    γ_ = Math.atan2(m10, m00) - m21 * λ;
-    ϕ_ = -m21 * Math.PI / 2;
-    λ_ = λ;
-  }
-
-  return ([λ_ * 180 / Math.PI, ϕ_ * 180 / Math.PI, γ_ * 180 / Math.PI]);
-}
-
-// Utility function to update map
-
-function getLoadFunction(type) {
-  var loadFct = null;
-  if (type === 'json' || type === 'topojson') {
-    loadFct = d3.json;
-  } else if (type === 'csv') {
-    loadFct = d3.csv;
-  } else if (type === 'tsv') {
-    loadFct = d3.tsv;
-  }
-  return loadFct;
-}
-
 // Service
 
 angular.module('mapManager.d3.services')
@@ -123,9 +13,23 @@ angular.module('mapManager.d3.services')
  * Provide functions to create and manipulate layers of maps.
  */
 .service('layerService', [ '$parse', 'currentMapService',
-    'consoleService', 'valueChecker', 'expressionService',
-    function($parse, currentMapService, consoleService, valueChecker, expressionService) {
+    'consoleService', 'valueChecker', 'expressionService', 'd3Service',
+    function($parse, currentMapService, consoleService, valueChecker, expressionService, d3Service) {
   return {
+    // Utility function to update map
+
+    getLoadFunction: function(type) {
+      var loadFct = null;
+      if (type === 'json' || type === 'topojson') {
+        loadFct = d3Service.json;
+      } else if (type === 'csv') {
+        loadFct = d3Service.csv;
+      } else if (type === 'tsv') {
+        loadFct = d3Service.tsv;
+      }
+      return loadFct;
+    },
+
     /**
      * @ngdoc method
      * @name toggleLayerVisibility
@@ -137,7 +41,9 @@ angular.module('mapManager.d3.services')
      * @param {Object} layer the layer
     */
     toggleLayerVisibility: function(layer) {
-      var layerElement = d3.select(document.getElementById(layer.id));
+      var currentMapId = currentMapService.getCurrentMapId();
+      var layerElement = d3.select(document.getElementById(
+        currentMapId + '-' +layer.id));
       var visible = (layerElement.style('visibility') === 'visible');
       if (visible) {
         consoleService.logMessage('info',
@@ -200,15 +106,21 @@ angular.module('mapManager.d3.services')
      * @param {Object} layer the layer
     */
     getLayerElement: function(svg, layer) {
-      var layerElement = d3.select(document.getElementById(layer.id));
+      var currentMapContext = currentMapService.getCurrentMapContext();
+      var currentMapId = currentMapService.getCurrentMapId();
+      var layerElement = d3Service.select(document.getElementById(
+        currentMapId + '-' + layer.id));
+      console.log('id layer = '+currentMapId + '-' + layer.id);
       if (layerElement.empty()) {
-        var sel = d3.select(document.getElementById(layer.applyOn));
+      console.log('apply on layer = '+currentMapId + '-' + layer.applyOn);
+        var sel = d3Service.select(document.getElementById(
+          currentMapId + '-' + layer.applyOn));
         if (valueChecker.isNull(sel)) {
           sel = svg;
         }
 
         layerElement = sel.append('g')
-            .attr('id', layer.id);
+            .attr('id', currentMapId + '-' + layer.id);
       }
 
       return layerElement;
@@ -233,7 +145,7 @@ angular.module('mapManager.d3.services')
         var data = $parse(layerData.inline);
         handleData(self.filterDataForLayer(layerData, data()));
       } else {
-        var loadFct = getLoadFunction(layerData.type);
+        var loadFct = self.getLoadFunction(layerData.type);
         loadFct(layerData.url, function(data) {
           handleData(self.filterDataForLayer(layerData, data));
         });
@@ -303,8 +215,8 @@ angular.module('mapManager.d3.services')
               return tooltipText(context);
             }
           })
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY - 30) + 'px');
+             .style('left', (d3Service.event.pageX) + 'px')
+             .style('top', (d3Service.event.pageY - 30) + 'px');
         });
       } else if (showEvent === 'mouseOver') {
         elements.on('mouseover', function(d) {
@@ -327,8 +239,8 @@ angular.module('mapManager.d3.services')
               return tooltipText(context);
             }
           })
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY - 30) + 'px');
+             .style('left', (d3Service.event.pageX) + 'px')
+             .style('top', (d3Service.event.pageY - 30) + 'px');
         });
       }
 
@@ -367,7 +279,7 @@ angular.module('mapManager.d3.services')
 
       var layerElement = this.getLayerElement(svg, layer);
 
-      var graticule = d3.geo.graticule();
+      var graticule = d3Service.geo.graticule();
 
       if (layer.display.background && layer.display.border) {
         layerElement.append('defs').append('path')
@@ -498,16 +410,16 @@ angular.module('mapManager.d3.services')
           // See https://github.com/mbostock/topojson/wiki/API-Reference
 
           // Supported values are: 10, 20, 20b, 20c
-          var color = d3.scale.category20();
+          var color = d3Service.scale.category20();
           if (valueChecker.isNotNull(layer.display.fill.categorical.name)) {
             if (layer.display.fill.categorical.name === 'category10') {
-              color = d3.scale.category10();
+              color = d3Service.scale.category10();
             } else if (layer.display.fill.categorical.name === 'category20') {
-              color = d3.scale.category20();
+              color = d3Service.scale.category20();
             } else if (layer.display.fill.categorical.name === 'category20b') {
-              color = d3.scale.category20b();
+              color = d3Service.scale.category20b();
             } else if (layer.display.fill.categorical.name === 'category20c') {
-              color = d3.scale.category20c();
+              color = d3Service.scale.category20c();
             }
           }
           /*var countries = topojson.feature(data, data.objects[layer.data.rootObject]).features;
@@ -526,6 +438,311 @@ angular.module('mapManager.d3.services')
           });
         }
       }
+    },
+
+    /**
+     * @ngdoc method
+     * @name configureZoomBoundingBehavior
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Configure behavior for a layer:
+     *
+     * * Zooming to bounding - see the method
+     * * Displaying sub map - see the method
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+     * @param {Object} pathElements the path elements to apply on
+    */
+    configureBehaviors: function(svg, path, layer, pathElements) {
+      if (valueChecker.isNotNull(layer.behavior) &&
+          valueChecker.isNotNull(layer.behavior.zoomBoundingBox)) {
+        this.configureZoomBoundingBehavior(svg, path, layer, pathElements);
+      } else if (valueChecker.isNotNull(layer.behavior) &&
+          valueChecker.isNotNull(layer.behavior.subMap)) {
+        this.configureSubMapBehavior(svg, path, layer, pathElements);
+      }
+    },
+
+    /**
+     * @ngdoc method
+     * @name configureZoomBoundingBehavior
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Configure the behavior `zooming to bounds` for a layer:
+     *
+     * This method is called if the layer has the following
+     * configuration:
+     *
+     * behavior: {
+     *   subMap: {
+     *     display: 'dblclick'
+     *   }
+     * }
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+     * @param {Object} pathElements the path elements to apply on
+    */
+    configureZoomBoundingBehavior: function(svg, path, layer, pathElements) {
+      // See http://bl.ocks.org/mbostock/4699541
+      // See http://bl.ocks.org/mbostock/4183330
+      // See https://www.jasondavies.com/maps/zoom/
+      // See http://bl.ocks.org/mbostock/2206590
+      // See http://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
+      pathElements.on('click', function(d) {
+        var currentMapContext = currentMapService.getCurrentMapContext();
+        var projection = currentMapContext.projection;
+
+        if (valueChecker.isNotNull(projection)/* &&
+            projection === 'orthographic'*/) {
+          d3Service.transition().delay(100).duration(750).tween('rotate', function() {
+            var p = d3Service.geo.centroid(d);
+            var r = d3Service.interpolate(projection.rotate(), [-p[0], -p[1]]);
+            return function(t) {
+              projection.rotate(r(t));
+            };
+          })/*.tween('scale', function() {
+            var s = d3Service.interpolate(projection.scale(), 1000);
+            return function(t) {
+              projection.scale(s(t));
+            };
+          })*/;
+        }
+      });
+    },
+
+    getBounds: function(path, d, width, height) {
+      var bounds = path.bounds(d);
+      var dx = bounds[1][0] - bounds[0][0];
+      var dy = bounds[1][1] - bounds[0][1];
+      var x = (bounds[0][0] + bounds[1][0]) / 2;
+      var y = (bounds[0][1] + bounds[1][1]) / 2;
+      var scale = 0.9 / Math.max(dx / width, dy / height);
+      var translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+      return {
+        translate: translate,
+        scale: scale
+      };
+    },
+
+    applyLayersOnSubMap: function(svg, path, layer) {
+      console.log('1 - end - applyLayersOnSubMap');
+      var self = this;
+
+      var subLayer = _.find(currentMapService.getCurrentMap().layers, 'id', 'meteorites');
+      console.log('1 - end - applyLayersOnSubMap - subLayer = '+subLayer);
+      subLayer.id = subLayer.id + '1';
+      self.createCircleObjectsDataLayer(svg, path, subLayer);
+    },
+
+    /**
+     * @ngdoc method
+     * @name configureSubMapBehavior
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Configure the behavior `sub map` for a layer:
+     *
+     * This method is called if the layer has the following
+     * configuration:
+     *
+     * behavior: {
+     *   subMap: {
+     *     display: 'dblclick'
+     *   }
+     * }
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+    */
+    configureSubMapBehavior: function(svg, path, layer, pathElements) {
+      var self = this;
+      pathElements.on('click', function(d) {
+        var currentMapContext = currentMapService.getCurrentMapContext();
+        // TODO: make things generic
+        var width = currentMapContext.dimensions.width;
+        var height = currentMapContext.dimensions.height;
+
+        console.log('path elements click');
+        //console.log('d = '+JSON.stringify(d));
+
+        /*var bounds = path.bounds(d);
+        var dx = bounds[1][0] - bounds[0][0];
+        var dy = bounds[1][1] - bounds[0][1];
+        var x = (bounds[0][0] + bounds[1][0]) / 2;
+        var y = (bounds[0][1] + bounds[1][1]) / 2;
+        var scale = 0.9 / Math.max(dx / width, dy / height);
+        var translate = [width / 2 - scale * x, height / 2 - scale * y];*/
+
+        /*g.transition()
+         .duration(750)
+         //.style("stroke-width", 1.5 / scale + "px")
+         .attr('transform', 'translate(' + translate +
+           ')scale(' + scale + ')');*/
+
+        var map2 = svg.append('g').attr('id', 'map2');
+        map2.on('click', function() {
+          currentMapService.setCurrentMapId('map1');
+          map2.remove();
+        });
+
+        // Create the background with opacity
+        var rect2 = map2.append('rect')
+          .attr('class', 'background')
+          .attr('width', width)
+          .attr('height', height)
+          .attr('id', 'rect2')
+          .style('fill', 'white')
+          .style('opacity', '0.75');
+
+        // Create container for layers
+        var layers2 = map2.append('g').attr('id', 'map2-layers');
+
+        // Create root layer
+        var rootLayer = layers2.append('g').attr('id', 'root');
+
+        // Clone element
+        var id = d.id;
+        var node = d3Service.select('[id="'+id+'"]'/*'#'+d.id*/).node();
+        var elt = d3Service.select(rootLayer.node().appendChild(node.cloneNode(true)));
+
+        map2.moveToFront();
+        elt.attr('id','cloned'+id);
+        //elt.style('fill', 'red');
+        //map2.
+
+        /*.attr("x", 0)
+          .attr("y", 0)
+          .attr("height", h)
+          .attr("width", w)
+          .style("stroke", bordercolor)
+          .style("fill", "none")
+          .style("stroke-width", border);*/
+
+        /*rect2.style('stroke','blue').style('stroke-width', '2').transition().attr('x', '200px').attr('y', '200px')
+        .duration(3000) // this is 1s
+        .delay(100);*/
+
+        var projection1 = d3Service.geo.orthographic()
+                 .scale(248)
+                 .clipAngle(90);
+                 //.clipAngle(90)/*.rotate(0,0)*/;
+        var path1 = d3Service.geo.path().projection(projection1);
+        //console.log('>> path1 = '+path1);
+        var pathElements = d3Service.selectAll('#map2 path')/*./*transition().duration(3000).delay(100).*//*attr('d', path1);*/
+         // this is 1s
+        ;
+
+        //map2.transition().duration(3000).delay(100).attr('transform', 'translate(200,200)');
+        var bds = self.getBounds(path, d, width, height);
+        //var transf = d3.svg.transform().rotate(-54).scale(bds.scale);
+
+        /*d3Service.transition().delay(100).duration(750).tween('rotate', function() {
+            var p = d3Service.geo.centroid(d);
+            var r = d3Service.interpolate(projection1.rotate(), [-p[0], -p[1]]);
+            return function(t) {
+              projection1.rotate(r(t));
+              var path1 = d3.geo.path().projection(projection1);
+              pathElements.attr('d', path1);
+
+            };
+          });*/
+
+        d3Service.select('#map2-layers').transition().duration(3000).delay(2000)
+          .attr('transform', 'translate('+bds.translate[0]+','+bds.translate[1]+'),scale('+bds.scale+')')
+          .style('stroke-width', '0.2px')
+          .each('end', function() {
+            console.log('1 - end');
+            currentMapService.setCurrentMapId('map2');
+            self.applyLayersOnSubMap(svg, path1, layer);
+            //d3Service.select('#map2-meteorites').selectAll('g')
+            //  .attr('transform', 'translate('+bds.translate[0]+','+bds.translate[1]+'),scale('+bds.scale+')');
+          })
+              /*.tween("rotate", function() {
+                var projection = d3.geo.orthographic()
+                     .scale(bds.scale)
+                     .clipAngle(90);
+
+                //var projection = currentMapService.getCurrentMapContext().projection;
+                var r = d3.interpolate(projection.rotate(), [2, -49]);
+                return function(t) {
+                  projection.rotate(r(t));
+                  map2.selectAll('path').attr('d', path);
+                };
+              })*/;
+
+        /*d3.select('#map1 path').transition().duration(3000).delay(100)
+          .attr('transform', 'scale(60)');*/
+          //d3.select('#map1').transition().duration(3000).delay(100).attr('transform', 'scale(60)');
+          //.tween("scale", function() {
+
+      });
+    },
+
+    configureShapeBounds: function(layer, layerElement, path, features) {
+      console.log('>> configureShapeBounds');
+      // See http://stackoverflow.com/questions/25310390/how-does-path-bounds-work
+      // See http://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object/17067379#17067379
+      // See http://bl.ocks.org/hugolpz/6391065
+
+function parallel(φ, λ0, λ1) {
+  if (λ0 > λ1) λ1 += 360;
+  var dλ = λ1 - λ0,
+      step = dλ / Math.ceil(dλ);
+  return d3.range(λ0, λ1 + .5 * step, step).map(function(λ) { return [normalise(λ), φ]; });
+}
+
+function normalise(x) {
+  return (x + 180) % 360 - 180;
+}
+
+      var elements = layerElement.selectAll('path')
+          /*.data(features)
+          .enter()*/
+          .append('path')
+          .datum(function(feature) {
+            //console.log('d.id = '+d.id);
+            //console.log('feature = '+JSON.stringify(feature));
+            //var bounds = path.bounds(d);
+            //console.log('>> bounds = '+bounds);
+            var bb = d3Service.geo.bounds(feature);
+            console.log('>> bb = '+bb);
+            /*var orig = origin(expressionService.getExpressionContext(d, i));
+            orig[0] = parseFloat(orig[0]);
+            orig[1] = parseFloat(orig[1]);
+            var rad = radius({d: d});
+            rad = parseFloat(rad);
+            var c = circle
+               .origin(orig)
+               .angle(rad)({d: d});
+            c.d = d;*/
+
+            return {
+              type: 'Polygon',
+              coordinates: [
+                [bb[0]]
+                .concat(parallel(bb[1][1], bb[0][0], bb[1][0]))
+                .concat(parallel(bb[0][1], bb[0][0], bb[1][0]).reverse())
+              ]/*,
+              d: d*/
+            };
+          })
+          /*.attr('id', function(d) {
+            return d.d.name + ' (bound)';
+          })*/
+          .attr('class', 'point')
+          .attr('d', function(d) { return path(d); })
+          /*.style('fill', '#f00')
+          .style('fill-opacity', '.25')
+          .style('stroke', '#000')
+          .style('stroke-width', '1px')
+          .style('pointer-events', 'none')*/
+          .style({'fill': '#94BF8B', 'fill-opacity': 0.25})
+    .style({'stroke': '#94BF8B', 'stroke-width': 1, 'stroke-linejoin': 'round' });
     },
 
     /**
@@ -556,9 +773,11 @@ angular.module('mapManager.d3.services')
           pathElements
             .attr('d', path);
         } else {
+          var features = topojson.feature(data,
+              data.objects[layer.data.rootObject]).features;
+
           pathElements = layerElement.selectAll('path')
-            .data(topojson.feature(data,
-              data.objects[layer.data.rootObject]).features)
+            .data(features)
           .enter()
           .append('path')
           .attr('id', function(d) { return d.id; })
@@ -566,133 +785,10 @@ angular.module('mapManager.d3.services')
 
           self.applyStylesForGeoDataLayer(layer, pathElements);
           self.configureTooltip(layer, pathElements);
+          self.configureShapeBounds(layer, layerElement, path, features);
         }
 
-        /*if (!_.isUndefined(layer.behavior) &&
-            !_.isNull(layer.behavior) &&
-            !_.isUndefined(layer.behavior.zoomBoundingBox) &&
-            !_.isNull(layer.behavior.zoomBoundingBox)) {*/
-          // See http://bl.ocks.org/mbostock/4699541
-          pathElements.on('dblclick', function(d) {
-            // TODO: make things generic
-            var width = 938;
-            var height = 500;
-
-            console.log('path elements click');
-
-            //console.log('d = '+JSON.stringify(d));
-
-            var bounds = path.bounds(d);
-            var dx = bounds[1][0] - bounds[0][0];
-            var dy = bounds[1][1] - bounds[0][1];
-            var x = (bounds[0][0] + bounds[1][0]) / 2;
-            var y = (bounds[0][1] + bounds[1][1]) / 2;
-            var scale = 0.9 / Math.max(dx / width, dy / height);
-            var translate = [width / 2 - scale * x, height / 2 - scale * y];
-
-            /*g.transition()
-             .duration(750)
-             //.style("stroke-width", 1.5 / scale + "px")
-             .attr('transform', 'translate(' + translate +
-               ')scale(' + scale + ')');*/
-
-            console.log('d.id = '+d.id);
-
-            var map2 = svg.append('g').attr('id','map2');
-
-            var rect2 = map2.append('rect')
-            .attr('class', 'background')
-            .attr('width', width)
-            .attr('height', height)
-            .attr('id', 'rect2')
-            .style('fill', 'white')
-            .style('opacity', '0.75');
-
-            var layers2 = map2.append('g').attr('id','layers2');
-
-// see https://github.com/wbkd/d3-extended/blob/master/src/core/moveToFront.js
-d3.selection.prototype.moveToFront = function() {
-  return this.each(function(){
-    this.parentNode.appendChild(this);
-  });
-}
-
-            console.log('before');
-            console.log('>> with id = '+(d3.select('[id="124"]'/*+d.id*/)));
-            console.log('after');
-            var id = d.id;
-            var node = d3.select('[id="'+id+'"]'/*'#'+d.id*/).node();
-            console.log('clone');
-            var elt = d3.select(layers2.node().appendChild(node.cloneNode(true)));
-
-            map2.moveToFront();
-            elt.attr('id','cloned'+id);
-            elt.style('fill', 'red');
-            //map2.
-
-/*.attr("x", 0)
-  .attr("y", 0)
-  .attr("height", h)
-  .attr("width", w)
-  .style("stroke", bordercolor)
-  .style("fill", "none")
-  .style("stroke-width", border);*/
-
-            /*rect2.style('stroke','blue').style('stroke-width', '2').transition().attr('x', '200px').attr('y', '200px')
-            .duration(3000) // this is 1s
-            .delay(100);*/
-
-            //map2.transition().duration(3000).delay(100).attr('transform', 'translate(200,200)');
-            var bds = getBounds(path, d);
-            //var transf = d3.svg.transform().rotate(-54).scale(bds.scale);
-            elt.transition().duration(3000).delay(100)
-              .attr('transform', 'translate('+bds.translate[0]+','+bds.translate[1]+'),scale('+bds.scale+')')
-              .style('stroke-width', '0.2px')
-              /*.tween("rotate", function() {
-                var projection = d3.geo.orthographic()
-                     .scale(bds.scale)
-                     .clipAngle(90);
-
-                //var projection = currentMapService.getCurrentMapContext().projection;
-                var r = d3.interpolate(projection.rotate(), [2, -49]);
-                return function(t) {
-                  projection.rotate(r(t));
-                  map2.selectAll('path').attr('d', path);
-                };
-              })*/;
-
-            /*d3.select('#map1 path').transition().duration(3000).delay(100)
-              .attr('transform', 'scale(60)');*/
-              //d3.select('#map1').transition().duration(3000).delay(100).attr('transform', 'scale(60)');
-              //.tween("scale", function() {
-
-            function getBounds(path, d) {
-              var bounds = path.bounds(d);
-              var dx = bounds[1][0] - bounds[0][0];
-              var dy = bounds[1][1] - bounds[0][1];
-              var x = (bounds[0][0] + bounds[1][0]) / 2;
-              var y = (bounds[0][1] + bounds[1][1]) / 2;
-              var scale = 0.9 / Math.max(dx / width, dy / height);
-              var translate = [width / 2 - scale * x, height / 2 - scale * y];
-
-              return {
-                translate: translate,
-                scale: scale
-              };
-            }
-
-            var projection1 = d3.geo.orthographic()
-                     .scale(248)
-                     .clipAngle(90);
-                     //.clipAngle(90)/*.rotate(0,0)*/;
-            var path1 = d3.geo.path().projection(projection1);
-            console.log('>> path1 = '+path1);
-            d3.selectAll('#map2 path')/*./*transition().duration(3000).delay(100).*//*attr('d', path1);*/
-             // this is 1s
-            ;
-            var bds = getBounds(path, d);
-            console.log('>> bounds = '+JSON.stringify(bds));
-          });
+        self.configureBehaviors(svg, path, layer, pathElements);
         //}
       }
 
@@ -716,7 +812,7 @@ d3.selection.prototype.moveToFront = function() {
      * @param {Object} layer the layer
     */
     clearFillDataLayer: function(svg, layer) {
-      var sel = d3.select(document.getElementById(layer.applyOn));
+      var sel = d3Service.select(document.getElementById(layer.applyOn));
       sel.selectAll('path')
          .style('fill', function(d) {
         return '#000';
@@ -729,7 +825,7 @@ d3.selection.prototype.moveToFront = function() {
       var styleHints = {};
 
       if (valueChecker.isNotNull(layer.display.fill.threshold)) {
-        var tColor = d3.scale.threshold()
+        var tColor = d3Service.scale.threshold()
           .domain(layer.display.fill.threshold.values)
           .range(layer.display.fill.threshold.colors);
         styleHints.color = tColor;
@@ -740,7 +836,7 @@ d3.selection.prototype.moveToFront = function() {
         });
         styleHints.elements = tElements;
       } else if (valueChecker.isNotNull(layer.display.fill.choropleth)) {
-        var cColor = d3.scale.quantize()
+        var cColor = d3Service.scale.quantize()
           .domain(layer.display.fill.choropleth.values)
           .range(layer.display.fill.choropleth.colors);
         styleHints.color = cColor;
@@ -763,7 +859,7 @@ d3.selection.prototype.moveToFront = function() {
         var values = {};
         _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
 
-        var sel = d3.select(document.getElementById(layer.applyOn));
+        var sel = d3Service.select(document.getElementById(layer.applyOn));
 
         var styleHints = self.applyStylesForFillLayer(
           layer, sel, values);
@@ -819,7 +915,7 @@ d3.selection.prototype.moveToFront = function() {
         if (valueChecker.isNotNull(layer.display.shape.color)) {
           pathElements.style('fill', layer.display.shape.color);
         } else if (valueChecker.isNotNull(layer.display.shape.threshold)) {
-          var tColor = d3.scale.threshold()
+          var tColor = d3Service.scale.threshold()
               .domain(layer.display.shape.threshold.values)
               .range(layer.display.shape.threshold.colors);
           styleHints.color = tColor;
@@ -831,7 +927,7 @@ d3.selection.prototype.moveToFront = function() {
               return tColor(parseFloat(val));
             });
         } else if (valueChecker.isNotNull(layer.display.shape.choropleth)) {
-          var cColor = d3.scale.choropleth()
+          var cColor = d3Service.scale.choropleth()
               .domain(layer.display.shape.choropleth.values)
               .range(layer.display.shape.choropleth.colors);
           styleHints.color = cColor;
@@ -853,37 +949,44 @@ d3.selection.prototype.moveToFront = function() {
             layer.display.legend.enabled) {
         var legendLabel = $parse(layer.display.legend.label);
 
+        // TODO: Configure the rect ize according the number of values
         layerElement.append('rect')
-            .attr('x', 10)
-            .attr('y', 350)
-            .attr('width', 100)
-            .attr('height', 150)
-            .style('fill', '#fff')
-            .style('opacity', '0.7');
+          .attr('x', 10)
+          .attr('y', 350)
+          .attr('width', 100)
+          .attr('height', 150)
+          .style('fill', '#fff')
+          .style('opacity', '0.7');
 
         var height = 500;
         var legend = layerElement.selectAll('g.legend')
-            .data(layer.display.shape.threshold.values)
-            .enter()
-            .append('g')
-            .attr('class', 'legend');
+          .data(layer.display.shape.threshold.values)
+          .enter()
+          .append('g')
+          .attr('class', 'legend');
 
         var ls_w = 20, ls_h = 20;
 
         legend.append('rect')
-            .attr('x', 20)
-            .attr('y', function(d, i){ return height - (i*ls_h) - 2*ls_h;})
-            .attr('width', ls_w)
-            .attr('height', ls_h)
-            .style('fill', function(d, i) { return styleHints.color(d); })
-            .style('opacity', 0.8);
+          .attr('x', 20)
+          .attr('y', function(d, i) {
+            return height - (i * ls_h) - 2 * ls_h;
+          })
+          .attr('width', ls_w)
+          .attr('height', ls_h)
+          .style('fill', function(d) {
+            return styleHints.color(d);
+          })
+          .style('opacity', 0.8);
 
         legend.append('text')
-            .attr('x', 50)
-            .attr('y', function(d, i){ return height - (i*ls_h) - ls_h - 4;})
-            .text(function(d, i) {
-              return legendLabel({d: d, i: i});
-            });
+          .attr('x', 50)
+          .attr('y', function(d, i) {
+            return height - (i * ls_h) - ls_h - 4;
+          })
+          .text(function(d, i) {
+            return legendLabel({d: d, i: i});
+          });
       }
     },
 
@@ -892,7 +995,7 @@ d3.selection.prototype.moveToFront = function() {
           layer.display.tooltip.enabled) {
         var tooltipText = $parse(layer.display.tooltip.text);
 
-        var tooltipDiv = d3.select('body').append('div')
+        var tooltipDiv = d3Service.select('body').append('div')
           .attr('id', 'tooltip-' + layer.id)
           .attr('class', 'tooltip')
           .style('opacity', 0);
@@ -913,6 +1016,41 @@ d3.selection.prototype.moveToFront = function() {
       }
     },
 
+    configureShapeLabel: function(layer, layerElement, data, origin) {
+      if (valueChecker.isNotNull(layer.display.shape.label)) {
+        // See this link https://dillieodigital.wordpress.com/2013/01/09/quick-tip-preserve-svg-text-size-after-scale-transform/
+        // regarding scaling
+        var projection = currentMapService.getCurrentMapContext().projection;
+        var labelText = $parse(layer.display.shape.label.text);
+
+        var dx = 0;
+        var dy = 0;
+        if (valueChecker.isNotNull(layer.display.shape.label.position)) {
+          if (valueChecker.isNotNull(layer.display.shape.label.position.x)) {
+            dx = layer.display.shape.label.position.x;
+          }
+          if (valueChecker.isNotNull(layer.display.shape.label.position.y)) {
+            dy = layer.display.shape.label.position.y;
+          }
+        }
+
+        layerElement.selectAll('text').data(data).enter().append('text')
+          .attr('x', function(d, i) {
+            var orig = origin(expressionService.getExpressionContext(d, i));
+            return projection(orig)[0];
+          })
+          .attr('dx', dx)
+          .attr('y', function(d, i) {
+            var orig = origin(expressionService.getExpressionContext(d, i));
+            return projection(orig)[1];
+          })
+          .attr('dy', dy)
+          .text(function(d, i) {
+            return labelText(expressionService.getExpressionContext(d, i));
+          });
+      }
+    },
+
     /**
      * @ngdoc method
      * @name createCircleObjectsDataLayer
@@ -925,13 +1063,14 @@ d3.selection.prototype.moveToFront = function() {
      * @param {Object} layer the layer
     */
     createCircleObjectsDataLayer: function(svg, path, layer) {
+      console.log('createCircleObjectsDataLayer - layer = '+JSON.stringify(layer));
       var self = this;
       var origin = $parse(layer.display.shape.origin);
       var radius = $parse(layer.display.shape.radius);
 
       consoleService.logMessage('info',
         'Creating data layer with identifier "' + layer.id + '"');
-      var circle = d3.geo.circle();
+      var circle = d3Service.geo.circle();
 
       var layerElement = this.getLayerElement(svg, layer);
 
@@ -940,8 +1079,6 @@ d3.selection.prototype.moveToFront = function() {
 
         var values = {};
         _.forEach(data, function(d) { values[d[idName]] = d; });
-
-        var sel = d3.select(document.getElementById(layer.applyOn));
 
         var elements = layerElement.selectAll('circle')
           .data(data)
@@ -964,6 +1101,8 @@ d3.selection.prototype.moveToFront = function() {
           })
           .attr('class', 'point')
           .attr('d', function(d) { return path(d); });
+
+        self.configureShapeLabel(layer, layerElement, data, origin);
 
         var styleHints = self.applyStylesForShapeLayer(layer, elements);
 
@@ -993,7 +1132,7 @@ d3.selection.prototype.moveToFront = function() {
 
       consoleService.logMessage('info',
         'Creating data layer with identifier "' + layer.id + '"');
-      var circle = d3.geo.circle();
+      var circle = d3Service.geo.circle();
 
       var layerElement = this.getLayerElement(svg, layer);
 
@@ -1002,9 +1141,9 @@ d3.selection.prototype.moveToFront = function() {
           .data(data)
           .enter()
           .append('path')
-          .datum(function(d) {
-            console.log('layer.display.shape.origin = '+layer.display.shape.origin);
-            return circle.origin(origin({d: d}));
+          .datum(function(d, i) {
+            return circle.origin(origin(
+              expressionService.getExpressionContext(d, i)));
           })
           .attr('class', 'point')
           .attr('d', path)
@@ -1233,7 +1372,9 @@ d3.selection.prototype.moveToFront = function() {
         layer.type + '" with identifier "' + layer.id + '"');
 
       // Remove layer
-      var layerElement = d3.select(document.getElementById(layer.id));
+      var currentMapId = currentMapService.getCurrentMapId();
+      var layerElement = d3Service.select(document.getElementById(
+        currentMapId + '-' + layer.id));
       if (this.isLayerWithFillMode(layer)) {
         this.clearFillDataLayer(svg, layer);
       } else {
@@ -1241,9 +1382,10 @@ d3.selection.prototype.moveToFront = function() {
       }
 
       // Remove legend and tooltip if any
-      var allLayersElement = d3.select(document.getElementById('layers'));
+      var allLayersElement = d3Service.select(
+        document.getElementById('layers'));
       allLayersElement.selectAll('g.legend').remove();
-      d3.select(document.getElementById(
+      d3Service.select(document.getElementById(
         'tooltip-' + layer.id)).remove();
     },
 
@@ -1257,7 +1399,7 @@ d3.selection.prototype.moveToFront = function() {
      * @param {Object} layers the layers
     */
     sortLayers: function(layers) {
-      var layerElts = d3.select(document.getElementById('layers'));
+      var layerElts = d3Service.select(document.getElementById('layers'));
       layerElts.selectAll('g').sort(function(layerElt1, layerElt2) {
         var layer1 = _.find(layers, { id: layerElt1.attr('id')});
         var layer2 = _.find(layers, { id: layerElt2.attr('id')});

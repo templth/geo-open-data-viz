@@ -1,36 +1,7 @@
 'use strict';
 
-function updateMapElements(projection, mapElements) {
-  function cxFct(d) {
-    if (!_.isNull(d)) {
-      return projection([d.lon, d.lat])[0];
-    } else {
-      return projection([0, 0])[0];
-    }
-  }
-
-  function cyFct(d) {
-    if (!_.isNull(d)) {
-      return projection([d.lon, d.lat])[1];
-    } else {
-      return projection([0, 0])[1];
-    }
-  }
-
-  for (var i = 0; i < mapElements.length; i++) {
-    var mapElement = mapElements[i];
-    if (mapElement.type === 'path') {
-      var path = d3.geo.path().projection(projection);
-      d3.selectAll('path').attr('d', path);
-    } else if (mapElement.type === 'circle') {
-      d3.selectAll('circle').attr('cx', cxFct)
-      .attr('cy', cyFct);
-    }
-  }
-}
-
 angular.module('mapManager.d3.services', [
-  'mapManager.map', 'mapManager.console' ])
+  'mapManager.map', 'mapManager.console', 'd3' ])
 
 // Map creator service
 
@@ -41,8 +12,8 @@ angular.module('mapManager.d3.services', [
  * Provide functions to create and refresh map rendering.
  */
 .service('mapCreatorService', [ 'currentMapService', 'mapInteractionService',
-    'layerService', 'projectionService', function(currentMapService,
-      mapInteractionService, layerService, projectionService) {
+    'layerService', 'projectionService', 'd3Service', function(currentMapService,
+      mapInteractionService, layerService, projectionService, d3Service) {
   return {
     /**
      * @ngdoc method
@@ -78,7 +49,7 @@ angular.module('mapManager.d3.services', [
       var gMap = svg.append('g').attr('id', 'map1');
 
       // Create element for layers
-      var gLayers = gMap.append('g').attr('id', 'layers');
+      var gLayers = gMap.append('g').attr('id', 'map1-layers');
 
       return { gMap: gMap, gLayers: gLayers };
     },
@@ -109,6 +80,7 @@ angular.module('mapManager.d3.services', [
     */
     createMap: function($scope, element) {
       var mWidth = element.width();
+      var mHeight = element.height();
       var width = 938;
       var height = 500;
 
@@ -132,7 +104,7 @@ angular.module('mapManager.d3.services', [
 
       var path = projectionService.configurePathWithProjection(projection);
 
-      var svg = d3.select(element[0]).append('svg')
+      var svg = d3Service.select(element[0]).append('svg')
           .attr('preserveAspectRatio', 'xMidYMid')
           .attr('viewBox', '0 0 ' + width + ' ' + height)
           .attr('width', mWidth)
@@ -148,7 +120,9 @@ angular.module('mapManager.d3.services', [
 
       // Save current map context
       currentMapService.registerCurrentMapContext(svg, path, projection,
-        mainMapElements.gMap, mainMapElements.gLayers);
+        mainMapElements.gMap, mainMapElements.gLayers, {
+        width: width, height: height, mWidth: mWidth, mHeight: mHeight
+      });
 
       var layers = currentMapService.getCurrentMap().layers;
 
@@ -232,7 +206,7 @@ angular.module('mapManager.d3.services', [
  * @description
  * Provide functions to create and configure projections for a map.
  */
-.service('projectionService', [ function() {
+.service('projectionService', [ 'd3Service', function(d3Service) {
   return {
     /**
      * @ngdoc method
@@ -244,7 +218,7 @@ angular.module('mapManager.d3.services', [
      * @param {Object} configuration the map configuration object
     */
     createMercatorProjection: function(configuration) {
-      var projection = d3.geo.mercator()
+      var projection = d3Service.geo.mercator()
           //.scale(150)
           .translate([configuration.width / 2, configuration.height / 1.5]);
       return projection;
@@ -260,12 +234,34 @@ angular.module('mapManager.d3.services', [
      * @param {Object} configuration the map configuration object
     */
     createOrthographicProjection: function(/*configuration*/) {
-        var projection = d3.geo.orthographic()
+        var projection = d3Service.geo.orthographic()
           .scale(248)
           .clipAngle(90);
 
         return projection;
       },
+
+    /**
+     * @ngdoc method
+     * @name createSatelliteProjection
+     * @methodOf mapManager.d3.services:projectionService
+     * @description
+     * Create a orthographic projection based on a configuration object.
+     *
+     * @param {Object} configuration the map configuration object
+    */
+    createSatelliteProjection: function(/*configuration*/) {
+      var projection = d3Service.geo.satellite()
+          .distance(1.1)
+          .scale(5500)
+          .rotate([76.00, -34.50, 32.12])
+          .center([-2, 5])
+          .tilt(25)
+          .clipAngle(Math.acos(1 / 1.1) * 180 / Math.PI - 1e-6)
+          .precision(0.1);
+
+      return projection;
+    },
 
     /**
      * @ngdoc method
@@ -288,6 +284,8 @@ angular.module('mapManager.d3.services', [
       // Create projection
       if (projectionType === 'orthographic') {
         projection = this.createOrthographicProjection(configuration);
+      } else if (projectionType === 'satellite') {
+        projection = this.createSatelliteProjection(configuration);
       } else if (projectionType === 'mercator') {
         projection = this.createMercatorProjection(configuration);
       }
@@ -308,7 +306,7 @@ angular.module('mapManager.d3.services', [
     configurePathWithProjection: function(projection, path) {
       // Return path
       if (_.isNull(path) || _.isUndefined(path)) {
-        path = d3.geo.path();
+        path = d3Service.geo.path();
       }
 
       if (!_.isNull(projection)) {
@@ -326,7 +324,8 @@ angular.module('mapManager.d3.services', [
  * Provide functions to configure the interactions like map moving and zooming.
  */
 .service('mapInteractionService', [ 'consoleService', 'currentMapService',
-	function(consoleService, currentMapService) {
+  'd3Service', 'd3Utils',
+	function(consoleService, currentMapService, d3Service, d3Utils) {
   return {
     // Moving
 
@@ -345,27 +344,29 @@ angular.module('mapManager.d3.services', [
     configureMovingWithMouseDragForOrthographicProjection: function(
         $scope, svg, projection, mapElements) {
       var m0, o0;
-      var drag = d3.behavior.drag()
+      var drag = d3Service.behavior.drag()
       .on('dragstart', function() {
         // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html
         // and updated for d3 v3
         var proj = projection.rotate();
-        m0 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
+        m0 = [ d3Service.event.sourceEvent.pageX, d3Service.event.sourceEvent.pageY ];
         o0 = [-proj[0], -proj[1]];
       })
       .on('drag', function() {
         if (m0) {
-          var m1 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-          var o1 = [o0[0] + (m0[0] - m1[0]) / 4, o0[1] + (m1[1] - m0[1]) / 4];
+          var m1 = [ d3Service.event.sourceEvent.pageX, d3Service.event.sourceEvent.pageY ];
+          var o1 = [ o0[0] + (m0[0] - m1[0]) / 4, o0[1] + (m1[1] - m0[1]) / 4 ];
           projection.rotate([-o1[0], -o1[1]]);
 
           // Update the map
-          updateMapElements(projection, mapElements);
+          d3Utils.updateMapElements(projection, mapElements);
 
           // Update current map context
           $scope.$apply(function() {
-            currentMapService.getCurrentMapContext().properties.center.lon = o1[0];
-            currentMapService.getCurrentMapContext().properties.center.lat = o1[1];
+            currentMapService.getCurrentMapContext()
+              .properties.center.lon = o1[0];
+            currentMapService.getCurrentMapContext()
+              .properties.center.lat = o1[1];
           });
 
           consoleService.logMessage('debug', 'Rotated to ' +
@@ -397,27 +398,46 @@ angular.module('mapManager.d3.services', [
 
       function mousedown() {
         // Remember where the mouse was pressed, in canvas coords
-        m0 = trackballAngles(projection, d3.mouse(svg[0][0]));
+        m0 = d3Utils.trackballAngles(projection, d3Service.mouse(svg[0][0]));
         o0 = projection.rotate();
-        d3.event.preventDefault();
+        d3Service.event.preventDefault();
       }
 
       function mousemove() {
         if (m0) {
-          var m1 = trackballAngles(projection, d3.mouse(svg[0][0]));
-          o1 = composedRotation(o0[0], o0[1], o0[2],
+          var m1 = d3Utils.trackballAngles(projection, d3Service.mouse(svg[0][0]));
+          o1 = d3Utils.composedRotation(o0[0], o0[1], o0[2],
             m1[0] - m0[0], m1[1] - m0[1]);
 
           projection.rotate(o1);
 
           // Update the map
-          updateMapElements(projection, mapElements);
+          d3Utils.updateMapElements(projection, mapElements);
 
           // Update current map context
           $scope.$apply(function() {
-            currentMapService.getCurrentMapContext().properties.center.lon = o1[0];
-            currentMapService.getCurrentMapContext().properties.center.lat = o1[1];
+            currentMapService.getCurrentMapContext()
+              .properties.center.lon = o1[0];
+            currentMapService.getCurrentMapContext()
+              .properties.center.lat = o1[1];
           });
+
+          /* console.log('view box = '+svg.attr('viewBox'));
+          console.log('bbox = '+svg.node().getBBox());
+          // SVGRect
+          var bbox = svg.node().getBBox();
+          for (var elt in bbox) {
+            console.log('>> elt = '+elt);
+          }
+          console.log('x = '+bbox.x+', y = '+bbox.y+', width = '+bbox.width+', height = '+bbox.height);
+
+          var x1 = bbox.x;
+          var y1 = bbox.y;
+          var x2 = bbox.x+bbox.width;
+          var y2 = bbox.y+bbox.height;
+          console.log('x1 = '+x1+', y1 = '+y2+', x2 = '+x2+', y2 = '+y2);
+
+          console.log('lon1 / lat1 = '+projection.invert([x1, y1])+', lon2 / lat2 = '+projection.invert([x2, y2])); */
         }
       }
 
@@ -446,25 +466,26 @@ angular.module('mapManager.d3.services', [
      * @param {Object} projection the current projection of the map
      * @param {Object} mapElements the element kinds to update after moving
     */
-    configureMovingForMercatorProjection: function(/*$scope, svg, projection, mapElements*/) {
-      /*var m0, o0;
+    configureMovingForMercatorProjection: function($scope, svg, projection, mapElements) {
+      // See this link http://bl.ocks.org/patricksurry/6621971
+      var m0, o0;
       var drag = d3.behavior.drag()
       .on('dragstart', function() {
         console.log('>> dragstart');
         // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html and updated for d3 v3
-        //m0 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-        m0 = projection.translate();
+        m0 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
+        //m0 = projection.translate();
       })
       .on('drag', function() {
         console.log('>> dragend');
         if (m0) {
-          //var m1 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-          var m1 = d3.event.translate;
+          var m1 = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
+          //var m1 = d3.event.translate;
           projection.translate([m1[0] - m0[0], m1[1] - m0[1]]);
         }
       });
 
-      svg.call(drag);*/
+      svg.call(drag);
       //svg.attr("transform", "translate(" + d3.event.translate + ")");
     },
 
@@ -507,16 +528,16 @@ angular.module('mapManager.d3.services', [
 
     configureZoomingWithMouseWheelForOrthographicProjection: function($scope, svg, projection, dimension, mapElements) {
       // Configure zooming
-      var zoom = d3.behavior.zoom()
+      var zoom = d3Service.behavior.zoom()
            //.translate(projection.translate())
            .scale(projection.scale())
            //.saleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
         consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
-        projection/*.translate(d3.event.translate)*/.scale(d3.event.scale);
+        projection/*.translate(d3Service.event.translate)*/.scale(d3Service.event.scale);
 
         // Update the map
-        updateMapElements(projection, mapElements);
+        d3Utils.updateMapElements(projection, mapElements);
 
         // Update current map context
         $scope.$apply(function() {
@@ -530,23 +551,25 @@ angular.module('mapManager.d3.services', [
 
     configureZoomingWithMouseWheelForMercatorProjection: function($scope, svg/*, projection, dimension, mapElements*/) {
       // Configure zooming
-      var zoom = d3.behavior.zoom()
+      var zoom = d3Service.behavior.zoom()
            /*.translate(projection.translate())
            .scale(projection.scale())*/
            //.scaleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
         consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
-        //projection.translate(d3.event.translate).scale(d3.event.scale);
+        //projection.translate(d3Service.event.translate).scale(d3Service.event.scale);
         svg.attr('transform', 'translate(' + 
-            d3.event.translate.join(',') + ')scale(' + d3.event.scale + ')');
+            d3Service.event.translate.join(',') + ')scale(' + d3Service.event.scale + ')');
 
         // Update the map
-        //updateMapElements(projection, mapElements);
+        //d3Utils.updateMapElements(projection, mapElements);
 
         // Update current map context
-        $scope.$apply(function() {
+        // Throw a "Error: [$rootScope:inprog] $digest already in progress"
+        // See http://stackoverflow.com/questions/12729122/prevent-error-digest-already-in-progress-when-calling-scope-apply/23102223#23102223
+        /*$scope.$apply(function() {
           currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
-        });
+        });*/
       });
 
       // Apply zoom behavior
@@ -556,7 +579,7 @@ angular.module('mapManager.d3.services', [
 
     configureDefaultZoomingWithMouseWheel: function($scope, svg) {
       // Configure zooming
-      var zoom = d3.behavior.zoom()
+      var zoom = d3Service.behavior.zoom()
            /*.translate(projection.translate())
            .scale(projection.scale())*/
            .translate([0, 0])
@@ -565,9 +588,9 @@ angular.module('mapManager.d3.services', [
 
            //.scaleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
-        //projection.translate(d3.event.translate).scale(d3.event.scale);
+        //projection.translate(d3Service.event.translate).scale(d3Service.event.scale);
         svg.attr('transform', 'translate(' +
-            d3.event.translate.join(',') + ')scale(' + d3.event.scale + ')');
+            d3Service.event.translate.join(',') + ')scale(' + d3Service.event.scale + ')');
 
         // Update the map
         //updateMapElements(projection, mapElements);

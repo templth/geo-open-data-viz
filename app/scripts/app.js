@@ -21,6 +21,7 @@ angular
     'toaster',
     'colorpicker.module',
     'colorBrewer',
+    'd3',
     'mapManager.form',
     'mapManager.console',
     'mapManager.map',

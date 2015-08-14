@@ -35,6 +35,7 @@ module.exports = function(config) {
       'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'bower_components/d3/d3.js',
       'bower_components/topojson/topojson.js',
+      'bower_components/d3-geo-projection/d3.geo.projection.js',
       'bower_components/bootstrap-select/bootstrap-select.js',
       'bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js',
       'bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js',

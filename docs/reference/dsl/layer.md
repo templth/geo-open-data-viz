@@ -602,15 +602,131 @@ Following sub sections describe the way to configure these layers.
 
 ## Defining variables
 
-TODO
+The block `variables` allows to define the set of usable variables. Each element must
+be an object with the possible following attributes:
+
+| Attribute   | Required | Description |
+| ----------- | -------- | ----------- |
+| `name`      | yes      | The name of the attribute |
+| `type`      | yes      | The type of the attribute. Supported types are primitive types (`string`, `integer`, `boolean`, `date`) but also `bounds` for the current display area, `object` for data objects and `geometry` for the current shape. |
+| `default`   | no       | The default value |
+
+Following code describes how to define variables for a layer:
+
+```
+{
+  id: 'meteorites',
+  type: 'data',
+  (...)
+  variables: [
+    {
+      name: 'mass',
+      type: 'string',
+      default: 100
+    },
+    {
+      name: 'area',
+      type: 'bounds'
+    },
+    {
+      name: 'data',
+      type: 'object'
+    },
+    {
+      name: 'geometry',
+      type: 'Geometry'
+    }
+  ]
+  (...)
+}
+```
 
 ## Using variables
 
-TODO
+Variable values are gotten from the current context of the layer and / or the map.
+
+```
+{
+  id: 'meteorites',
+  type: 'data',
+  (...)
+  data: {
+    (...)
+    where: 'mass<{mass} & lon < {area.y}'
+  }
+  (...)
+}
+```
+
+```
+{
+  id: 'meteorites',
+  type: 'data',
+  (...)
+  data: {
+    (...)
+    where: 'name == {data.name}
+  }
+  (...)
+}
+```
+
+## Defining a filtering box
+
+```
+{
+  id: 'meteorites',
+  type: 'data',
+  (...)
+  display: {
+    (...)
+    filtering: {
+      fields: [
+        {
+          label: 'Name',
+          variable: 'name'
+        },
+        (...)
+      ]
+    }
+  }
+  (...)
+}
+```
 
 # Sub maps
 
 TODO
+
+```
+{
+  (...)
+  display: {
+    subMap: {
+      layers: [
+        'layer1',
+        'layer2'
+      ],
+      variables: [
+        bounds: 
+      ]
+    }
+  },
+  (...)
+}
+```
+
+```
+{
+  (...)
+  behavior: {
+    subMap: {
+      display: 'dblclick'
+    }
+  }
+  (...)
+}
+```
 
 # Expressions
 

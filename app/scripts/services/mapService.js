@@ -26,6 +26,10 @@ angular.module('mapManager.map', [
         return this.currentMapElement;
       },
 
+      getCurrentMapId: function() {
+        return this.currentMapId;
+      },
+
       setCurrentMapId: function(mapId) {
         this.currentMapId = mapId;
       },
@@ -39,7 +43,7 @@ angular.module('mapManager.map', [
       },
 
       registerCurrentMapContext: function(svg, path,
-          projection, gMap, gLayers) {
+          projection, gMap, gLayers, dimensions) {
         if (this.currentMapContext[this.currentMapId] == null) {
           this.currentMapContext[this.currentMapId] = {};
         }
@@ -49,10 +53,12 @@ angular.module('mapManager.map', [
         this.currentMapContext[this.currentMapId].projection = projection;
         this.currentMapContext[this.currentMapId].gMap = gMap;
         this.currentMapContext[this.currentMapId].gLayers = gLayers;
+        this.currentMapContext[this.currentMapId].dimensions = dimensions;
       },
 
       getCurrentMapContext: function() {
         if (this.currentMapContext[this.currentMapId] == null) {
+          console.log('1');
           this.currentMapContext[this.currentMapId] = {};
         }
 
@@ -97,6 +103,7 @@ angular.module('mapManager.map', [
             name: 'World',
             type: 'd3js',
             projection: 'orthographic',
+            //projection: 'mercator',
             scale: 420,
             center: {
               lon: 60,
@@ -155,6 +162,9 @@ angular.module('mapManager.map', [
                     }/*,
                     value: 'd.id === 840 || d.id === 250 ? "#ff0000" : "#000000"'*/
                   },
+                  bounds: {
+                    applyIf: ''
+                  },
                   tooltip: {
                     enabled: true,
                     fromScale: 300,
@@ -176,7 +186,10 @@ angular.module('mapManager.map', [
                     display: 'click'
                     //display: 'mouseOver',
                     //hide: 'mouseOut'
-                  }*/
+                  },*/
+                  subMap: {
+                    display: 'click'
+                  },
                   tooltip: {
                     //display: 'click'
                     display: 'mouseOver',
@@ -238,7 +251,11 @@ angular.module('mapManager.map', [
                       colors: [ '#ffffb2', '#fed976', '#feb24c',
                                 '#fd8d3c', '#f03b20', '#bd0026' ]
                     },
-                    value: 'parseDate(d.year).getFullYear()'
+                    value: 'parseDate(d.year).getFullYear()',
+                    /*label: {
+                      text: 'd.name',
+                      position: { x: 5, y: 5 }
+                    }*/
                   },
                   legend: {
                     enabled: true,

@@ -51,6 +51,7 @@
                   <option value="none">None</option>
                   <option value="orthographic">Orthographic</option>
                   <option value="mercator">Mercator</option>
+                  <option value="satellite">Satellite</option>
                 </select>
               </field>
               <field label="Scale">
@@ -220,6 +221,13 @@
               <!-- data -->
               <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
                 <form name="dataForm" novalidate class="form-horizontal">
+                  <field label="Source">
+                    <select class="form-control input-sm" name="source"
+                         ng-model="layer.data.source"
+                         ng-model-options="{ updateOn: 'blur' }">
+                      <option value="{{linkedSource.id}}" ng-repeat="linkedSource in linkedSources">{{linkedSource.name}}</option>
+                    </select>
+                  </field>
                   <field label="URL">
                     <input class="form-control input-sm" name="name" type="text" 
                          required ng-model="layer.data.url"
