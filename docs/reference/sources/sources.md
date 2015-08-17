@@ -1,3 +1,5 @@
+# Map providers
+
 * http://freegisdata.rtwilson.com/
 * US
   * https://uwaterloo.ca/library/geospatial/collections/us-and-world-geospatial-data-resources	
@@ -12,3 +14,10 @@
 List of freely available sources:
 
 * http://www.naturalearthdata.com/
+
+# Data providers
+
+* Earthquakes:
+ * New Zealand: http://geonet.org.nz/
+ * Chili with animation: http://pnavarrc.github.io/earthquake/
+

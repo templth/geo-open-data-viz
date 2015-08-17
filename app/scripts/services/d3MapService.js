@@ -81,6 +81,8 @@ angular.module('mapManager.d3.services', [
     createMap: function($scope, element) {
       var mWidth = element.width();
       var mHeight = element.height();
+      console.log('mWidth = '+mWidth+', mHeight = '+mHeight);
+
       var width = 938;
       var height = 500;
 
@@ -392,6 +394,7 @@ angular.module('mapManager.d3.services', [
     */
     configureMovingWithMouseMoveForOrthographicProjection: function(
         $scope, svg, projection, mapElements) {
+      // See http://bl.ocks.org/patricksurry/5721459
       var m0 = null;
       var o0;
       var o1;
@@ -589,7 +592,8 @@ angular.module('mapManager.d3.services', [
            //.scaleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
         //projection.translate(d3Service.event.translate).scale(d3Service.event.scale);
-        svg.attr('transform', 'translate(' +
+        var currentMapContext = currentMapService.getCurrentMapContext();
+        currentMapContext.gMap.attr('transform', 'translate(' +
             d3Service.event.translate.join(',') + ')scale(' + d3Service.event.scale + ')');
 
         // Update the map

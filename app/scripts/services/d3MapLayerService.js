@@ -463,6 +463,9 @@ angular.module('mapManager.d3.services')
           valueChecker.isNotNull(layer.behavior.subMap)) {
         this.configureSubMapBehavior(svg, path, layer, pathElements);
       }
+
+      // TODO: animation
+      // See http://pnavarrc.github.io/earthquake/
     },
 
     /**
@@ -492,6 +495,9 @@ angular.module('mapManager.d3.services')
       // See https://www.jasondavies.com/maps/zoom/
       // See http://bl.ocks.org/mbostock/2206590
       // See http://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
+      // See http://bl.ocks.org/mbostock/5126418
+      // See http://bl.ocks.org/mbostock/4707858
+      // See http://bl.ocks.org/jasondavies/4183701
       pathElements.on('click', function(d) {
         var currentMapContext = currentMapService.getCurrentMapContext();
         var projection = currentMapContext.projection;
@@ -584,14 +590,14 @@ angular.module('mapManager.d3.services')
          .attr('transform', 'translate(' + translate +
            ')scale(' + scale + ')');*/
 
-        var map2 = svg.append('g').attr('id', 'map2');
-        map2.on('click', function() {
+        var gMap2 = svg.append('g').attr('id', 'map2');
+        gMap2.on('click', function() {
           currentMapService.setCurrentMapId('map1');
-          map2.remove();
+          gMap2.remove();
         });
 
         // Create the background with opacity
-        var rect2 = map2.append('rect')
+        gMap2.append('rect')
           .attr('class', 'background')
           .attr('width', width)
           .attr('height', height)
@@ -600,86 +606,60 @@ angular.module('mapManager.d3.services')
           .style('opacity', '0.75');
 
         // Create container for layers
-        var layers2 = map2.append('g').attr('id', 'map2-layers');
+        var gLayers2 = gMap2.append('g').attr('id', 'map2-layers');
 
         // Create root layer
-        var rootLayer = layers2.append('g').attr('id', 'root');
+        var rootLayer = gLayers2.append('g').attr('id', 'root');
 
-        // Clone element
-        var id = d.id;
-        var node = d3Service.select('[id="'+id+'"]'/*'#'+d.id*/).node();
-        var elt = d3Service.select(rootLayer.node().appendChild(node.cloneNode(true)));
+        var projection2 = d3Service.geo.orthographic()
+                 .scale(420)
+                 .clipAngle(90)
+                 /*.clipAngle(90)*/.rotate([ 60, -30 ]);
+        var path2 = d3Service.geo.path().projection(projection2);
 
-        map2.moveToFront();
-        elt.attr('id','cloned'+id);
-        //elt.style('fill', 'red');
-        //map2.
+        currentMapService.setCurrentMapId('map2');
+        currentMapService.registerCurrentMapContext(svg, path2,
+          projection2, gMap2, gLayers2, {width: width, height: height});
 
-        /*.attr("x", 0)
-          .attr("y", 0)
-          .attr("height", h)
-          .attr("width", w)
-          .style("stroke", bordercolor)
-          .style("fill", "none")
-          .style("stroke-width", border);*/
+        var layerElements = rootLayer.selectAll('path')
+                 .data([ d ])
+                 .enter()
+                 .append('path')
+                 .attr('id', function(d) {
+                   return 'cloned' + d.id;
+                 })
+                 .attr('d', path2)
+                 .style('fill', '#ff0000')
+                 .style('stroke', '#fff')
+                 .style('strokeWidth', '1px')
+                 .style('strokeOpacity', '1');
 
-        /*rect2.style('stroke','blue').style('stroke-width', '2').transition().attr('x', '200px').attr('y', '200px')
-        .duration(3000) // this is 1s
-        .delay(100);*/
+        var bds = self.getBounds(path2, d, width, height);
 
-        var projection1 = d3Service.geo.orthographic()
-                 .scale(248)
-                 .clipAngle(90);
-                 //.clipAngle(90)/*.rotate(0,0)*/;
-        var path1 = d3Service.geo.path().projection(projection1);
-        //console.log('>> path1 = '+path1);
-        var pathElements = d3Service.selectAll('#map2 path')/*./*transition().duration(3000).delay(100).*//*attr('d', path1);*/
-         // this is 1s
-        ;
-
-        //map2.transition().duration(3000).delay(100).attr('transform', 'translate(200,200)');
-        var bds = self.getBounds(path, d, width, height);
-        //var transf = d3.svg.transform().rotate(-54).scale(bds.scale);
-
-        /*d3Service.transition().delay(100).duration(750).tween('rotate', function() {
+        d3Service.select('#map2-layers').transition()
+          .delay(100).duration(750)
+          .tween('rotate', function() {
             var p = d3Service.geo.centroid(d);
-            var r = d3Service.interpolate(projection1.rotate(), [-p[0], -p[1]]);
+            var r = d3Service.interpolate(projection2.rotate(), [-p[0], -p[1]]);
             return function(t) {
-              projection1.rotate(r(t));
-              var path1 = d3.geo.path().projection(projection1);
-              pathElements.attr('d', path1);
+              projection2.rotate(r(t));
+              path2 = path2.projection(projection2);
+              layerElements.attr('d', path2);
 
             };
-          });*/
-
-        d3Service.select('#map2-layers').transition().duration(3000).delay(2000)
-          .attr('transform', 'translate('+bds.translate[0]+','+bds.translate[1]+'),scale('+bds.scale+')')
-          .style('stroke-width', '0.2px')
-          .each('end', function() {
-            console.log('1 - end');
-            currentMapService.setCurrentMapId('map2');
-            self.applyLayersOnSubMap(svg, path1, layer);
-            //d3Service.select('#map2-meteorites').selectAll('g')
-            //  .attr('transform', 'translate('+bds.translate[0]+','+bds.translate[1]+'),scale('+bds.scale+')');
           })
-              /*.tween("rotate", function() {
-                var projection = d3.geo.orthographic()
-                     .scale(bds.scale)
-                     .clipAngle(90);
+          .tween('scale', function() {
+            var r = d3Service.interpolate(projection2.scale(), 1000);
+            return function(t) {
+              projection2.scale(r(t));
+              path2 = path2.projection(projection2);
+              layerElements.attr('d', path2);
 
-                //var projection = currentMapService.getCurrentMapContext().projection;
-                var r = d3.interpolate(projection.rotate(), [2, -49]);
-                return function(t) {
-                  projection.rotate(r(t));
-                  map2.selectAll('path').attr('d', path);
-                };
-              })*/;
-
-        /*d3.select('#map1 path').transition().duration(3000).delay(100)
-          .attr('transform', 'scale(60)');*/
-          //d3.select('#map1').transition().duration(3000).delay(100).attr('transform', 'scale(60)');
-          //.tween("scale", function() {
-
+            };
+          })
+          .each('end', function() {
+            self.applyLayersOnSubMap(svg, path2, layer);
+          });
       });
     },
 
@@ -747,7 +727,7 @@ function normalise(x) {
 
     /**
      * @ngdoc method
-     * @name applyStylesForGeoDataLayer
+     * @name createGeoDataLayer
      * @methodOf mapManager.d3.services:layerService
      * @description
      * Create a layer of type `geodata`.
@@ -851,7 +831,7 @@ function normalise(x) {
       return styleHints;
     },
 
-    createFillDataLayer: function(svg, layer) {
+    createFillDataLayer: function(svg, layer, context) {
       var self = this;
       var value = $parse(layer.display.fill.value);
 
@@ -878,7 +858,7 @@ function normalise(x) {
 
     /**
      * @ngdoc method
-     * @name applyStylesForGeoDataLayer
+     * @name applyStylesForShapeLayer
      * @methodOf mapManager.d3.services:layerService
      * @description
      * Apply styles on the geo data according to the configuration
@@ -940,6 +920,9 @@ function normalise(x) {
           });
         }
       }
+
+      // raster images
+      // See http://bl.ocks.org/mbostock/4150951
 
       return styleHints;
     },
@@ -1062,7 +1045,7 @@ function normalise(x) {
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */
-    createCircleObjectsDataLayer: function(svg, path, layer) {
+    createCircleObjectsDataLayer: function(svg, path, layer, context) {
       console.log('createCircleObjectsDataLayer - layer = '+JSON.stringify(layer));
       var self = this;
       var origin = $parse(layer.display.shape.origin);
@@ -1125,7 +1108,7 @@ function normalise(x) {
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */
-    createImageObjectsDataLayer: function(svg, path, layer) {
+    createImageObjectsDataLayer: function(svg, path, layer, context) {
       // Experimental - Display image - Not working at the moment
       var origin = $parse(layer.display.shape.origin);
       // var radius = $parse(layer.display.shape.radius);
@@ -1183,7 +1166,7 @@ function normalise(x) {
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */
-    createLineObjectsDataLayer: function(svg, path, layer) {
+    createLineObjectsDataLayer: function(svg, path, layer, context) {
       var layerElement = this.getLayerElement(svg, layer);
       var value = $parse(layer.display.shape.value);
       var pointValue = $parse(layer.display.shape.pointValue);
@@ -1226,7 +1209,7 @@ function normalise(x) {
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */
-    createPolygonObjectsDataLayer: function(svg, path, layer) {
+    createPolygonObjectsDataLayer: function(svg, path, layer, context) {
       var layerElement = this.getLayerElement(svg, layer);
       var value = $parse(layer.display.shape.value);
       var pointValue = $parse(layer.display.shape.pointValue);
@@ -1288,16 +1271,16 @@ function normalise(x) {
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */
-    createObjectsDataLayer: function(svg, path, layer) {
+    createObjectsDataLayer: function(svg, path, layer, context) {
       if (layer.display.shape) {
         if (layer.display.shape.type === 'circle') {
-          this.createCircleObjectsDataLayer(svg, path, layer);
+          this.createCircleObjectsDataLayer(svg, path, layer, context);
         } else if (layer.display.shape.type === 'image') {
-          this.createImageObjectsDataLayer(svg, path, layer);
+          this.createImageObjectsDataLayer(svg, path, layer, context);
         } else if (layer.display.shape.type === 'line') {
-          this.createLineObjectsDataLayer(svg, path, layer);
+          this.createLineObjectsDataLayer(svg, path, layer, context);
         } else if (layer.display.shape.type === 'polygon') {
-          this.createPolygonObjectsDataLayer(svg, path, layer);
+          this.createPolygonObjectsDataLayer(svg, path, layer, context);
         }
       }
     },
@@ -1320,18 +1303,18 @@ function normalise(x) {
      * @param {Object} path the path element for the projection
      * @param {Object} layer the layer
     */
-    createLayer: function(svg, path, layer) {
+    createLayer: function(svg, path, layer, context) {
       consoleService.logMessage('info', 'Creating layer of type "' +
         layer.type + '" with identifier "' + layer.id + '"');
 
       if (layer.type === 'graticule') {
-        this.createGraticuleLayer(svg, path, layer);
+        this.createGraticuleLayer(svg, path, layer, context);
       } else if (layer.type === 'data' && layer.mode === 'objects') {
-        this.createObjectsDataLayer(svg, path, layer);
+        this.createObjectsDataLayer(svg, path, layer, context);
       } else if (layer.type === 'data' && layer.mode === 'fill') {
-        this.createFillDataLayer(svg, layer);
+        this.createFillDataLayer(svg, layer, context);
       } else if (layer.type === 'geodata') {
-        this.createGeoDataLayer(svg, path, layer);
+        this.createGeoDataLayer(svg, path, layer, context);
       }
     },
 
