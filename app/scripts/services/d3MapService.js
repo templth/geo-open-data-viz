@@ -12,8 +12,9 @@ angular.module('mapManager.d3.services', [
  * Provide functions to create and refresh map rendering.
  */
 .service('mapCreatorService', [ 'currentMapService', 'mapInteractionService',
-    'layerService', 'projectionService', 'd3Service', function(currentMapService,
-      mapInteractionService, layerService, projectionService, d3Service) {
+    'layerService', 'projectionService', 'd3Service', 'mapUtils', 'valueChecker',
+    function(currentMapService, mapInteractionService, layerService,
+      projectionService, d3Service, mapUtils, valueChecker) {
   return {
     /**
      * @ngdoc method
@@ -38,20 +39,6 @@ angular.module('mapManager.d3.services', [
       }
 
       this.createMap($scope, element);
-    },
-
-    createSubMapStructure: function() {
-
-    },
-
-    createMainMapStructure: function(svg) {
-      // Create element for the map
-      var gMap = svg.append('g').attr('id', 'map1');
-
-      // Create element for layers
-      var gLayers = gMap.append('g').attr('id', 'map1-layers');
-
-      return { gMap: gMap, gLayers: gLayers };
     },
 
     /**
@@ -104,6 +91,14 @@ angular.module('mapManager.d3.services', [
           currentMapService.getCurrentMap().center.lat ]);
       }
 
+      // Configure clip angle
+      if (!_.isNull(projection) &&
+          currentMapService.getCurrentMap().projection === 'orthographic' &&
+          valueChecker.isNotNull(currentMapService.getCurrentMap().clipAngle)) {
+        console.log('clipAngle = '+currentMapService.getCurrentMap().clipAngle);
+        projection.clipAngle(currentMapService.getCurrentMap().clipAngle);
+      }
+
       var path = projectionService.configurePathWithProjection(projection);
 
       var svg = d3Service.select(element[0]).append('svg')
@@ -118,7 +113,7 @@ angular.module('mapManager.d3.services', [
           .attr('height', height);
 
       // Create structure elements for the map (map and layers)
-      var mainMapElements = this.createMainMapStructure(svg);
+      var mainMapElements = mapUtils.createMainMapStructure(svg);
 
       // Save current map context
       currentMapService.registerCurrentMapContext(svg, path, projection,

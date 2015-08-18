@@ -49,17 +49,30 @@ angular.module('mapManagerApp')
         }
       }
 
-      var exprFct = $parse($scope.expression.value);
+      try {
+        var exprFct = $parse($scope.expression.value);
+        var context = null;
+        if (valueChecker.isNotNull($scope.expression.context)) {
+          var contextFct = $parse($scope.expression.context);
+          context = contextFct();
+        }
 
-      if (_.isArray(jsData)) {
-        var results = [];
-        _.forEach(jsData, function(elt, i) {
-          results.push(exprFct(expressionService.getExpressionContext(elt, i)));
-        });
-        $scope.expression.result = JSON.stringify(results, null, 2);
-      } else {
-        var result = exprFct(expressionService.getExpressionContext(jsData, 0));
-        $scope.expression.result = JSON.stringify(result, null, 2);
+        if (_.isArray(jsData)) {
+          var results = [];
+          _.forEach(jsData, function(elt, i) {
+            results.push(exprFct(
+              expressionService.getExpressionContext(elt, i, context)));
+          });
+          $scope.expression.result = JSON.stringify(results, null, 2);
+        } else {
+          var result = exprFct(
+            expressionService.getExpressionContext(jsData, 0, context));
+          $scope.expression.result = JSON.stringify(result, null, 2);
+        }
+        $scope.expression.success = true;
+      } catch (err) {
+        $scope.expression.result = err.message;
+        $scope.expression.success = false;
       }
     };
 

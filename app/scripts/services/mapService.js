@@ -169,6 +169,18 @@ angular.module('mapManager.map', [
                     enabled: true,
                     fromScale: 300,
                     text: '"Name: "+d.properties.name',
+                  },
+                  subMap: {
+                    layers: [
+                      'cities-country',
+                      'meteorites-country'
+                    ],
+                    variables: [
+                      'bounds', 'shape'
+                    ],
+                    legend: {
+                      label: 'shape.properties.name'
+                    }
                   }
                 },
                 styles: {
@@ -182,6 +194,24 @@ angular.module('mapManager.map', [
                   }
                 },
                 behavior: {
+                  animations: [
+                    {
+
+                    }
+                  ],
+                  events: {
+                    click: [
+                      {
+                        display: 'subMap'
+                      }
+                    ],
+                    mouseover: {
+                      display: 'tooltip'
+                    },
+                    mouseout: {
+                      hide: 'tooltip'
+                    }
+                  },
                   /*zoomBoundingBox: {
                     display: 'click'
                     //display: 'mouseOver',
@@ -268,8 +298,8 @@ angular.module('mapManager.map', [
                   }
                 },
                 behavior: {
-                  tooltip: {
-                    display: 'click'
+                  click: {
+                    display: 'tooltip'
                     //display: 'mouseOver',
                     //hide: 'mouseOut'
                   }
@@ -277,6 +307,99 @@ angular.module('mapManager.map', [
                 applyOn: 'layers',
                 applied: true,
                 visible: true
+              },
+              {
+                id: 'meteorites-country',
+                type: 'data',
+                mode: 'objects',
+                rank: 6,
+                data: {
+                  url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
+                  type: 'csv',
+                  source: '15',
+                  content: [],
+                  loaded: false,
+                  id: 'name',
+                  where: 'd.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)',
+                  order: {
+                    field: 'mass',
+                    ascending: false
+                  }
+                },
+                name: 'Meteorites (Country)',
+                display: {
+                  shape: {
+                    type: 'circle',
+                    radius: 'd.mass / 50000',
+                    origin: '[ d.reclong, d.reclat ]',
+                    opacity: 0.75,
+                    threshold: {
+                      paletteCode: 'YlOrRd',
+                      paletteReverse: false,
+                      values: [ 1800, 1900, 1950, 2000, 2015 ],
+                      colors: [ '#ffffb2', '#fed976', '#feb24c',
+                                '#fd8d3c', '#f03b20', '#bd0026' ]
+                    },
+                    value: 'parseDate(d.year).getFullYear()',
+                    /*label: {
+                      text: 'd.name',
+                      position: { x: 5, y: 5 }
+                    }*/
+                  },
+                  legend: {
+                    enabled: true,
+                    label: 'd'
+                  },
+                  tooltip: {
+                    enabled: true,
+                    fromScale: 300,
+                    text: '"Name: "+d.name+"<br/>Year: "+d.year+"<br/>Mass (g): "+d.mass',
+                  }
+                },
+                behavior: {
+                  click: {
+                    display: 'tooltip'
+                  }
+                },
+                applyOn: 'layers',
+                applied: false,
+                visible: false
+              },
+              {
+                id: 'cities-country',
+                type: 'data',
+                mode: 'objects',
+                rank: 6,
+                data: {
+                  inline: '[{name: "Paris", lat: 48.50, lon: 2.20 }]',
+                  content: [],
+                  loaded: false,
+                  id: 'name',
+                  where: 'isInBounds([d.lon, d.lat], bounds)'
+                  /*,
+                  where: 'd.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)',
+                  order: {
+                    field: 'mass',
+                    ascending: false
+                  }*/
+                },
+                name: 'Cities (Country)',
+                display: {
+                  shape: {
+                    type: 'circle',
+                    radius: '.2',
+                    origin: '[ d.lon, d.lat ]',
+                    opacity: 0.75,
+                    color: 'black',
+                    label: {
+                      text: 'd.name',
+                      position: { x: 5, y: 5 }
+                    }
+                  }
+                },
+                applyOn: 'layers',
+                applied: false,
+                visible: false
               },
               {
                 id: 'test',

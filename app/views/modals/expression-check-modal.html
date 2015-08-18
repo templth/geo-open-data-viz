@@ -9,6 +9,7 @@
     <div class="btn-group" role="group">
       <button type="button" ng-click="displayPanel('structure')" ng-class="{active: isDisplayedPanel('structure')}" class="btn btn-default">Structure</button>
       <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
+      <button type="button" ng-click="displayPanel('context')"  ng-class="{active: isDisplayedPanel('context')}" class="btn btn-default">Context</button>
       <button type="button" ng-click="displayPanel('expression')"  ng-class="{active: isDisplayedPanel('expression')}" class="btn btn-default">Expression</button>
     </div>
   </div>
@@ -33,6 +34,15 @@
       <field label="Data">
         <textarea row="10" class="form-control input-sm data" name="data"
            ng-model="expression.data"
+           ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+      </field>
+    </div>
+    <!-- context -->
+    <div ng-show="shouldDisplayPanel('context')" class="layer-description-area">
+      <field label="Context">
+        <textarea row="10" class="form-control input-sm data" name="context"
+           ng-model="expression.context"
            ng-model-options="{ updateOn: 'blur' }">
         </textarea>
       </field>

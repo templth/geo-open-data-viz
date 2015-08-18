@@ -1,0 +1,12 @@
+{
+  "local": {
+  	"storage": {
+  	  "type": "inmemory"
+  	}
+  },
+  "demo": {
+  	"storage": {
+  	  "type": ""
+  	}
+  }
+}

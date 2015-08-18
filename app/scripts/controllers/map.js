@@ -25,7 +25,8 @@ angular.module('mapManagerApp')
       center: {
         lon: map.center.lon,
         lat: map.center.lat
-      }
+      },
+      clipAngle: map.clipAngle
     };
 
     // Set current map in scope

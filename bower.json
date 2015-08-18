@@ -19,7 +19,8 @@
     "angular-bootstrap-colorpicker": "3.0.18",
     "AngularJS-Toaster": "0.4.15",
     "angular-colorbrewer-selector": "0.0.3",
-    "lodash": "3.8.0"
+    "lodash": "3.8.0",
+    "ngStorage": "0.3.7"
   },
   "overrides": {
     "bootstrap": {

@@ -21,6 +21,10 @@ module.exports = function (grunt) {
     dist: 'dist'
   };
 
+  // Configuration
+  var appPackageJson = grunt.file.readJSON('package.json');
+  var environmentsJson = grunt.file.readJSON('environments.json');
+
   // Define the configuration for all the tasks
   grunt.initConfig({
 
@@ -457,6 +461,27 @@ module.exports = function (grunt) {
         src: ['app/**/*.js', '!app/**/*-spec.js'],
         title: 'Docs'
       }
+    },
+
+    ngconstants: {
+      options: {
+        name: 'app.config',
+        dest: '<%= yeoman.app %>/scripts/config.js',
+        constants: function() {
+          return {
+            environment: grunt.option('env') || 'NO_ENV',
+            appVersion: appPackageJson.version
+          };
+        }
+      },
+
+      local: {
+        constants: {
+          storageType: '<%= environmentsJson.local.storage.type %>',
+        }
+      },
+
+
     }
   });
 
