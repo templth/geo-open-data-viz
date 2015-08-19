@@ -54,7 +54,7 @@
     "test": "grunt test",
     "map:sample:generate": "node tools/map-sample-serializer.js",
     "schema:generate": "node tools/schema-entities-generator.js",
-    "install": "node tools/installer.js",
+    "apispark:install": "node tools/installer.js",
     "site:generate": "node docs/templates/site-generator.js"
   }
 }

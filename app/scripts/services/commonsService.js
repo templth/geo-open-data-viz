@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('mapManager.commons', [ 'mapManager.map',
-                                'mapManager.d3.services' ])
+        'mapManager.d3.services', 'mapManager.utilities' ])
   /**
    * @ngdoc service
    * @name mapManager.commons:commonsService
@@ -10,7 +10,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
    * into their associated scope.
    */
   .service('commonsService', function(currentMapService,
-      layerService, mapCreatorService, toaster) {
+      layerService, mapCreatorService, toaster, valueChecker) {
     return {
       /**
        * @ngdoc method
@@ -216,6 +216,10 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           layerService.refreshLayerApplying(svg, path, layer);
         });
+
+        $scope.shoudDisplayCheckExpression = function(sourceId) {
+          return valueChecker.isNotNull(sourceId);
+        };
 
         $scope.checkExpression = function(domain, attribute, linkedSources,
                                         source, rootObject, expression, description) {

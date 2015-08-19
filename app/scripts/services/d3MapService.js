@@ -403,22 +403,22 @@ angular.module('mapManager.d3.services', [
 
       function mousemove() {
         if (m0) {
-          var m1 = d3Utils.trackballAngles(projection, d3Service.mouse(svg[0][0]));
+          /*var m1 = d3Utils.trackballAngles(projection, d3Service.mouse(svg[0][0]));
           o1 = d3Utils.composedRotation(o0[0], o0[1], o0[2],
             m1[0] - m0[0], m1[1] - m0[1]);
 
           projection.rotate(o1);
 
           // Update the map
-          d3Utils.updateMapElements(projection, mapElements);
+          d3Utils.updateMapElements(projection, mapElements);*/
 
           // Update current map context
-          $scope.$apply(function() {
-            currentMapService.getCurrentMapContext()
+          //$scope.$apply(function() {
+          /*  currentMapService.getCurrentMapContext()
               .properties.center.lon = o1[0];
             currentMapService.getCurrentMapContext()
-              .properties.center.lat = o1[1];
-          });
+              .properties.center.lat = o1[1];*/
+          //});
 
           /* console.log('view box = '+svg.attr('viewBox'));
           console.log('bbox = '+svg.node().getBBox());
@@ -538,9 +538,9 @@ angular.module('mapManager.d3.services', [
         d3Utils.updateMapElements(projection, mapElements);
 
         // Update current map context
-        $scope.$apply(function() {
+        //$scope.$apply(function() {
           currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
-        });
+        //});
       });
 
       // Apply zoom behavior
@@ -563,6 +563,7 @@ angular.module('mapManager.d3.services', [
         //d3Utils.updateMapElements(projection, mapElements);
 
         // Update current map context
+        currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
         // Throw a "Error: [$rootScope:inprog] $digest already in progress"
         // See http://stackoverflow.com/questions/12729122/prevent-error-digest-already-in-progress-when-calling-scope-apply/23102223#23102223
         /*$scope.$apply(function() {

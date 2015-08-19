@@ -1,12 +1,32 @@
 {
   "local": {
-  	"storage": {
-  	  "type": "inmemory"
-  	}
+    "storage": {
+      "type": "inmemory"
+    },
+    "addSamples": true
+  },
+  "local-browserstorage": {
+    "storage": {
+      "type": "browserstorage"
+    },
+    "addSamples": true
+  },
+  "local-webapi": {
+    "storage": {
+      "type": "webapi",
+      "apiBaseUrl": ""
+    }
   },
   "demo": {
-  	"storage": {
-  	  "type": ""
-  	}
+    "storage": {
+      "type": "browserstorage"
+    },
+    "addSamples": true
+  },
+  "prod": {
+    "storage": {
+      "type": "webapi",
+      "apiBaseUrl": ""
+    }
   }
 }

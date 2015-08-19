@@ -14,9 +14,9 @@ angular.module('mapManager.d3.services')
  */
 .service('layerService', [ '$parse', 'currentMapService',
     'consoleService', 'valueChecker', 'expressionService', 'd3Service',
-    'eventUtils', 'mapUtils',
+    'eventUtils', 'mapUtils', 'd3Utils',
     function($parse, currentMapService, consoleService, valueChecker,
-      expressionService, d3Service, eventUtils, mapUtils) {
+      expressionService, d3Service, eventUtils, mapUtils, d3Utils) {
   return {
     // Utility function to update map
 
@@ -547,7 +547,8 @@ angular.module('mapManager.d3.services')
       };
     },
 
-    applyLayersOnSubMap: function(svg, path, layer, layerElement, additionalContext) {
+    applyLayersOnSubMap: function(svg, path,
+        layer, layerElement, additionalContext) {
       var self = this;
 
       _.forEach(layer.display.subMap.layers, function(layer) {
@@ -556,7 +557,8 @@ angular.module('mapManager.d3.services')
         self.createLayer(svg, path, subLayer, additionalContext);
       });
 
-      self.configureSubMapLegend(svg, path, layer, layerElement, additionalContext);
+      self.configureSubMapLegend(svg, path, layer,
+        layerElement, additionalContext);
     },
 
     /**
@@ -588,18 +590,60 @@ angular.module('mapManager.d3.services')
 
         var mapElements = mapUtils.createSubMapStructure(svg, 2,
           { width: width, height: height },
-          { fill: 'white', opacity: '0.95' });
+          { fill: 'white', opacity: '0.75' });
         mapElements.gMap.on('click', function() {
           currentMapService.setCurrentMapId('map1');
-          this.remove();
+          var selfElement = this;
+
+          // TODO: delete other layers than 'root'
+
+          d3Service.select('#map2-layers').transition()
+            .delay(100).duration(750)
+            .tween('rotate', function() {
+              var r = d3Service.interpolate(projection2.rotate(), [
+                currentMapService.getCurrentMapContext()
+                                 .properties.center.lon,
+                currentMapService.getCurrentMapContext()
+                                 .properties.center.lat
+              ]);
+              return function(t) {
+                projection2.rotate(r(t));
+                path2 = path2.projection(projection2);
+                //d3Utils.updateMapElements(projection2, [ { type: 'path'}, { type: 'circle' } ], path2);
+                layerElements.attr('d', path2);
+              };
+            })
+            .tween('scale', function() {
+              var r = d3Service.interpolate(projection2.scale(),
+                currentMapService.getCurrentMapContext().properties.scale);
+              return function(t) {
+                projection2.scale(r(t));
+                path2 = path2.projection(projection2);
+                //d3Utils.updateMapElements(projection2, [ { type: 'path'}, { type: 'circle' } ], path2);
+                layerElements.attr('d', path2);
+              };
+            })
+            .each('end', function() {
+              selfElement.remove();
+            });
+
+          d3Service.select('#map1').transition()
+            .delay(100).duration(750)
+            .attr('transform', 'translate(0,0)scale(1,1)');
         });
 
         // Create root layer
         var rootLayer = mapElements.gLayers.append('g').attr('id', 'root');
 
         var projection2 = d3Service.geo.orthographic()
-                 .scale(420)
-                 .clipAngle(90).rotate([ 60, -30 ]);
+              .scale(currentMapService.getCurrentMapContext().properties.scale)
+              .clipAngle(90)
+              .rotate([
+                currentMapService.getCurrentMapContext()
+                                 .properties.center.lon,
+                currentMapService.getCurrentMapContext()
+                                 .properties.center.lat
+              ]);
         var path2 = d3Service.geo.path().projection(projection2);
 
         currentMapService.setCurrentMapId('map2');
@@ -644,15 +688,19 @@ angular.module('mapManager.d3.services')
             };
           })
           .each('end', function() {
-            self.applyLayersOnSubMap(svg, path2, layer, rootLayer, { shape: d, bounds: bds.bounds });
+            self.applyLayersOnSubMap(svg, path2, layer, rootLayer,
+              { shape: d, bounds: bds.bounds });
           });
+
+        d3Service.select('#map1').transition()
+          .delay(100).duration(750)
+          .attr('transform', 'translate(750,40)scale(0.2083333283662796,0.2083333283662796)');
       });
     },
 
     configureSubMapLegend: function(svg, path, layer, layerElement, additionalContext) {
       if (valueChecker.isNotNull(layer.display.subMap.legend)) {
         var legendLabel = $parse(layer.display.subMap.legend.label);
-        console.log('>> layer.display.subMap.legend.label = '+layer.display.subMap.legend.label);
 
         // TODO: Configure the rect ize according the number of values
         var legendRect = layerElement.append('rect')
@@ -704,7 +752,6 @@ function normalise(x) {
             //var bounds = path.bounds(d);
             //console.log('>> bounds = '+bounds);
             var bb = d3Service.geo.bounds(feature);
-            console.log('>> bb = '+bb);
             /*var orig = origin(expressionService.getExpressionContext(d, i));
             orig[0] = parseFloat(orig[0]);
             orig[1] = parseFloat(orig[1]);
@@ -1070,8 +1117,6 @@ function normalise(x) {
      * @param {Object} additionalContext the additional context
     */
     createCircleObjectsDataLayer: function(svg, path, layer, additionalContext) {
-      console.log('createCircleObjectsDataLayer - layer = '+JSON.stringify(layer));
-      console.log('createCircleObjectsDataLayer - additionalContext = '+JSON.stringify(additionalContext));
       var self = this;
       var origin = $parse(layer.display.shape.origin);
       var radius = $parse(layer.display.shape.radius);

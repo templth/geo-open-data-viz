@@ -10,12 +10,15 @@ angular.module('mapManagerApp')
    */
   .controller('MapCtrl', function($scope, $modal, currentMapService, layerService, //
                                   projectionService, consoleService, //
-                                  mapCreatorService, map, maps, sources, //
+                                  mapCreatorService, map, mapLayers, maps, sources, //
                                   commonsService, toaster) {
 
     // Register common functions
     commonsService.registerCommonFunctionsInScope(
       $scope, $modal, 'map', maps, sources);
+
+    // Set layers in map
+    map.layers = mapLayers;
 
     // Set current map elements
     currentMapService.setCurrentMap(map);
@@ -179,6 +182,7 @@ angular.module('mapManagerApp')
     };
 
     $scope.addSource = function() {
+      console.log('>> $scope.sourceToAdd = '+JSON.stringify($scope.sourceToAdd, null, 2));
       $modalInstance.close($scope.sourceToAdd);
     };
 

@@ -42,6 +42,8 @@ module.exports = function(config) {
       'bower_components/AngularJS-Toaster/toaster.js',
       'bower_components/angular-colorbrewer-selector/dist/angular-color-brewer-picker.min.js',
       'bower_components/lodash/lodash.js',
+      'bower_components/ngstorage/ngStorage.js',
+      'bower_components/angular-uuid4/angular-uuid4.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       "app/scripts/**/*.js",

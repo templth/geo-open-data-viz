@@ -22,11 +22,15 @@ angular
     'colorpicker.module',
     'colorBrewer',
     'd3',
+    'uuid4',
+    'ngStorage',
+    'app.config',
     'mapManager.form',
     'mapManager.console',
     'mapManager.map',
     'mapManager.source',
-    'mapManager.webapi',
+    'mapManager.samples',
+    'mapManager.persistence',
     'mapManager.commons',
     'mapManager.utilities',
     'mapManager.d3.services',
@@ -55,6 +59,9 @@ angular
         resolve: {
           map: function(mapsService) {
             return mapsService.resolveCurrentMap();
+          },
+          mapLayers: function(mapsService) {
+            return mapsService.resolveCurrentMapLayers();
           },
           maps: function(mapsService) {
             return mapsService.resolveMaps();

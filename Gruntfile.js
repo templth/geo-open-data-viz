@@ -23,13 +23,15 @@ module.exports = function (grunt) {
 
   // Configuration
   var appPackageJson = grunt.file.readJSON('package.json');
-  var environmentsJson = grunt.file.readJSON('environments.json');
 
   // Define the configuration for all the tasks
   grunt.initConfig({
 
     // Project settings
     yeoman: appConfig,
+
+    // Environment settings
+    environmentsJson: grunt.file.readJSON('environments.json'),
 
     // Watches files for changes and runs tasks based on the changed files
     watch: {
@@ -463,7 +465,7 @@ module.exports = function (grunt) {
       }
     },
 
-    ngconstants: {
+    ngconstant: {
       options: {
         name: 'app.config',
         dest: '<%= yeoman.app %>/scripts/config.js',
@@ -477,7 +479,9 @@ module.exports = function (grunt) {
 
       local: {
         constants: {
+          addSamples: '<%= environmentsJson.local.addSamples %>',
           storageType: '<%= environmentsJson.local.storage.type %>',
+          apiBaseUrl: '<%= environmentsJson.local.storage.apiBaseUrl %>'
         }
       },
 
@@ -533,8 +537,10 @@ module.exports = function (grunt) {
       return grunt.task.run(['build', 'connect:dist:keepalive']);
     }
 
+    var env = grunt.option('env') || 'local';
     grunt.task.run([
       'clean:server',
+      'ngconstant:' + env,
       'wiredep',
       'html2js:main',
       'concurrent:server',
@@ -542,41 +548,65 @@ module.exports = function (grunt) {
       'connect:livereload',
       'watch'
     ]);
+
+    grunt.log.ok();
   });
 
-  grunt.registerTask('server', 'DEPRECATED TASK. Use the "serve" task instead', function (target) {
+  grunt.registerTask('server', 'DEPRECATED TASK. Use the "serve" task instead', function(target) {
     grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
     grunt.task.run(['serve:' + target]);
   });
 
-  grunt.registerTask('test', [
-    'clean:server',
-    'wiredep',
-    'concurrent:test',
-    'autoprefixer',
-    'html2js',
-    'connect:test',
-    'karma'
-  ]);
+  grunt.registerTask('test', function() {
+    var env = grunt.option('env') || 'local';
 
-  grunt.registerTask('build', [
-    'clean:dist',
-    'wiredep',
-    'useminPrepare',
-    'concurrent:dist',
-    'autoprefixer',
-    'html2js',
-    'concat',
-    'ngAnnotate',
-    'copy:dist',
-    'cdnify',
-    'cssmin',
-    'uglify',
-    'filerev',
-    'usemin',
-    'htmlmin',
-    'apisparkify'
-  ]);
+    var allTasks = [
+      'clean:server',
+      'ngconstant:' + env,
+      'wiredep',
+      'concurrent:test',
+      'autoprefixer',
+      'html2js',
+      'connect:test',
+      'karma'
+    ];
+
+    grunt.task.run(allTasks);
+
+    grunt.log.ok();
+  });
+
+  grunt.registerTask('build', function(target) {
+    var env = grunt.option('env') || 'local';
+
+    var allTasks = [
+      'clean:dist',
+      'ngconstant:' + env,
+      'wiredep',
+      'useminPrepare',
+      'concurrent:dist',
+      'autoprefixer',
+      'html2js',
+      'concat',
+      'ngAnnotate',
+      'copy:dist',
+      'cdnify',
+      'cssmin',
+      'uglify',
+      'filerev',
+      'usemin',
+      'htmlmin',
+      'apisparkify'
+    ];
+
+    if (target === 'dist') {
+      allTasks.push('compress');
+    }
+
+    grunt.task.run(allTasks);
+
+    grunt.log.ok();
+  });
 
   grunt.registerTask('default', [
     'newer:jshint',

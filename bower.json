@@ -20,7 +20,8 @@
     "AngularJS-Toaster": "0.4.15",
     "angular-colorbrewer-selector": "0.0.3",
     "lodash": "3.8.0",
-    "ngStorage": "0.3.7"
+    "ngstorage": "0.3.8",
+    "angular-uuid4": "0.3.0"
   },
   "overrides": {
     "bootstrap": {

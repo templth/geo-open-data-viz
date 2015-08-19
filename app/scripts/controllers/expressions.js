@@ -16,6 +16,8 @@ angular.module('mapManagerApp')
 
     var data = '[{name:"test1"},{name:"test2"}]';
     var structure = '["name"]';
+    console.log('sourceId = '+sourceId);
+    console.log('linkedSources = '+JSON.stringify(linkedSources, null, 2));
     if (valueChecker.isNotNull(sourceId) &&
         valueChecker.isNotNull(linkedSources)) {
       var source = _.find(linkedSources, 'id', sourceId);
