@@ -12,10 +12,10 @@ angular.module('mapManager.d3.services')
  * @description
  * Provide functions to create and manipulate layers of maps.
  */
-.service('layerService', [ '$parse', 'currentMapService',
+.service('layerService', [ '$parse', 'currentMapService', 'mapInteractionService',
     'consoleService', 'valueChecker', 'expressionService', 'd3Service',
     'eventUtils', 'mapUtils', 'd3Utils',
-    function($parse, currentMapService, consoleService, valueChecker,
+    function($parse, currentMapService, mapInteractionService, consoleService, valueChecker,
       expressionService, d3Service, eventUtils, mapUtils, d3Utils) {
   return {
     // Utility function to update map
@@ -547,6 +547,19 @@ angular.module('mapManager.d3.services')
       };
     },
 
+    /**
+     * @ngdoc method
+     * @name applyLayersOnSubMap
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Apply layers on sub map.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+     * @param {Object} layerElement the layer element
+     * @param {Object} additionalContext the additional context for expressions
+    */
     applyLayersOnSubMap: function(svg, path,
         layer, layerElement, additionalContext) {
       var self = this;
@@ -559,6 +572,119 @@ angular.module('mapManager.d3.services')
 
       self.configureSubMapLegend(svg, path, layer,
         layerElement, additionalContext);
+    },
+
+    /**
+     * @ngdoc method
+     * @name unapplyLayersOnSubMap
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Unapply layers on sub map.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} layer the layer
+    */
+    unapplyLayersOnSubMap: function(svg, layer) {
+      _.forEach(layer.display.subMap.layers, function(layer) {
+        d3Service.select('#map2-' + layer).remove();
+      });
+    },
+
+    /**
+     * @ngdoc method
+     * @name executeShowSubMapTransition
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Execute the transition to show the sub map
+     *
+     * @param {Object} d the current selected element
+     * @param {Object} projection the current projection
+     * @param {Object} path the current path
+     * @param {Object} layerElements the different path elements that define the shape
+     * @param {Function} onEndFct the function to execute when transition ends
+    */
+    executeShowSubMapTransition: function(d, projection,
+        path, layerElements, onEndFct) {
+      d3Service.select('#map2-layers').transition()
+        .delay(100).duration(750)
+        .tween('rotate', function() {
+          var p = d3Service.geo.centroid(d);
+          var r = d3Service.interpolate(projection.rotate(), [-p[0], -p[1]]);
+          return function(t) {
+            projection.rotate(r(t));
+            path = path.projection(projection);
+            layerElements.attr('d', path);
+
+          };
+        })
+        .tween('scale', function() {
+          var r = d3Service.interpolate(projection.scale(), 1000);
+          return function(t) {
+            projection.scale(r(t));
+            path = path.projection(projection);
+            layerElements.attr('d', path);
+
+          };
+        })
+        .each('end', onEndFct);
+    },
+
+    /**
+     * @ngdoc method
+     * @name executeShowSubMapTransition
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Create processing for the transition to hide the sub map
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} layer the layer
+     * @param {Object} projection the current projection
+     * @param {Object} gMap the element corresponding to the map
+     * @param {Object} path the current path
+     * @param {Object} layerElements the different path elements that define the shape
+    */
+    createHideSubMapTransition: function(svg, layer,
+        projection, gMap, path, layerElements) {
+      var self = this;
+      return function() {
+        var selfElement = gMap;
+
+        currentMapService.setCurrentMapId('map1');
+
+        self.unapplyLayersOnSubMap(svg, layer);
+
+        d3Service.select('#map2-layers').transition()
+          .delay(100).duration(750)
+          .tween('rotate', function() {
+            var r = d3Service.interpolate(projection.rotate(), [
+              currentMapService.getCurrentMapContext()
+                               .properties.center.lon,
+              currentMapService.getCurrentMapContext()
+                               .properties.center.lat
+            ]);
+            return function(t) {
+              projection.rotate(r(t));
+              path = path.projection(projection);
+              layerElements.attr('d', path);
+            };
+          })
+          .tween('scale', function() {
+            var r = d3Service.interpolate(projection.scale(),
+              currentMapService.getCurrentMapContext().properties.scale);
+            return function(t) {
+              projection.scale(r(t));
+              path = path.projection(projection);
+              layerElements.attr('d', path);
+            };
+          })
+          .each('end', function() {
+            selfElement.remove();
+          });
+
+        d3Service.select('#map1').transition()
+          .delay(100).duration(750)
+          .attr('transform', 'translate(0,0)scale(1,1)');
+      };
     },
 
     /**
@@ -587,50 +713,12 @@ angular.module('mapManager.d3.services')
         var currentMapContext = currentMapService.getCurrentMapContext();
         var width = currentMapContext.dimensions.width;
         var height = currentMapContext.dimensions.height;
+        var moveType = 'mouseMove';
+        var zoomType = 'mouseWheel';
 
         var mapElements = mapUtils.createSubMapStructure(svg, 2,
           { width: width, height: height },
           { fill: 'white', opacity: '0.75' });
-        mapElements.gMap.on('click', function() {
-          currentMapService.setCurrentMapId('map1');
-          var selfElement = this;
-
-          // TODO: delete other layers than 'root'
-
-          d3Service.select('#map2-layers').transition()
-            .delay(100).duration(750)
-            .tween('rotate', function() {
-              var r = d3Service.interpolate(projection2.rotate(), [
-                currentMapService.getCurrentMapContext()
-                                 .properties.center.lon,
-                currentMapService.getCurrentMapContext()
-                                 .properties.center.lat
-              ]);
-              return function(t) {
-                projection2.rotate(r(t));
-                path2 = path2.projection(projection2);
-                //d3Utils.updateMapElements(projection2, [ { type: 'path'}, { type: 'circle' } ], path2);
-                layerElements.attr('d', path2);
-              };
-            })
-            .tween('scale', function() {
-              var r = d3Service.interpolate(projection2.scale(),
-                currentMapService.getCurrentMapContext().properties.scale);
-              return function(t) {
-                projection2.scale(r(t));
-                path2 = path2.projection(projection2);
-                //d3Utils.updateMapElements(projection2, [ { type: 'path'}, { type: 'circle' } ], path2);
-                layerElements.attr('d', path2);
-              };
-            })
-            .each('end', function() {
-              selfElement.remove();
-            });
-
-          d3Service.select('#map1').transition()
-            .delay(100).duration(750)
-            .attr('transform', 'translate(0,0)scale(1,1)');
-        });
 
         // Create root layer
         var rootLayer = mapElements.gLayers.append('g').attr('id', 'root');
@@ -651,6 +739,13 @@ angular.module('mapManager.d3.services')
           projection2, mapElements.gMap, mapElements.gLayers,
           {width: width, height: height});
 
+        mapInteractionService.configureMoving(/*$scope*/null, svg, moveType, {
+          type: currentMapService.getCurrentMap().projection, raw: projection2
+        }, mapUtils.getMapElements());
+        /*mapInteractionService.configureZooming(null, svg, zoomType, {
+          type: currentMapService.getCurrentMap().projection, raw: projection2
+        }, mapUtils.getMapElements());*/
+
         var layerElements = rootLayer.selectAll('path')
                  .data([ d ])
                  .enter()
@@ -666,31 +761,14 @@ angular.module('mapManager.d3.services')
 
         var bds = self.getBounds(path2, d, width, height);
 
-        d3Service.select('#map2-layers').transition()
-          .delay(100).duration(750)
-          .tween('rotate', function() {
-            var p = d3Service.geo.centroid(d);
-            var r = d3Service.interpolate(projection2.rotate(), [-p[0], -p[1]]);
-            return function(t) {
-              projection2.rotate(r(t));
-              path2 = path2.projection(projection2);
-              layerElements.attr('d', path2);
-
-            };
-          })
-          .tween('scale', function() {
-            var r = d3Service.interpolate(projection2.scale(), 1000);
-            return function(t) {
-              projection2.scale(r(t));
-              path2 = path2.projection(projection2);
-              layerElements.attr('d', path2);
-
-            };
-          })
-          .each('end', function() {
-            self.applyLayersOnSubMap(svg, path2, layer, rootLayer,
-              { shape: d, bounds: bds.bounds });
-          });
+        self.executeShowSubMapTransition(d, projection2, path2, layerElements, function() {
+          self.applyLayersOnSubMap(svg, path2, layer, rootLayer,
+            { shape: d, bounds: bds.bounds });
+          self.configureSubMapLegend(svg, path2, layer, mapElements.gMap,
+            { shape: d, bounds: bds.bounds },
+            self.createHideSubMapTransition(svg, layer, projection2,
+              mapElements.gMap, path2, layerElements));
+        });
 
         d3Service.select('#map1').transition()
           .delay(100).duration(750)
@@ -698,21 +776,34 @@ angular.module('mapManager.d3.services')
       });
     },
 
-    configureSubMapLegend: function(svg, path, layer, layerElement, additionalContext) {
+    /**
+     * @ngdoc method
+     * @name configureSubMapLegend
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Configure the legend associated for the sub map
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+     * @param {Object} layerElement the layer element
+     * @param {Object} additionalContext the additional context for expressions
+    */
+    configureSubMapLegend: function(svg, path, layer, gMap, additionalContext, closeFct) {
       if (valueChecker.isNotNull(layer.display.subMap.legend)) {
         var legendLabel = $parse(layer.display.subMap.legend.label);
 
         // TODO: Configure the rect ize according the number of values
-        var legendRect = layerElement.append('rect')
+        var legend = gMap.append('g')
+          .attr('class', 'legend');
+
+        legend.append('rect')
           .attr('x', 10)
           .attr('y', 10)
           .attr('width', 150)
-          .attr('height', 50)
+          .attr('height', 60)
           .style('fill', 'grey')
           .style('opacity', '0.7');
-
-        var legend = layerElement.append('g')
-          .attr('class', 'legend');
 
         legend.append('text')
           .attr('x', 75)
@@ -722,6 +813,13 @@ angular.module('mapManager.d3.services')
               null, null, additionalContext));
           })
           .style('text-anchor', 'middle');
+
+        legend.append('text')
+          .attr('x', 75)
+          .attr('y', 55)
+          .text('close')
+          .style('text-anchor', 'middle')
+          .on('click', closeFct);
       }
     },
 
@@ -1116,7 +1214,8 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createCircleObjectsDataLayer: function(svg, path, layer, additionalContext) {
+    createCircleObjectsDataLayer: function(
+        svg, path, layer, additionalContext) {
       var self = this;
       var origin = $parse(layer.display.shape.origin);
       var radius = $parse(layer.display.shape.radius);

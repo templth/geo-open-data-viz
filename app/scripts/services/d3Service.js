@@ -12,7 +12,7 @@ angular.module('d3', [])
     return d3;
   })
 
-  .service('d3Utils', function() {
+  .service('d3Utils', function(d3Service) {
     return {
       interpolatedProjection: function (a, b) {
         function raw(λ, φ) {
@@ -21,7 +21,7 @@ angular.module('d3', [])
           return [(1 - α) * pa[0] + α * pb[0], (α - 1) * pa[1] - α * pb[1]];
         }
 
-        var projection = d3.geo.projection(raw).scale(1);
+        var projection = d3Service.geo.projection(raw).scale(1);
         var center = projection.center;
         var translate = projection.translate;
         var α;
@@ -112,7 +112,8 @@ angular.module('d3', [])
         return ([λ_ * 180 / Math.PI, ϕ_ * 180 / Math.PI, γ_ * 180 / Math.PI]);
       },
 
-      updateMapElements: function(projection, mapElements) {
+      updateMapElements: function(mapId, projection, mapElements) {
+        console.log('>> updateMapElements - mapId = '+mapId);
         function cxFct(d) {
           if (!_.isNull(d)) {
             return projection([d.lon, d.lat])[0];
@@ -129,16 +130,19 @@ angular.module('d3', [])
           }
         }
 
-        for (var i = 0; i < mapElements.length; i++) {
-          var mapElement = mapElements[i];
+        _.forEach(mapElements, function(mapElement) {
+          console.log('- mapElement - type = '+mapElement.type);
           if (mapElement.type === 'path') {
-            var path = d3.geo.path().projection(projection);
-            d3.selectAll('path').attr('d', path);
+            var path = d3Service.geo.path().projection(projection);
+            d3Service.select('#' + mapId + '-layers')
+              .selectAll('path').attr('d', path);
           } else if (mapElement.type === 'circle') {
-            d3.selectAll('circle').attr('cx', cxFct)
+            d3Service.select('#' + mapId + '-layers')
+              .selectAll('circle')
+              .attr('cx', cxFct)
               .attr('cy', cyFct);
           }
-        }
+        });
       }
     };
   });

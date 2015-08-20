@@ -188,6 +188,10 @@ angular.module('mapManager.utilities', [ ])
       var gLayers = gMap.append('g').attr('id', 'map' + mapId + '-layers');
 
       return { gMap: gMap, gLayers: gLayers };
+    },
+
+    getMapElements: function() {
+      return [ {type: 'path'}, {type: 'circle'}, {type: 'LineString'}];
     }
   };
 }]);

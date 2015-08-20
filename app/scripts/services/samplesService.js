@@ -202,10 +202,14 @@ angular.module('mapManager.samples', [  ])
               }
             },
             behavior: {
-              click: {
-                display: 'tooltip'
-                //display: 'mouseOver',
-                //hide: 'mouseOut'
+              events: {
+                click: [
+                  {
+                    display: 'tooltip'
+                    //display: 'mouseOver',
+                    //hide: 'mouseOut'
+                  }
+                ]
               }
             },
             applyOn: 'layers',
@@ -263,8 +267,14 @@ angular.module('mapManager.samples', [  ])
               }
             },
             behavior: {
-              click: {
-                display: 'tooltip'
+              events: {
+                click: [
+                  {
+                    display: 'tooltip'
+                    //display: 'mouseOver',
+                    //hide: 'mouseOut'
+                  }
+                ]
               }
             },
             applyOn: 'layers',
