@@ -118,11 +118,6 @@ angular.module('mapManager.samples', [  ])
               }
             },
             behavior: {
-              animations: [
-                {
-
-                }
-              ],
               events: {
                 click: [
                   {
@@ -198,7 +193,7 @@ angular.module('mapManager.samples', [  ])
               tooltip: {
                 enabled: true,
                 fromScale: 300,
-                text: '"Name: "+d.name+"<br/>Year: "+d.year+"<br/>Mass (g): "+d.mass',
+                text: '"Name: "+d.name+"<br/>Year: "+parseDate(d.year).getFullYear()+"<br/>Mass: "+d.mass/1000+" kg"'
               }
             },
             behavior: {
@@ -222,7 +217,7 @@ angular.module('mapManager.samples', [  ])
             id: 'meteorites-country',
             type: 'data',
             mode: 'objects',
-            rank: 6,
+            rank: 7,
             data: {
               url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
               type: 'csv',
@@ -263,10 +258,18 @@ angular.module('mapManager.samples', [  ])
               tooltip: {
                 enabled: true,
                 fromScale: 300,
-                text: '"Name: "+d.name+"<br/>Year: "+d.year+"<br/>Mass (g): "+d.mass',
+                text: '"Name: "+d.name+"<br/>Year: "+parseDate(d.year).getFullYear()+"<br/>Mass: "+d.mass/1000+" kg"'
               }
             },
             behavior: {
+              animation: {
+                value: 'parseDate(d.year).getFullYear()',
+                startValue: 1950,
+                ascending: true,
+                interval: 500,
+                showAllAtEnd: true,
+                label: '"Year: "+d'
+              },
               events: {
                 click: [
                   {

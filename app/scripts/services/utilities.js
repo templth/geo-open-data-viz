@@ -21,6 +21,19 @@ angular.module('mapManager.utilities', [ ])
      *
      * @param {Object} val the value to check
     */
+    isNotNaN: function(val) {
+      return !_.isNaN(val);
+    },
+
+    /**
+     * @ngdoc method
+     * @name isNull
+     * @methodOf mapManager.utilities:attributeChecker
+     * @description
+     * Check if a value is null or undefined.
+     *
+     * @param {Object} val the value to check
+    */
     isNull: function(val) {
       return _.isUndefined(val) || _.isNull(val);
     },

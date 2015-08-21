@@ -313,12 +313,13 @@ angular.module('mapManager.commons', [ 'mapManager.map',
    * Provide utility functions for controllers to register content
    * into their associated scope.
    */
-  .service('expressionService', [ 'valueChecker', function(valueChecker) {
+  .service('expressionService', [ 'valueChecker', '$parse', function(valueChecker, $parse) {
     return {
       getExpressionParameterDescriptions: function() {
         return 'd: the current element in the collection\n' +
           'i: the index of the current element in the collection\n' +
-          'parseDate: utility function to convert a string to a date object';
+          'parseDate: utility function to convert a string to a date object\n' +
+          'isInBounds: utility function to check if a point is in bounds';
       },
 
       getExpressionContext: function(d, i, additionalContext) {
@@ -326,7 +327,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           d: d,
           i: i,
           parseDate: function(val) {
-            return new Date(val);
+            return (new Date(val));
           },
           isInBounds: function(point, bounds) {
             // See http://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object/17067379#17067379
@@ -348,6 +349,20 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         }
 
         return context;
+      },
+
+      parseExpression: function(expression) {
+        return $parse(expression);
+      },
+
+      evaluateExpression: function(parsedExpression, d, i, additionalContext) {
+        var value = parsedExpression(this.getExpressionContext(
+              d, i, additionalContext));
+        if (_.isFunction(value)) {
+          return value();
+        } else {
+          return value;
+        }
       }
     };
   }]);

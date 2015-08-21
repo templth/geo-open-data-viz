@@ -14,9 +14,9 @@ angular.module('mapManager.d3.services')
  */
 .service('layerService', [ '$parse', 'currentMapService', 'mapInteractionService',
     'consoleService', 'valueChecker', 'expressionService', 'd3Service',
-    'eventUtils', 'mapUtils', 'd3Utils',
+    'eventUtils', 'mapUtils', 'd3Utils', '$interval',
     function($parse, currentMapService, mapInteractionService, consoleService, valueChecker,
-      expressionService, d3Service, eventUtils, mapUtils, d3Utils) {
+      expressionService, d3Service, eventUtils, mapUtils, d3Utils, $interval) {
   return {
     // Utility function to update map
 
@@ -192,10 +192,10 @@ angular.module('mapManager.d3.services')
     // Tooltips
 
     createTooltipEvents: function(elements, values, tooltipDiv,
-        tooltipText, showEvent, hideEvent) {
+        tooltipText, showEvent, hideEvent, additionalContext) {
       // Show tooltip
       if (showEvent === 'click') {
-        elements.on('click', function(d) {
+        elements.on('click', function(d, i) {
           //d3.select(this).transition().duration(300).style('opacity', 1);
           // TODO: enlighten borders rather
           tooltipDiv.transition().duration(300)
@@ -205,13 +205,15 @@ angular.module('mapManager.d3.services')
             // within the generated geo path. See method createCircleObjectsDataLayer
             // for more details
             if (valueChecker.isNotNull(d.d)) {
-              var context = { d: d.d };
+              var context = expressionService.getExpressionContext(
+                d.d, i, additionalContext);
               if (valueChecker.isNotNull(values)) {
                 context.value = values[d.d.id];
               }
               return tooltipText(context);
             } else {
-              var context = { d: d };
+              var context = expressionService.getExpressionContext(
+                d, i, additionalContext);
               if (valueChecker.isNotNull(values)) {
                 context.value = values[d.id];
               }
@@ -222,20 +224,22 @@ angular.module('mapManager.d3.services')
              .style('top', (d3Service.event.pageY - 30) + 'px');
         });
       } else if (showEvent === 'mouseover') {
-        elements.on('mouseover', function(d) {
+        elements.on('mouseover', function(d, i) {
           // TODO: enlighten borders rather
           //d3.select(this).transition().duration(300).style('opacity', 1);
           tooltipDiv.transition().duration(300)
              .style('opacity', 1);
           tooltipDiv.html(function() {
             if (valueChecker.isNotNull(d.d)) {
-              var context = { d: d.d };
+              var context = expressionService.getExpressionContext(
+                d.d, i, additionalContext);
               if (valueChecker.isNotNull(values)) {
                 context.value = values[d.d.id];
               }
               return tooltipText(context);
             } else {
-              var context = { d: d };
+              var context = expressionService.getExpressionContext(
+                d, i, additionalContext);
               if (valueChecker.isNotNull(values)) {
                 context.value = values[d.id];
               }
@@ -820,6 +824,25 @@ angular.module('mapManager.d3.services')
           .text('close')
           .style('text-anchor', 'middle')
           .on('click', closeFct);
+
+        //if (valueChecker.isNotNull(layer.behavior.animation)) {
+          var legendAnimation = gMap.append('g')
+            .attr('class', 'legend');
+
+          legendAnimation.append('rect')
+            .attr('x', 10)
+            .attr('y', 75)
+            .attr('width', 150)
+            .attr('height', 60)
+            .style('fill', 'grey')
+            .style('opacity', '0.7');
+
+          legendAnimation.append('text')
+            .attr('x', 75)
+            .attr('y', 100)
+            .attr('id', 'map2-animation')
+            .style('text-anchor', 'middle');
+        //}
       }
     },
 
@@ -923,9 +946,9 @@ function normalise(x) {
           .attr('id', function(d) { return d.id; })
           .attr('d', path);
 
-          self.applyStylesForGeoDataLayer(layer, pathElements);
-          self.configureTooltip(layer, pathElements);
-          self.configureShapeBounds(layer, layerElement, path, features);
+          self.applyStylesForGeoDataLayer(layer, pathElements, additionalContext);
+          self.configureTooltip(layer, pathElements, additionalContext);
+          self.configureShapeBounds(layer, layerElement, path, features, additionalContext);
         }
 
         self.configureBehaviors(svg, path, layer, pathElements);
@@ -1015,8 +1038,8 @@ function normalise(x) {
         var styleHints = self.applyStylesForFillLayer(
           layer, sel, values);
 
-        self.configureTooltip(layer, styleHints.elements, values);
-        self.configureLegend(layer, sel, styleHints);
+        self.configureTooltip(layer, styleHints.elements, values, additionalContext);
+        self.configureLegend(layer, sel, styleHints, additionalContext);
       }
 
       // Actually create the layer based on provided data
@@ -1147,9 +1170,10 @@ function normalise(x) {
       }
     },
 
-    configureTooltip: function(layer, layerElements, values) {
+    configureTooltip: function(layer, layerElements, values, additionalContext) {
       if (valueChecker.isNotNull(layer.display.tooltip) &&
           layer.display.tooltip.enabled) {
+        console.log('>> ')
         var tooltipText = $parse(layer.display.tooltip.text);
 
         var tooltipDiv = d3Service.select('body').append('div')
@@ -1159,10 +1183,10 @@ function normalise(x) {
 
         // Events
         var tooltipEvents = eventUtils.getDomainEvents(layer, 'tooltip');
-        if (tooltipEvents != null) {
+        if (valueChecker.isNotNull(tooltipEvents)) {
           this.createTooltipEvents(layerElements, values, tooltipDiv,
                 tooltipText, tooltipEvents.display,
-                tooltipEvents.hide);
+                tooltipEvents.hide, additionalContext);
         }
       }
     },
@@ -1202,6 +1226,8 @@ function normalise(x) {
       }
     },
 
+    
+
     /**
      * @ngdoc method
      * @name createCircleObjectsDataLayer
@@ -1216,6 +1242,40 @@ function normalise(x) {
     */
     createCircleObjectsDataLayer: function(
         svg, path, layer, additionalContext) {
+          function filterData(data, value, additionalContext, startValue) {
+            return _.filter(data, function(d, i) {
+              //console.log('d.year = '+d.year);
+              var val = value(expressionService.getExpressionContext(
+                d, i, additionalContext));
+              if (valueChecker.isNotNaN(val)) {
+                if (valueChecker.isNotNull(startValue)) {
+                  return (val > startValue);
+                } else {
+                  return true;
+                }
+              }
+              return false;
+            });
+          }
+
+          function getRange(data, value, additionalContext) {
+            var min = _.min(data, function(d, i) {
+              return value(expressionService.getExpressionContext(
+                d, i, additionalContext));
+            });
+            var max = _.max(data, function(d, i) {
+              return value(expressionService.getExpressionContext(
+                d, i, additionalContext));
+            });
+
+            return {
+              min: value(expressionService.getExpressionContext(
+                min, 0, additionalContext)),
+              max: value(expressionService.getExpressionContext(
+                max, 0, additionalContext))
+            };
+          }
+
       var self = this;
       var origin = $parse(layer.display.shape.origin);
       var radius = $parse(layer.display.shape.radius);
@@ -1232,37 +1292,145 @@ function normalise(x) {
         var values = {};
         _.forEach(data, function(d) { values[d[idName]] = d; });
 
-        var elements = layerElement.selectAll('circle')
-          .data(data)
-          .enter()
-          .append('path')
-          .datum(function(d, i) {
-            var orig = origin(expressionService.getExpressionContext(
-              d, i, additionalContext));
-            orig[0] = parseFloat(orig[0]);
-            orig[1] = parseFloat(orig[1]);
-            var rad = radius(expressionService.getExpressionContext(
-              d, i, additionalContext));
-            rad = parseFloat(rad);
-            var c = circle
-               .origin(orig)
-               .angle(rad)(expressionService.getExpressionContext(
-                 d, i, additionalContext));
-            c.d = d;
-            return c;
-          })
-          .attr('id', function(d) {
-            return d.d.name;
-          })
-          .attr('class', 'point')
-          .attr('d', function(d) { return path(d); });
+        if (valueChecker.isNotNull(layer.behavior) &&
+          valueChecker.isNotNull(layer.behavior.animation)) {
 
-        self.configureShapeLabel(layer, layerElement, data, origin);
+          var animationValue = $parse(layer.behavior.animation.value);
 
-        var styleHints = self.applyStylesForShapeLayer(layer, elements, additionalContext);
+          var startValue = null;
+          if (valueChecker.isNotNull(layer.behavior.animation.startValue)) {
+            startValue = layer.behavior.animation.startValue;
+          }
+          var filteredData = filterData(data, animationValue, additionalContext, startValue);
 
-        self.configureTooltip(layer, elements, values);
-        self.configureLegend(layer, layerElement, styleHints);
+          var elements = layerElement.selectAll('circle')
+              .data(filteredData)
+              .enter()
+              .append('path');
+
+          elements
+            .datum(function(d, i) {
+              //console.log('datum - d = '+JSON.stringify(d));
+              var orig = origin(expressionService.getExpressionContext(
+                d, i, additionalContext));
+              orig[0] = parseFloat(orig[0]);
+              orig[1] = parseFloat(orig[1]);
+              var rad = radius(expressionService.getExpressionContext(
+                d, i, additionalContext));
+              rad = parseFloat(rad);
+              var c = circle
+                 .origin(orig)
+                 .angle(rad)(expressionService.getExpressionContext(
+                   d, i, additionalContext));
+              c.d = d;
+              return c;
+            })
+            .attr('id', function(d) {
+              return d.d.name;
+            })
+            .attr('class', 'point')
+            .attr('d', function(d) {
+              return path(d);
+            })
+            .style('fill-opacity', 0.0);
+
+          var styleHints = self.applyStylesForShapeLayer(
+            layer, elements, additionalContext);
+
+          self.configureTooltip(layer, elements, values, additionalContext);
+          self.configureLegend(layer, layerElement, styleHints, additionalContext);
+
+          var count = filteredData.length;
+          var range = getRange(filteredData, animationValue, additionalContext);
+          var currentValue = range.min;
+
+          var duration = 500;
+          if (valueChecker.isNotNull(layer.behavior.animation.interval)) {
+            duration = layer.behavior.animation.interval;
+          }
+
+          var animationLabel = null;
+          if (valueChecker.isNotNull(layer.behavior.animation.label)) {
+            animationLabel = $parse(layer.behavior.animation.label);
+          }
+
+          var intrv = $interval(function() {
+            if (valueChecker.isNotNull(animationLabel)) {
+              d3Service.select('#map2-animation').text(
+                animationLabel(expressionService.getExpressionContext(
+                  currentValue, 0, additionalContext)));
+            } else {
+              d3Service.select('#map2-animation').text(currentValue);
+            }
+            currentValue++;
+            if (currentValue > range.max) {
+              d3Service.select('#map2-animation').text('');
+              $interval.cancel(intrv);
+            }
+          }, duration);
+
+          var showAllAtEnd = false;
+          if (valueChecker.isNotNull(layer.behavior.animation.showAllAtEnd)) {
+            showAllAtEnd = layer.behavior.animation.showAllAtEnd;
+          }
+
+          elements
+            .transition()
+            .delay(function(d, i) {
+              return (animationValue(expressionService.getExpressionContext(
+                   d.d, i, additionalContext)) - range.min) * duration;
+            })
+            .duration(function() {
+              return duration;
+            })
+            .each('start', function() {
+              d3Service.select(this)
+                  .style('fill-opacity', 1.0);
+
+            })
+            .each('end', function() {
+              d3Service.select(this)
+                .style('fill-opacity', 0.0);
+              count--;
+              if (count === 0 && showAllAtEnd) {
+                elements.style('fill-opacity', 1.0);
+              }
+            });
+        } else {
+          var elements = layerElement.selectAll('circle')
+              .data(data)
+              .enter()
+              .append('path');
+
+          elements
+            .datum(function(d, i) {
+              var orig = origin(expressionService.getExpressionContext(
+                d, i, additionalContext));
+              orig[0] = parseFloat(orig[0]);
+              orig[1] = parseFloat(orig[1]);
+              var rad = radius(expressionService.getExpressionContext(
+                d, i, additionalContext));
+              rad = parseFloat(rad);
+              var c = circle
+                 .origin(orig)
+                 .angle(rad)(expressionService.getExpressionContext(
+                   d, i, additionalContext));
+              c.d = d;
+              return c;
+            })
+            .attr('id', function(d) {
+              return d.d.name;
+            })
+            .attr('class', 'point')
+            .attr('d', function(d) { return path(d); });
+
+          self.configureShapeLabel(layer, layerElement, data, origin);
+
+          var styleHints = self.applyStylesForShapeLayer(layer, elements, additionalContext);
+
+          self.configureTooltip(layer, elements, values, additionalContext);
+          self.configureLegend(layer, layerElement, styleHints, additionalContext);
+        }
       }
 
       // Actually create the layer based on provided data

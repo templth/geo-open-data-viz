@@ -225,3 +225,41 @@ div.tooltip {
 .form-group-sm textarea.form-control.result {
   height: 200px;
 }
+
+/* margin color - see http://tinkerbin.com/pGqegwmr
+rgb(31, 138, 112);
+rgb(190, 219, 57);
+rgb(255, 225, 26);
+rgb(253, 116, 0);
+rgb(0, 67, 88);
+rgb(31, 138, 112);
+*/
+div.s1 {
+  border-left-color: rgb(255, 225, 26);
+border-left-style: solid;
+border-left-width: 7px;
+}
+
+div.s1 legend {
+  background-color: rgb(255, 225, 26);
+  font-size: 1.1em;
+  border-style: none;
+  text-align: center;
+  color: #bbb;
+  font-weight: bold;
+}
+
+div.s2 {
+  border-left-color: rgb(31, 138, 112);
+border-left-style: solid;
+border-left-width: 7px;
+}
+
+div.s2 legend {
+  background-color: rgb(31, 138, 112);
+  font-size: 1.1em;
+  border-style: none;
+  text-align: center;
+  color: #ddd;
+  font-weight: bold;
+}
