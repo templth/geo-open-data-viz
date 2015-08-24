@@ -100,13 +100,51 @@
           <accordion-group ng-repeat="layer in layers">
             <accordion-heading>
               {{layer.name}}
-              <div class="pull-right">
-                <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>
-                &nbsp;<span ng-if="!isLayerWithFillMode(layer)" class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
-                &nbsp;&nbsp;&nbsp;
-                <i tooltip="Refresh the layer on the map" ng-click="refreshLayerApplying($event, layer)" class="glyphicon glyphicon-refresh grey-icon"></i>
+
+              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
+                <a dropdown-toggle>
+                  <i tooltip="Tools" class="glyphicon glyphicon-cog grey-icon"></i></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">UI mode <span class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+                  <li><a href="#">JSON mode</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Display areas</li>
+                  <li><a href="#">Shape <span ng-if="shouldDisplayShapeArea(layer)" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+                  <li><a href="#">Legend <span ng-if="shouldDisplayLegendArea(layer)" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+                  <li><a href="#">Tooltip <span ng-if="shouldDisplayTooltipArea(layer)" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Behavior areas</li>
+                  <li><a href="#">Events</a></li>
+                  <li><a href="#">Animation</a></li>
+                </ul>
+              </div>
+
+              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
                 <i tooltip="Remove the layer" class="glyphicon glyphicon-remove grey-icon"></i>
               </div>
+
+              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
+                <i tooltip="Save the layer" class="glyphicon glyphicon-save-file grey-icon"></i>
+              </div>
+
+              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown auto-close="always">
+                <a dropdown-toggle>
+                  <i tooltip="Refresh / Reload layer" class="glyphicon glyphicon-refresh grey-icon"></i></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#" ng-click="refreshLayerApplying($event, layer);">Refresh layer</a></li>
+                  <li><a href="#">Reload layer</a></li>
+                </ul>
+              </div>
+
+              <div class="pull-right separator"></div>
+
+              <div ng-click="$event.stopPropagation();" class="pull-right">
+                <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>
+                <span ng-if="!isLayerWithFillMode(layer)" class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
+              </div>
+
             </accordion-heading>
 
             <div ng-if="shouldDisplayGraticuleProperties(layer)" ng-controller="UpdateLayerCtrl">
@@ -452,8 +490,8 @@
               <!-- display -->
               <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
                 <form name="displayForm" novalidate class="form-horizontal">
-                  <div class="s1">
-                    <!-- legend>Shape</legend -->
+                  <div class="shape" ng-show="shouldDisplayShapeArea(layer)">
+                    <legend>Shape <div class="pull-right"><span ng-click="removeDisplayShapeArea(layer)" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
                     <field label="Shape">
                       <select class="form-control input-sm" name="type" ng-model="layer.display.shape.type">
                         <option value="circle">Circle</option>
@@ -504,7 +542,7 @@
                               ng-model-options="{ updateOn: 'blur' }" />
                         </field>
                       </div>
-                        <div ng-if="layer.display.shape.fillMode === 'threshold'">
+                      <div ng-if="layer.display.shape.fillMode === 'threshold'">
                         <field label="Palette">
                           <palette-picker
                             initial-name='{{layer.display.shape.threshold.paletteCode}}'
@@ -538,7 +576,7 @@
                                  ng-model-options="{ updateOn: 'blur' }" />
                             <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'value', linkedSources, layer.data.source, layer.data.rootObject, layer.display.shape.value, 'Define value. The expression must return a number that will be used define the color of the shape.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
                           </div>
-                          <input  ng-if="!shoudDisplayCheckExpression(layer.data.source)"
+                          <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
                                class="form-control input-sm" name="value" type="text" 
                                required ng-model="layer.display.shape.value"
                                ng-model-options="{ updateOn: 'blur' }" />
@@ -546,11 +584,39 @@
                       </div>
                     </div>
                   </div>
-                  <div class="s2">
-                    <!--legend>XXX</legend-->
-                    <field label="Opacity">
-                      <input class="form-control input-sm" name="opacity" type="text" 
-                           required ng-model="layer.display.shape.opacity"
+                  <div class="legend" ng-show="shouldDisplayLegendArea(layer)">
+                    <legend>Legend <div class="pull-right"><span  ng-click="removeDisplayLegendArea(layer)" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
+                    <field label="Enabled">
+                      <input class="checkbox" type="checkbox" ng-model="layer.display.legend.enabled"/>
+                    </field>
+                    <field label="Label">
+                      <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
+                        <input class="form-control input-sm" name="value" type="text" 
+                             required ng-model="layer.display.legend.label"
+                             ng-model-options="{ updateOn: 'blur' }" />
+                        <span class="input-group-addon"><a ng-click="checkExpression(layer.display.legend, 'label', linkedSources, layer.data.source, layer.data.rootObject, layer.display.legend.label, 'Define legend label.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+                      </div>
+                      <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
+                           class="form-control input-sm" name="label" type="text" 
+                           required ng-model="layer.display.legend.label"
+                          ng-model-options="{ updateOn: 'blur' }" />
+                    </field>
+                  </div>
+                  <div class="displayTooltip" ng-show="shouldDisplayTooltipArea(layer)">
+                    <legend>Tooltip <div class="pull-right"><span  ng-click="removeDisplayTooltipArea(layer)" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
+                    <field label="Enabled">
+                      <input class="checkbox" type="checkbox" ng-model="layer.display.tooltip.enabled"/>
+                    </field>
+                    <field label="Text">
+                      <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
+                        <input class="form-control input-sm" name="value" type="text" 
+                             required ng-model="layer.display.tooltip.text"
+                             ng-model-options="{ updateOn: 'blur' }" />
+                        <span class="input-group-addon"><a ng-click="checkExpression(layer.display.tooltip, 'value', linkedSources, layer.data.source, layer.data.rootObject, layer.display.tooltip.text, 'Define tooltip text.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+                      </div>
+                      <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
+                           class="form-control input-sm" name="text" type="text" 
+                           required ng-model="layer.display.tooltip.text"
                           ng-model-options="{ updateOn: 'blur' }" />
                     </field>
                   </div>

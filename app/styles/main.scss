@@ -234,14 +234,16 @@ rgb(253, 116, 0);
 rgb(0, 67, 88);
 rgb(31, 138, 112);
 */
-div.s1 {
+
+div.shape {
   border-left-color: rgb(255, 225, 26);
-border-left-style: solid;
-border-left-width: 7px;
+  border-left-style: solid;
+  border-left-width: 7px;
 }
 
-div.s1 legend {
-  background-color: rgb(255, 225, 26);
+div.shape legend {
+  border-left-color: none;
+  border-bottom-color: rgb(255, 225, 26);
   font-size: 1.1em;
   border-style: none;
   text-align: center;
@@ -249,17 +251,49 @@ div.s1 legend {
   font-weight: bold;
 }
 
-div.s2 {
+div.legend {
   border-left-color: rgb(31, 138, 112);
-border-left-style: solid;
-border-left-width: 7px;
+  border-left-style: solid;
+  border-left-width: 7px;
 }
 
-div.s2 legend {
-  background-color: rgb(31, 138, 112);
+div.legend legend {
+  border-left-color: none;
+  border-bottom-color: rgb(31, 138, 112);
   font-size: 1.1em;
   border-style: none;
   text-align: center;
   color: #ddd;
   font-weight: bold;
+}
+
+div.displayTooltip {
+  border-left-color: rgb(190, 219, 57);
+  border-left-style: solid;
+  border-left-width: 7px;
+}
+
+div.displayTooltip legend {
+  border-left-color: none;
+  border-bottom-color: rgb(190, 219, 57);
+  font-size: 1.1em;
+  border-style: none;
+  text-align: center;
+  color: #ddd;
+  font-weight: bold;
+}
+
+.panel-heading .pull-right {
+  padding-left: 10px;
+}
+
+.panel-heading .pull-right .glyphicon {
+  color: rgb(51, 51, 51)
+}
+
+.panel-heading .pull-right.separator {
+  border-left-color: #000;
+  border-left-style: solid;
+  border-left-width: 1px;
+  opacity: .25;
 }

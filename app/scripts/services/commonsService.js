@@ -153,6 +153,60 @@ angular.module('mapManager.commons', [ 'mapManager.map',
             layer.display.shape.type === 'circle');
         };
 
+        $scope.shouldDisplayShapeArea = function(layer) {
+          return (valueChecker.isNotNull(layer.display) &&
+            valueChecker.isNotNull(layer.display.shape));
+        };
+
+        $scope.addDisplayShapeArea = function(layer) {
+          if (valueChecker.isNotNull(layer.display)) {
+            layer.display.shape = {};
+          }
+        };
+
+        $scope.removeDisplayShapeArea = function(layer) {
+          if (valueChecker.isNotNull(layer.display) &&
+              valueChecker.isNotNull(layer.display.shape)) {
+            delete layer.display.shape;
+          }
+        };
+
+        $scope.shouldDisplayLegendArea = function(layer) {
+          return (valueChecker.isNotNull(layer.display) &&
+            valueChecker.isNotNull(layer.display.legend));
+        };
+
+        $scope.addDisplayLegendArea = function(layer) {
+          if (valueChecker.isNotNull(layer.display)) {
+            layer.display.legend = {};
+          }
+        };
+
+        $scope.removeDisplayLegendArea = function(layer) {
+          if (valueChecker.isNotNull(layer.display) &&
+              valueChecker.isNotNull(layer.display.legend)) {
+            delete layer.display.legend;
+          }
+        };
+
+        $scope.shouldDisplayTooltipArea = function(layer) {
+          return (valueChecker.isNotNull(layer.display) &&
+            valueChecker.isNotNull(layer.display.tooltip));
+        };
+
+        $scope.addDisplayTooltipArea = function(layer) {
+          if (valueChecker.isNotNull(layer.display)) {
+            layer.display.tooltip = {};
+          }
+        };
+
+        $scope.removeDisplayTooltipArea = function(layer) {
+          if (valueChecker.isNotNull(layer.display) &&
+              valueChecker.isNotNull(layer.display.tooltip)) {
+            delete layer.display.tooltip;
+          }
+        };
+
         $scope.$watch('properties.projection', function(newValue, oldValue) {
           if (oldValue === newValue) {
             return;
@@ -173,7 +227,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           console.log('>> toggleLayerVisibility');
           layerService.toggleLayerVisibility(layer);
           layer.visible = !layer.visible;
-          $event.stopPropagation();
+          //$event.stopPropagation();
         };
 
         $scope.toggleLayerApplying = function($event, layer) {
@@ -182,7 +236,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
 
           layerService.toggleLayerApplying(svg, path, layer);
           layer.applied = !layer.applied;
-          $event.stopPropagation();
+          //$event.stopPropagation();
         };
 
         $scope.refreshLayerApplying = function($event, layer) {
@@ -190,7 +244,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           var path = currentMapService.getCurrentMapContext().path;
 
           layerService.refreshLayerApplying(svg, path, layer);
-          $event.stopPropagation();
+          //$event.stopPropagation();
         };
 
         $scope.isLayerWithFillMode = function(layer) {
