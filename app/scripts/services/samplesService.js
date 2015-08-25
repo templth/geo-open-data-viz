@@ -101,8 +101,8 @@ angular.module('mapManager.samples', [  ])
                 categorical: {
                   name: 'category20b',
                   value: 'i'
-                }/*,
-                value: 'd.id === 840 || d.id === 250 ? "#ff0000" : "#000000"'*/
+                }//,
+                //value: 'd.id === 840 || d.id === 250 ? "#ff0000" : "#000000"'*/
               },
               bounds: {
                 applyIf: ''
@@ -149,19 +149,19 @@ angular.module('mapManager.samples', [  ])
                   hide: 'tooltip'
                 }
               }
-              /*zoomBoundingBox: {
-                display: 'click'
+              //zoomBoundingBox: {
+              //  display: 'click'
                 //display: 'mouseOver',
                 //hide: 'mouseOut'
-              },*/
-              /*subMap: {
-                display: 'click'
-              },
-              tooltip: {
+              //},
+              //subMap: {
+              //  display: 'click'
+              //},
+              //tooltip: {
                 //display: 'click'
-                display: 'mouseOver',
-                hide: 'mouseOut'
-              }*/
+              //  display: 'mouseOver',
+              //  hide: 'mouseOut'
+              //}
             }
           },
 
@@ -311,12 +311,12 @@ angular.module('mapManager.samples', [  ])
               loaded: false,
               id: 'name',
               where: 'isInBounds([d.lon, d.lat], bounds)'
-              /*,
-              where: 'd.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)',
-              order: {
-                field: 'mass',
-                ascending: false
-              }*/
+              //,
+              //where: 'd.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)',
+              //order: {
+              //  field: 'mass',
+              //  ascending: false
+              //}
             },
             name: 'Cities (Country)',
             display: {
