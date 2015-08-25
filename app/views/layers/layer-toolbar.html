@@ -1,0 +1,43 @@
+<div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
+  <a dropdown-toggle>
+    <i tooltip="Tools" class="glyphicon glyphicon-cog grey-icon"></i></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li><a href="#">UI mode <span class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+    <li><a href="#">JSON mode</a></li>
+    <li role="separator" class="divider"></li>
+    <li class="dropdown-header">Display areas</li>
+    <li><a href="#">Shape <span ng-if="shouldDisplayElementArea(layer, 'display', 'shape')" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+    <li><a href="#">Legend <span ng-if="shouldDisplayElementArea(layer, 'display', 'legend')" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+    <li><a href="#">Tooltip <span ng-if="shouldDisplayElementArea(layer, 'display', 'tooltip')" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+    <li role="separator" class="divider"></li>
+    <li class="dropdown-header">Behavior areas</li>
+    <li><a href="#">Events <span ng-if="shouldDisplayElementArea(layer, 'behavior', 'events')" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+    <li><a href="#">Animation <span ng-if="shouldDisplayElementArea(layer, 'behavior', 'animation')" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
+  </ul>
+</div>
+
+<div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
+  <i tooltip="Remove the layer" class="glyphicon glyphicon-remove grey-icon"></i>
+</div>
+
+<div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
+  <i tooltip="Save the layer" class="glyphicon glyphicon-save-file grey-icon"></i>
+</div>
+
+<div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown auto-close="always">
+  <a dropdown-toggle>
+    <i tooltip="Refresh / Reload layer" class="glyphicon glyphicon-refresh grey-icon"></i></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li><a href="#" ng-click="refreshLayerApplying($event, layer);">Refresh layer</a></li>
+    <li><a href="#">Reload layer</a></li>
+  </ul>
+</div>
+
+<div class="pull-right separator"></div>
+
+<div ng-click="$event.stopPropagation();" class="pull-right">
+  <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>
+  <span ng-if="!isLayerWithFillMode(layer)" class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
+</div>

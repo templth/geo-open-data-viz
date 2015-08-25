@@ -235,13 +235,17 @@ rgb(0, 67, 88);
 rgb(31, 138, 112);
 */
 
-div.shape {
+div.displayShape,
+div.behaviorEvents,
+div.stylesBackground {
   border-left-color: rgb(255, 225, 26);
   border-left-style: solid;
   border-left-width: 7px;
 }
 
-div.shape legend {
+div.displayShape legend,
+div.behaviorEvents legend,
+div.stylesBackground legend {
   border-left-color: none;
   border-bottom-color: rgb(255, 225, 26);
   font-size: 1.1em;
@@ -251,35 +255,41 @@ div.shape legend {
   font-weight: bold;
 }
 
-div.legend {
+div.displayLegend,
+div.behaviorAnimation,
+div.stylesLine {
   border-left-color: rgb(31, 138, 112);
   border-left-style: solid;
   border-left-width: 7px;
 }
 
-div.legend legend {
+div.displayLegend legend,
+div.behaviorAnimation legend,
+div.stylesLine legend {
   border-left-color: none;
   border-bottom-color: rgb(31, 138, 112);
   font-size: 1.1em;
   border-style: none;
   text-align: center;
-  color: #ddd;
+  color: #bbb;
   font-weight: bold;
 }
 
-div.displayTooltip {
+div.displayTooltip,
+div.stylesBorder {
   border-left-color: rgb(190, 219, 57);
   border-left-style: solid;
   border-left-width: 7px;
 }
 
-div.displayTooltip legend {
+div.displayTooltip legend,
+div.stylesBorder legend {
   border-left-color: none;
   border-bottom-color: rgb(190, 219, 57);
   font-size: 1.1em;
   border-style: none;
   text-align: center;
-  color: #ddd;
+  color: #bbb;
   font-weight: bold;
 }
 
@@ -296,4 +306,8 @@ div.displayTooltip legend {
   border-left-style: solid;
   border-left-width: 1px;
   opacity: .25;
+}
+
+legend span.glyphicon {
+  cursor: pointer;
 }

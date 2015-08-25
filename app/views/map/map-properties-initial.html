@@ -1,0 +1,22 @@
+<form name="propertiesForm" novalidate class="form-horizontal">
+  <field label="Projection">
+    <select class="form-control input-sm" name="projection" ng-model="properties.projection">
+      <option value="none">None</option>
+      <option value="orthographic">Orthographic</option>
+      <option value="mercator">Mercator</option>
+      <option value="satellite">Satellite</option>
+    </select>
+  </field>
+  <field label="Scale">
+    <input class="form-control input-sm" name="scale" type="text" 
+               placeholder="Scale" required ng-model="properties.scale" />
+  </field>
+  <field label="Center (lon)">
+    <input class="form-control input-sm" name="centerLon" type="text" 
+               placeholder="Center (longitude)" required ng-model="properties.center.lon" />
+  </field>
+  <field label="Center (lat)">
+    <input class="form-control input-sm" name="centerLat" type="text" 
+               placeholder="Center (latitude)" required ng-model="properties.center.lat" />
+  </field>
+</form>

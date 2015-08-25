@@ -1,0 +1,26 @@
+<form name="layerForm" novalidate class="form-horizontal">
+  <field label="Name">
+    <input class="form-control input-sm" name="name" type="text" 
+         required ng-model="layer.name"
+         ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+  <field label="Type">
+    <input class="form-control input-sm" name="type" type="text" 
+         disabled ng-model="layer.type"
+         ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+  <field label="Apply on layer">
+    <select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
+      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
+    </select>
+  </field>
+  <field label="Background">
+    <input class="checkbox" type="checkbox" ng-model="layer.display.background">
+  </field>
+  <field label="Lines">
+    <input class="checkbox" type="checkbox" ng-model="layer.display.lines">
+  </field>
+  <field label="Border">
+    <input class="checkbox" type="checkbox"  ng-model="layer.display.border">
+  </field>
+</form>

@@ -29,11 +29,9 @@
                 <a data-toggle="dropdown" class="dropdown-toggle">Sources <b class="caret"></b></a>
                 <ul class="dropdown-menu">
                   <li class="dropdown-header">Map sources</li>
-                  <li class="divider"></li>
                   <li ng-repeat="source in mapSources = (sources | filter: { type: 'map' })"><a href="/#/sources/{{source.id}}">{{source.name}}</a></li>
                   <li class="divider"></li>
                   <li class="dropdown-header">Data sources</li>
-                  <li class="divider"></li>
                   <li ng-repeat="source in mapSources = (sources | filter: { type: 'data' })"><a href="/#/sources/{{source.id}}">{{source.name}}</a></li>
                   <li class="divider"></li>
                   <li><a ng-click="openAddSourceDialog()">Create new source</a></li>

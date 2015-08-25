@@ -23,12 +23,30 @@ angular.module('mapManager.samples', [  ])
               zooming: 'mouseWheel'
             },
             sources: sources
+          },
+          {
+            id: '1',
+            name: 'US unemployment',
+            type: 'd3js',
+            projection: 'orthographic',
+            //projection: 'mercator',
+            scale: 420,
+            center: {
+              lon: 60,
+              lat: -30
+            },
+            interactions: {
+              moving: 'mouseMove',
+              zooming: 'mouseWheel'
+            },
+            sources: sources
           }
         ];
       },
 
       getLayerSamples: function() {
         return [
+          // Map #1
           // Graticule
           {
             id: 'graticuleLayer',
@@ -130,20 +148,20 @@ angular.module('mapManager.samples', [  ])
                 mouseout: {
                   hide: 'tooltip'
                 }
-              },
+              }
               /*zoomBoundingBox: {
                 display: 'click'
                 //display: 'mouseOver',
                 //hide: 'mouseOut'
               },*/
-              subMap: {
+              /*subMap: {
                 display: 'click'
               },
               tooltip: {
                 //display: 'click'
                 display: 'mouseOver',
                 hide: 'mouseOut'
-              }
+              }*/
             }
           },
 
@@ -181,10 +199,10 @@ angular.module('mapManager.samples', [  ])
                             '#fd8d3c', '#f03b20', '#bd0026' ]
                 },
                 value: 'parseDate(d.year).getFullYear()',
-                /*label: {
-                  text: 'd.name',
-                  position: { x: 5, y: 5 }
-                }*/
+                //label: {
+                //  text: 'd.name',
+                //  position: { x: 5, y: 5 }
+                //}
               },
               legend: {
                 enabled: true,
@@ -246,10 +264,6 @@ angular.module('mapManager.samples', [  ])
                             '#fd8d3c', '#f03b20', '#bd0026' ]
                 },
                 value: 'parseDate(d.year).getFullYear()',
-                /*label: {
-                  text: 'd.name',
-                  position: { x: 5, y: 5 }
-                }*/
               },
               legend: {
                 enabled: true,
@@ -331,17 +345,6 @@ angular.module('mapManager.samples', [  ])
             rank: 6,
             data: {
               inline: '[{ points: [ {lon: -74.007124, lat: 40.71455}, {lon: -118.245323, lat: 34.05349}, { lon: -92.888759, lat: 45.37399} ] }] ',
-              /*url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
-              type: 'csv',
-              source: 'meteoritesSource',
-              content: [],
-              loaded: false,
-              id: 'name',
-              where: 'd.mass > 100000',
-              order: {
-                field: 'mass',
-                ascending: false
-              }*/
             },
             name: 'Test line',
             display: {
@@ -358,6 +361,264 @@ angular.module('mapManager.samples', [  ])
               }
             },
             applyOn: 'layers',
+            applied: true,
+            visible: true
+          },*/
+
+          // Map #2
+          {
+            id: 'graticuleLayer',
+            type: 'graticule',
+            rank: 1,
+            name: 'Graticule',
+            applyOn: 'layers',
+            applied: true,
+            visible: true,
+            display: {
+              background: true,
+              lines: true,
+              border: true
+            },
+            styles: {
+              background: {
+                fill: '#a4bac7'
+              },
+              border: {
+                stroke: '#000',
+                strokeWidth: '3px'
+              },
+              lines: {
+                stroke: '#777',
+                strokeWidth: '.5px',
+                strokeOpacity: '.5'
+              }
+            }
+          },
+          {
+            id: 'worldLayer',
+            type: 'geodata',
+            rank: 2,
+            data: {
+              url: 'http://localhost:9000/scripts/json/continent.json',
+              rootObject: 'countries',
+              type: 'topojson',
+              content: [],
+              loaded: false
+            },
+            applyOn: 'layers',
+            name: 'World',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'usLayer',
+            type: 'geodata',
+            rank: 3,
+            data: {
+              url: 'http://localhost:9000/scripts/json/us-light.json',
+              rootObject: 'counties',
+              type: 'topojson',
+              content: [],
+              loaded: false
+            },
+            styles: {
+              path: {
+                fill: 'none',
+                stroke: '#fff',
+                strokeLinejoin: 'round',
+                strokeLinecap: 'round'
+              },
+              d: {
+                strokeWidth: '1.5px'
+              }
+            },
+            applyOn: 'layers',
+            name: 'US',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'usLayer1',
+            type: 'geodata',
+            rank: 4,
+            data: {
+              url: 'http://localhost:9000/scripts/json/us-light.json',
+              rootObject: 'counties',
+              type: 'topojson',
+              content: [],
+              loaded: false,
+              mesh: true
+            },
+            styles: {
+              path: {
+                fill: 'none',
+                stroke: '#fff',
+                strokeLinejoin: 'round',
+                strokeLinecap: 'round'
+              },
+              d: {
+                strokeWidth: '0.5px'
+              }
+            },
+            applyOn: 'layers',
+            name: 'US counties',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'usLayer2',
+            type: 'geodata',
+            rank: 5,
+            data: {
+              url: 'http://localhost:9000/scripts/json/us-light.json',
+              rootObject: 'states',
+              type: 'topojson',
+              content: [],
+              loaded: false,
+              mesh: true
+            },
+            styles: {
+              path: {
+                fill: 'none',
+                stroke: '#fff',
+                strokeLinejoin: 'round',
+                strokeLinecap: 'round'
+              },
+              d: {
+                strokeWidth: '1.5px'
+              }
+            },
+            applyOn: 'layers',
+            name: 'US states',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'layer1',
+            type: 'data',
+            mode: 'objects',
+            rank: 6,
+            data: {
+              url: 'http://localhost:9000/scripts/json/test.csv',
+              type: 'csv',
+              content: [],
+              loaded: false
+            },
+            name: 'Cities',
+            display: {
+              shape: {
+                type: 'circle',
+                radius: 'd.population / 3000000',
+                origin: '[ d.lon, d.lat ]',
+                color: 'yellow',
+                opacity: 0.75
+              }
+            },
+            applyOn: 'layers',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'layer1a',
+            type: 'data',
+            mode: 'objects',
+            rank: 6,
+            data: {
+              content: [],
+              inline: '[{ rank:1, place: "New York", population: 8175133, lat: 40.71455, lon: -74.007124 }]',
+              loaded: false
+            },
+            name: 'Cities (1)',
+            display: {
+              shape: {
+                type: 'circle',
+                radius: 'd.population / 3000000',
+                origin: '[ d.lon, d.lat ]',
+                color: 'yellow',
+                opacity: 0.75
+              }
+            },
+            applyOn: 'layers',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'layer1b',
+            type: 'data',
+            mode: 'objects',
+            rank: 6,
+            data: {
+              content: [],
+              inline: '[{ rank:1, place: "New York", population: 8175133, lat: 40.71455, lon: -74.007124 }]',
+              loaded: false
+            },
+            name: 'Cities (b)',
+            display: {
+              shape: {
+                type: 'image',
+                //radius: 'd.population / 3000000',
+                origin: '[ d.lon, d.lat ]',
+                //color: 'yellow',
+                opacity: 0.75
+              },
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: '"Value: "+value',
+                event: 'click' // or over
+              }
+            },
+            applyOn: 'layers',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'layer2',
+            type: 'data',
+            mode: 'fill',
+            rank: 7,
+            data: {
+              url: 'http://localhost:9000/scripts/json/unemployment.tsv',
+              type: 'tsv',
+              content: [],
+              loaded: false
+            },
+            name: 'Unemployment rate',
+            display: {
+              fill: {
+                threshold: {
+                  values: [ 0.02, 0.04, 0.06, 0.08, 0.10 ],
+                  colors: [ '#f2f0f7', '#dadaeb', '#bcbddc',
+                            '#9e9ac8', '#756bb1', '#54278f' ]
+                },
+                value: 'd.rate'
+              },
+              legend: {
+                enabled: true,
+                label: '(d * 100) + " %"'
+              },
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: '"Value: "+value',
+              }
+            },
+            styles: {
+              legend: {
+
+              },
+              tooltip: {
+
+              }
+            },
+            behavior: {
+              tooltip: {
+                //display: 'click'
+                display: 'mouseOver',
+                hide: 'mouseOut'
+              }
+            },
+            applyOn: 'usLayer',
             applied: true,
             visible: true
           }

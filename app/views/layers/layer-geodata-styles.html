@@ -1,0 +1,32 @@
+<div ng-show="shouldDisplayPanel('styles')" class="layer-description-area">
+  <form name="stylesForm" novalidate class="form-horizontal">
+    <!-- background -->
+    <div class="stylesBackground">
+      <legend>Background</legend>
+      <field label="fill">
+        <input colorpicker class="form-control input-sm" name="scale" type="text" 
+             required ng-model="layer.styles.background.fill"
+             ng-model-options="{ updateOn: 'blur' }" />
+      </field>
+    </div>
+    <!-- lines -->
+    <div class="stylesLine">
+      <legend>Line</legend>
+      <field label="Stroke">
+        <input colorpicker class="form-control input-sm" name="scale" type="text" 
+             placeholder="Scale" required ng-model="layer.styles.lines.stroke"
+             ng-model-options="{ updateOn: 'blur' }" />
+      </field>
+      <field label="Stroke width">
+        <input class="form-control input-sm" name="scale" type="text" 
+             placeholder="Scale" required ng-model="layer.styles.lines.strokeWidth"
+             ng-model-options="{ updateOn: 'blur' }" />
+      </field>
+      <field label="Stroke opacity">
+        <input class="form-control input-sm" name="scale" type="text" 
+             placeholder="Scale" required ng-model="layer.styles.lines.strokeOpacity"
+             ng-model-options="{ updateOn: 'blur' }" />
+      </field>
+    </div>
+  </form>
+</div>

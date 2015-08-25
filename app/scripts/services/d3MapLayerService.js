@@ -473,8 +473,9 @@ angular.module('mapManager.d3.services')
           valueChecker.isNotNull(layer.behavior.zoomBoundingBox)) {
         this.configureZoomBoundingBehavior(svg, path,
           layer, pathElements, eventsZoomBoundingBox);
-      } else if (valueChecker.isNotNull(layer.behavior) &&
-          valueChecker.isNotNull(layer.behavior.subMap)) {
+      } else if (valueChecker.isNotNull(layer.display) &&
+          valueChecker.isNotNull(layer.display.subMap) &&
+          valueChecker.isNotNull(eventsSubMap)) {
         this.configureSubMapBehavior(svg, path, layer,
           pathElements, eventsSubMap);
       }
@@ -713,21 +714,23 @@ angular.module('mapManager.d3.services')
     */
     configureSubMapBehavior: function(svg, path, layer, pathElements, events) {
       var self = this;
-      pathElements.on(events.display, function(d) {
-        var currentMapContext = currentMapService.getCurrentMapContext();
-        var width = currentMapContext.dimensions.width;
-        var height = currentMapContext.dimensions.height;
-        var moveType = 'mouseMove';
-        var zoomType = 'mouseWheel';
+      if (events.display === 'click') {
+        pathElements.on('click', function(d) {
+          console.log('>> configureSubMapBehavior - click');
+          var currentMapContext = currentMapService.getCurrentMapContext();
+          var width = currentMapContext.dimensions.width;
+          var height = currentMapContext.dimensions.height;
+          var moveType = 'mouseMove';
+          var zoomType = 'mouseWheel';
 
-        var mapElements = mapUtils.createSubMapStructure(svg, 2,
-          { width: width, height: height },
-          { fill: 'white', opacity: '0.75' });
+          var mapElements = mapUtils.createSubMapStructure(svg, 2,
+            { width: width, height: height },
+            { fill: 'white', opacity: '0.75' });
 
-        // Create root layer
-        var rootLayer = mapElements.gLayers.append('g').attr('id', 'root');
+          // Create root layer
+          var rootLayer = mapElements.gLayers.append('g').attr('id', 'root');
 
-        var projection2 = d3Service.geo.orthographic()
+          var projection2 = d3Service.geo.orthographic()
               .scale(currentMapService.getCurrentMapContext().properties.scale)
               .clipAngle(90)
               .rotate([
@@ -736,21 +739,21 @@ angular.module('mapManager.d3.services')
                 currentMapService.getCurrentMapContext()
                                  .properties.center.lat
               ]);
-        var path2 = d3Service.geo.path().projection(projection2);
+          var path2 = d3Service.geo.path().projection(projection2);
 
-        currentMapService.setCurrentMapId('map2');
-        currentMapService.registerCurrentMapContext(svg, path2,
-          projection2, mapElements.gMap, mapElements.gLayers,
-          {width: width, height: height});
+          currentMapService.setCurrentMapId('map2');
+          currentMapService.registerCurrentMapContext(svg, path2,
+            projection2, mapElements.gMap, mapElements.gLayers,
+            {width: width, height: height});
 
-        mapInteractionService.configureMoving(/*$scope*/null, svg, moveType, {
-          type: currentMapService.getCurrentMap().projection, raw: projection2
-        }, mapUtils.getMapElements());
-        /*mapInteractionService.configureZooming(null, svg, zoomType, {
-          type: currentMapService.getCurrentMap().projection, raw: projection2
-        }, mapUtils.getMapElements());*/
+          mapInteractionService.configureMoving(/*$scope*/null, svg, moveType, {
+            type: currentMapService.getCurrentMap().projection, raw: projection2
+          }, mapUtils.getMapElements());
+          /*mapInteractionService.configureZooming(null, svg, zoomType, {
+            type: currentMapService.getCurrentMap().projection, raw: projection2
+          }, mapUtils.getMapElements());*/
 
-        var layerElements = rootLayer.selectAll('path')
+          var layerElements = rootLayer.selectAll('path')
                  .data([ d ])
                  .enter()
                  .append('path')
@@ -763,21 +766,22 @@ angular.module('mapManager.d3.services')
                  .style('strokeWidth', '1px')
                  .style('strokeOpacity', '1');
 
-        var bds = self.getBounds(path2, d, width, height);
+          var bds = self.getBounds(path2, d, width, height);
 
-        self.executeShowSubMapTransition(d, projection2, path2, layerElements, function() {
-          self.applyLayersOnSubMap(svg, path2, layer, rootLayer,
-            { shape: d, bounds: bds.bounds });
-          self.configureSubMapLegend(svg, path2, layer, mapElements.gMap,
-            { shape: d, bounds: bds.bounds },
-            self.createHideSubMapTransition(svg, layer, projection2,
-              mapElements.gMap, path2, layerElements));
+          self.executeShowSubMapTransition(d, projection2, path2, layerElements, function() {
+            self.applyLayersOnSubMap(svg, path2, layer, rootLayer,
+              { shape: d, bounds: bds.bounds });
+            self.configureSubMapLegend(svg, path2, layer, mapElements.gMap,
+              { shape: d, bounds: bds.bounds },
+              self.createHideSubMapTransition(svg, layer, projection2,
+                mapElements.gMap, path2, layerElements));
+          });
+
+          d3Service.select('#map1').transition()
+            .delay(100).duration(750)
+            .attr('transform', 'translate(750,40)scale(0.2083333283662796,0.2083333283662796)');
         });
-
-        d3Service.select('#map1').transition()
-          .delay(100).duration(750)
-          .attr('transform', 'translate(750,40)scale(0.2083333283662796,0.2083333283662796)');
-      });
+      }
     },
 
     /**

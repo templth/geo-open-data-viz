@@ -153,6 +153,39 @@ angular.module('mapManager.commons', [ 'mapManager.map',
             layer.display.shape.type === 'circle');
         };
 
+        $scope.shouldDisplayDataPolygonProperties = function(layer) {
+          return (layer.type === 'data' && layer.mode === 'objects' &&
+            layer.display.shape.type === 'polygon');
+        };
+
+        $scope.shouldDisplayDataSquareProperties = function(layer) {
+          return (layer.type === 'data' && layer.mode === 'objects' &&
+            layer.display.shape.type === 'square');
+        };
+
+        $scope.shouldDisplayDataLineProperties = function(layer) {
+          return (layer.type === 'data' && layer.mode === 'objects' &&
+            layer.display.shape.type === 'line');
+        };
+
+        $scope.shouldDisplayElementArea = function(layer, domain, area) {
+          return (valueChecker.isNotNull(layer[domain]) &&
+            valueChecker.isNotNull(layer[domain][area]));
+        };
+
+        $scope.addElementArea = function(layer, domain, area) {
+          if (valueChecker.isNotNull(layer[domain])) {
+            layer[domain][area] = {};
+          }
+        };
+
+        $scope.removeElementArea = function(layer, domain, area) {
+          if (valueChecker.isNotNull(layer[domain]) &&
+              valueChecker.isNotNull(layer[domain][area])) {
+            delete layer[domain][area];
+          }
+        };
+
         $scope.shouldDisplayShapeArea = function(layer) {
           return (valueChecker.isNotNull(layer.display) &&
             valueChecker.isNotNull(layer.display.shape));
@@ -205,6 +238,10 @@ angular.module('mapManager.commons', [ 'mapManager.map',
               valueChecker.isNotNull(layer.display.tooltip)) {
             delete layer.display.tooltip;
           }
+        };
+
+        $scope.isArray = function(obj) {
+          return angular.isArray(obj);
         };
 
         $scope.$watch('properties.projection', function(newValue, oldValue) {

@@ -551,13 +551,11 @@ angular.module('mapManager.d3.services', [
            .scale(projection.scale())
            //.saleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
-            console.log('>> on zoom');
         consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
         projection/*.translate(d3Service.event.translate)*/.scale(d3Service.event.scale);
 
-console.log('>> mapId = '+mapId);
         // Update the map
-        //d3Utils.updateMapElements(mapId, projection, mapElements);
+        d3Utils.updateMapElements(mapId, projection, mapElements);
 
         // Update current map context
         //$scope.$apply(function() {

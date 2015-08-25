@@ -1,0 +1,83 @@
+<field label="Radius">
+  <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
+    <input class="form-control input-sm" name="radius" type="text" 
+         required ng-model="layer.display.shape.radius"
+         ng-model-options="{ updateOn: 'blur' }" />
+    <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'radius', linkedSources, layer.data.source, '', layer.display.shape.radius, 'Define shape radius. The expression must return a number.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+  </div>
+  <input  ng-if="!shoudDisplayCheckExpression(layer.data.source)"
+       class="form-control input-sm" name="radius" type="text" 
+       required ng-model="layer.display.shape.radius"
+       ng-model-options="{ updateOn: 'blur' }" />
+</field>
+<field label="Origin">
+  <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
+    <input class="form-control input-sm" name="origin" type="text" 
+         required ng-model="layer.display.shape.origin"
+         ng-model-options="{ updateOn: 'blur' }" />
+    <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'radius', linkedSources, layer.data.source, '', layer.display.shape.origin, 'Define shape origin. The expression must return an array with two values (longitude and latitude).')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+  </div>
+  <input  ng-if="!shoudDisplayCheckExpression(layer.data.source)"
+       class="form-control input-sm" name="origin" type="text" 
+       required ng-model="layer.display.shape.origin"
+       ng-model-options="{ updateOn: 'blur' }" />
+</field>
+<field label="Opacity">
+  <input class="form-control input-sm" name="opacity" type="text" 
+       required ng-model="layer.display.shape.opacity"
+      ng-model-options="{ updateOn: 'blur' }" />
+</field>
+<field label="Fill mode">
+  <select class="form-control input-sm" name="fillMode" ng-model="layer.display.shape.fillMode">
+    <option value="static">Static</option>
+    <option value="threshold">Threshold</option>
+    <option value="choropleth">Choropleth</option>
+  </select>
+</field>
+<div ng-if="layer.display.shape.fillMode === 'static'">
+  <field label="Color">
+    <input colorpicker class="form-control input-sm" name="color" type="text" 
+         required ng-model="layer.display.shape.color"
+        ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+</div>
+<div ng-if="layer.display.shape.fillMode === 'threshold'">
+  <field label="Palette">
+    <palette-picker
+      initial-name='{{layer.display.shape.threshold.paletteCode}}'
+      initial-range='{{layer.display.shape.threshold.values.length}}'
+      initial-reverse='false'
+      on-select='selectBrewColors(item, isReverse)'
+    />
+  </field>
+  <field label="Palette code">
+    <input class="form-control input-sm" name="paletteCode" type="text" 
+         disabled ng-model="layer.display.shape.threshold.paletteCode"
+         ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+  <field label="Reverse">
+    <input class="checkbox" type="checkbox" ng-model="layer.display.shape.threshold.paletteReverse"/>
+  </field>
+  <field label="Values (Range)">
+    <input class="form-control input-sm" ng-list name="values" type="text" 
+         required ng-model="layer.display.shape.threshold.values"
+        ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+  <field label="Colors (Range)">
+    <input class="form-control input-sm" ng-list name="colors" type="text" 
+         disabled ng-model="layer.display.shape.threshold.colors"
+        ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+  <field label="Value">
+    <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
+      <input class="form-control input-sm" name="value" type="text" 
+           required ng-model="layer.display.shape.value"
+           ng-model-options="{ updateOn: 'blur' }" />
+      <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'value', linkedSources, layer.data.source, layer.data.rootObject, layer.display.shape.value, 'Define value. The expression must return a number that will be used define the color of the shape.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
+    </div>
+    <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
+         class="form-control input-sm" name="value" type="text" 
+         required ng-model="layer.display.shape.value"
+         ng-model-options="{ updateOn: 'blur' }" />
+  </field>
+</div>

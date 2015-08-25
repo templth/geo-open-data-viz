@@ -1,0 +1,45 @@
+<div class="behaviorEvents" ng-show="shouldDisplayElementArea(layer, 'behavior', 'events')">
+  <legend>Events <div class="pull-right"><span  ng-click="removeElementArea(layer, 'behavior', 'events')" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
+
+  <!-- Click event -->
+  <div ng-if="isArray(layer.behavior.events['click'])">
+    <div ng-repeat="event in layer.behavior.events['click']">
+      <field label="Click" ng-repeat="(key, value) in event">
+  	    <input type="text" value="{{key}}:{{value}}"/>
+      </field>
+    </div>
+  </div>
+  <div ng-if="!isArray(layer.behavior.events['click'])">
+    <field label="Click" ng-repeat="(key, value) in layer.behavior.events['click']">
+      <input type="text" value="{{key}}:{{value}}"/>
+    </field>
+  </div>
+
+  <!-- Mouve over event -->
+  <div ng-if="isArray(layer.behavior.events['mouseover'])">
+    <div ng-repeat="event in layer.behavior.events['mouseover']">
+      <field label="Mouse over" ng-repeat="(key, value) in event">
+  	    <input type="text" value="{{key}}:{{value}}"/>
+      </field>
+    </div>
+  </div>
+  <div ng-if="!isArray(layer.behavior.events['mouseover'])">
+    <field label="Mouse over" ng-repeat="(key, value) in layer.behavior.events['mouseover']">
+      <input type="text" value="{{key}}:{{value}}"/>
+    </field>
+  </div>
+
+  <!-- Mouve out event -->
+  <div ng-if="isArray(layer.behavior.events['mouseout'])">
+    <div ng-repeat="event in layer.behavior.events['mouseout']">
+      <field label="Mouse out" ng-repeat="(key, value) in event">
+  	    <input type="text" value="{{key}}:{{value}}"/>
+      </field>
+    </div>
+  </div>
+  <div ng-if="!isArray(layer.behavior.events['mouseout'])">
+    <field label="Mouse out" ng-repeat="(key, value) in layer.behavior.events['mouseout']">
+      <input type="text" value="{{key}}:{{value}}"/>
+    </field>
+  </div>
+</div>

@@ -37,53 +37,14 @@
         </accordion-heading>
 
         <div ng-controller="UpdatePropertiesCtrl">
-          <div class="text-center">
-            <div class="btn-group" role="group">
-              <button type="button" ng-click="displayPanel('initial')" ng-class="{active: isDisplayedPanel('initial')}" class="btn btn-default">Initial</button>
-              <button type="button" ng-click="displayPanel('current')"  ng-class="{active: isDisplayedPanel('current')}" class="btn btn-default">Current</button>
-            </div>
-          </div>
+          <ng-include src="'views/map/map-properties-tabs.html'"></ng-include>
 
           <div ng-show="shouldDisplayPanel('initial')" class="layer-description-area">
-            <form name="propertiesForm" novalidate class="form-horizontal">
-              <field label="Projection">
-                <select class="form-control input-sm" name="projection" ng-model="properties.projection">
-                  <option value="none">None</option>
-                  <option value="orthographic">Orthographic</option>
-                  <option value="mercator">Mercator</option>
-                  <option value="satellite">Satellite</option>
-                </select>
-              </field>
-              <field label="Scale">
-                <input class="form-control input-sm" name="scale" type="text" 
-                           placeholder="Scale" required ng-model="properties.scale" />
-              </field>
-              <field label="Center (lon)">
-                <input class="form-control input-sm" name="centerLon" type="text" 
-                           placeholder="Center (longitude)" required ng-model="properties.center.lon" />
-              </field>
-              <field label="Center (lat)">
-                <input class="form-control input-sm" name="centerLat" type="text" 
-                           placeholder="Center (latitude)" required ng-model="properties.center.lat" />
-              </field>
-            </form>
+            <ng-include src="'views/map/map-properties-initial.html'"></ng-include>
           </div>
 
           <div ng-show="shouldDisplayPanel('current')" class="layer-description-area">
-            <form name="propertiesForm" novalidate class="form-horizontal">
-              <field label="Scale">
-                <input disabled class="form-control input-sm" name="scale" type="text" 
-                           placeholder="Scale" required ng-model="currentProperties.scale" />
-              </field>
-              <field label="Center (lon)">
-                <input disabled class="form-control input-sm" name="lon" type="text" 
-                           placeholder="Center (longitude)" required ng-model="currentProperties.center.lon" />
-              </field>
-              <field label="Center (lat)">
-                <input disabled class="form-control input-sm" name="lat" type="text" 
-                           placeholder="Center (latitude)" required ng-model="currentProperties.center.lat" />
-              </field>
-            </form>
+            <ng-include src="'views/map/map-properties-current.html'"></ng-include>
           </div>
         </div>
       </accordion-group>
@@ -101,526 +62,82 @@
             <accordion-heading>
               {{layer.name}}
 
-              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
-                <a dropdown-toggle>
-                  <i tooltip="Tools" class="glyphicon glyphicon-cog grey-icon"></i></span>
-                </a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="#">UI mode <span class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
-                  <li><a href="#">JSON mode</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li class="dropdown-header">Display areas</li>
-                  <li><a href="#">Shape <span ng-if="shouldDisplayShapeArea(layer)" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
-                  <li><a href="#">Legend <span ng-if="shouldDisplayLegendArea(layer)" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
-                  <li><a href="#">Tooltip <span ng-if="shouldDisplayTooltipArea(layer)" class="dropdown-menu-right"><i class="glyphicon glyphicon-ok grey-icon"></i></span></a></li>
-                  <li role="separator" class="divider"></li>
-                  <li class="dropdown-header">Behavior areas</li>
-                  <li><a href="#">Events</a></li>
-                  <li><a href="#">Animation</a></li>
-                </ul>
-              </div>
-
-              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
-                <i tooltip="Remove the layer" class="glyphicon glyphicon-remove grey-icon"></i>
-              </div>
-
-              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown >
-                <i tooltip="Save the layer" class="glyphicon glyphicon-save-file grey-icon"></i>
-              </div>
-
-              <div ng-click="$event.stopPropagation();" class="pull-right btn-group btn-group-xs" dropdown auto-close="always">
-                <a dropdown-toggle>
-                  <i tooltip="Refresh / Reload layer" class="glyphicon glyphicon-refresh grey-icon"></i></span>
-                </a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="#" ng-click="refreshLayerApplying($event, layer);">Refresh layer</a></li>
-                  <li><a href="#">Reload layer</a></li>
-                </ul>
-              </div>
-
-              <div class="pull-right separator"></div>
-
-              <div ng-click="$event.stopPropagation();" class="pull-right">
-                <span class="label label-success" ng-click="toggleLayerApplying($event, layer)"><span ng-if="layer.applied">Applied</span><span ng-if="!layer.applied">Not applied</span></span>
-                <span ng-if="!isLayerWithFillMode(layer)" class="label label-primary" ng-click="toggleLayerVisibility($event, layer)"><span ng-if="layer.visible">Visible</span><span ng-if="!layer.visible">Hidden</span></span>
-              </div>
-
+              <ng-include src="'views/layers/layer-toolbar.html'"></ng-include>
             </accordion-heading>
 
             <div ng-if="shouldDisplayGraticuleProperties(layer)" ng-controller="UpdateLayerCtrl">
-              <div class="text-center">
-                <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Styles</button>
-                </div>
-              </div>
+              <ng-include src="'views/layers/layer-graticule-tabs.html'"></ng-include>
 
               <!-- properties -->
               <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
-                <form name="layerForm" novalidate class="form-horizontal">
-                  <field label="Name">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.name"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="type" type="text" 
-                         disabled ng-model="layer.type"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Apply on layer">
-                    <select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
-                    </select>
-                  </field>
-                  <field label="Background">
-                    <input class="checkbox" type="checkbox" ng-model="layer.display.background">
-                  </field>
-                  <field label="Lines">
-                    <input class="checkbox" type="checkbox" ng-model="layer.display.lines">
-                  </field>
-                  <field label="Border">
-                    <input class="checkbox" type="checkbox"  ng-model="layer.display.border">
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-graticule-properties.html'"></ng-include>
               </div>
               <!-- styles -->
               <div ng-show="shouldDisplayPanel('styles')" class="layer-description-area">
-                <form name="stylesForm" novalidate class="form-horizontal">
-                  <!-- background -->
-                  <field-multi-labels label1="background" label2="fill">
-                    <input colorpicker class="form-control input-sm" name="scale" type="text" 
-                         required ng-model="layer.styles.background.fill"
-                          ng-model-options="{ updateOn: 'blur' }" />
-                  </field-multi-labels>
-                  <!-- border -->
-                  <field-multi-labels label1="border" label2="stroke">
-                    <input colorpicker class="form-control input-sm" name="scale" type="text" 
-                         required ng-model="layer.styles.border.stroke"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field-multi-labels>
-                  <field-multi-labels label1="border" label2="strokeWidth">
-                    <input class="form-control input-sm" name="scale" type="text" 
-                         placeholder="Scale" required ng-model="layer.styles.border.strokeWidth"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field-multi-labels>
-                  <!-- lines -->
-                  <field-multi-labels label1="lines" label2="stroke">
-                    <input colorpicker class="form-control input-sm" name="scale" type="text" 
-                         placeholder="Scale" required ng-model="layer.styles.lines.stroke"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field-multi-labels>
-                  <field-multi-labels label1="lines" label2="strokeWidth">
-                    <input class="form-control input-sm" name="scale" type="text" 
-                         placeholder="Scale" required ng-model="layer.styles.lines.strokeWidth"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field-multi-labels>
-                  <field-multi-labels label1="lines" label2="strokeOpacity">
-                    <input class="form-control input-sm" name="scale" type="text" 
-                         placeholder="Scale" required ng-model="layer.styles.lines.strokeOpacity"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field-multi-labels>
-                </form>
+                <ng-include src="'views/layers/layer-graticule-styles.html'"></ng-include>
               </div>
             </div>
 
             <div ng-if="shouldDisplayGeoDataProperties(layer)" ng-controller="UpdateLayerCtrl">
-              <div class="text-center">
-                <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
-                  <button type="button" ng-click="displayPanel('display')"  ng-class="{active: isDisplayedPanel('display')}" class="btn btn-default">Display</button>
-                  <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Styles</button>
-                  <button type="button" ng-click="displayPanel('behavior')"  ng-class="{active: isDisplayedPanel('behavior')}" class="btn btn-default">Behavior</button>
-                </div>
-              </div>
+              <ng-include src="'views/layers/layer-geodata-tabs.html'"></ng-include>
 
               <!-- properties -->
               <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
-                <form name="layerForm" novalidate class="form-horizontal">
-                  <field label="Name">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.name"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="type" type="text" 
-                         disabled ng-model="layer.type"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Apply on layer">
-                    <input type="text" class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                    <!-- select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
-                    </select -->
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-geodata-properties.html'"></ng-include>
               </div>
               <!-- data -->
               <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
-                <form name="dataForm" novalidate class="form-horizontal">
-                  <field label="From source">
-                    <select class="form-control input-sm" name="source"
-                         ng-model="layer.data.source"
-                         ng-model-options="{ updateOn: 'blur' }">
-                      <option value="{{linkedSource.id}}" ng-selected="linkedSource.id === layer.data.source" ng-repeat="linkedSource in linkedSources">{{linkedSource.name}}</option>
-                    </select>
-                  </field>
-                  <field label="URL">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.data.url"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="applyOn" type="text" 
-                         required ng-model="layer.data.type"
-                        ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Root object">
-                    <input class="form-control input-sm" name="rootObject" type="text" 
-                         required ng-model="layer.data.rootObject"
-                        ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Mesh">
-                    <input class="checkbox" type="checkbox" ng-model="layer.data.mesh">
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-geodata-data.html'"></ng-include>
               </div>
               <!-- display -->
               <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
-                <form name="dataForm" novalidate class="form-horizontal">
-                  <field label="Tooltip">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.data.url"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Tooltip text">
-                    <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                      <input class="form-control input-sm" name="tooltipText" type="text" 
-                           required ng-model="layer.display.tooltip.text"
-                           ng-model-options="{ updateOn: 'blur' }" />
-                      <span class="input-group-addon"><a ng-click="checkExpression(layer.display.tooltip, 'text', linkedSources, layer.data.source, layer.data.rootObject, layer.display.tooltip.text, 'Define the content of the tooltip text.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                    </div>
-                    <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
-                         class="form-control input-sm" name="tooltipText" type="text" 
-                         required ng-model="layer.display.tooltip.text"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-geodata-display.html'"></ng-include>
               </div>
               <!-- styles -->
               <div ng-if="shouldDisplayGeoDataStylesProperties(layer)">
-                <div ng-show="shouldDisplayPanel('styles')" class="layer-description-area">
-                  <form name="stylesForm" novalidate class="form-horizontal">
-                    <!-- background -->
-                    <field-multi-labels label1="background" label2="fill">
-                      <input colorpicker class="form-control input-sm" name="scale" type="text" 
-                           required ng-model="layer.styles.background.fill"
-                            ng-model-options="{ updateOn: 'blur' }" />
-                    </field-multi-labels>
-                    <!-- lines -->
-                    <field-multi-labels label1="lines" label2="stroke">
-                      <input colorpicker class="form-control input-sm" name="scale" type="text" 
-                           placeholder="Scale" required ng-model="layer.styles.lines.stroke"
-                           ng-model-options="{ updateOn: 'blur' }" />
-                    </field-multi-labels>
-                    <field-multi-labels label1="lines" label2="strokeWidth">
-                      <input class="form-control input-sm" name="scale" type="text" 
-                           placeholder="Scale" required ng-model="layer.styles.lines.strokeWidth"
-                           ng-model-options="{ updateOn: 'blur' }" />
-                    </field-multi-labels>
-                    <field-multi-labels label1="lines" label2="strokeOpacity">
-                      <input class="form-control input-sm" name="scale" type="text" 
-                           placeholder="Scale" required ng-model="layer.styles.lines.strokeOpacity"
-                           ng-model-options="{ updateOn: 'blur' }" />
-                    </field-multi-labels>
-                  </form>
-                </div>
+                <ng-include src="'views/layers/layer-geodata-styles.html'"></ng-include>
               </div>
               <!-- display -->
               <div ng-show="shouldDisplayPanel('behavior')" class="layer-description-area">
-                <form name="dataForm" novalidate class="form-horizontal">
-                  <field label="URL">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.data.url"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-geodata-behavior.html'"></ng-include>
               </div>
             </div>
 
             <div ng-if="shouldDisplayDataFillProperties(layer)" ng-controller="UpdateLayerCtrl">
-              <div class="text-center">
-                <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
-                  <button type="button" ng-click="displayPanel('styles')"  ng-class="{active: isDisplayedPanel('styles')}" class="btn btn-default">Display</button>
-                </div>
-              </div>
+              <ng-include src="'views/layers/layer-fill-tabs.html'"></ng-include>
 
               <!-- properties -->
               <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
-                <form name="propertiesForm" novalidate class="form-horizontal">
-                  <field label="Name">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.name"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="type" type="text" 
-                         disabled ng-model="layer.type"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Mode">
-                    <input class="form-control input-sm" name="mode" type="text" 
-                         disabled ng-model="layer.mode"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Apply on layer">
-                    <input type="text" class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                    <!-- select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
-                    </select -->
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-fill-properties.html'"></ng-include>
               </div>
               <!-- data -->
               <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
-                <form name="dataForm" novalidate class="form-horizontal">
-                  <field label="URL">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.data.url"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="applyOn" type="text" 
-                         required ng-model="layer.data.type"
-                        ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-fill-data.html'"></ng-include>
               </div>
               <!-- display -->
               <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
-                <form name="displayForm" novalidate class="form-horizontal">
-                  <field label="Value">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.display.fill.value"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-fill-display.html'"></ng-include>
               </div>
             </div>
 
             <div ng-if="shouldDisplayDataObjectsProperties(layer)" ng-controller="UpdateLayerCtrl">
-              <div class="text-center">
-                <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayPanel('properties')" ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
-                  <button type="button" ng-click="displayPanel('data')"  ng-class="{active: isDisplayedPanel('data')}" class="btn btn-default">Data</button>
-                  <button type="button" ng-click="displayPanel('display')"  ng-class="{active: isDisplayedPanel('display')}" class="btn btn-default">Display</button>
-                </div>
-              </div>
+              <ng-include src="'views/layers/layer-object-tabs.html'"></ng-include>
 
               <!-- properties -->
               <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
-                <form name="propertiesForm" novalidate class="form-horizontal">
-                  <field label="Name">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.name"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="type" type="text" 
-                         disabled ng-model="layer.type"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Mode">
-                    <input class="form-control input-sm" name="mode" type="text" 
-                         disabled ng-model="layer.mode"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Apply on layer">
-                    <input type="text" class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                    <!-- select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-                      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
-                    </select -->
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-object-properties.html'"></ng-include>
               </div>
               <!-- data -->
               <div ng-show="shouldDisplayPanel('data')" class="layer-description-area">
-                <form name="dataForm" novalidate class="form-horizontal">
-                  <field label="From source">
-                    <select class="form-control input-sm" name="source"
-                         ng-model="layer.data.source"
-                         ng-model-options="{ updateOn: 'blur' }">
-                      <option value="{{linkedSource.id}}" ng-selected="linkedSource.id === layer.data.source" ng-repeat="linkedSource in linkedSources">{{linkedSource.name}}</option>
-                    </select>
-                  </field>
-                  <field label="URL">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         required ng-model="layer.data.url"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Type">
-                    <input class="form-control input-sm" name="applyOn" type="text" 
-                         required ng-model="layer.data.type"
-                        ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Where">
-                    <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                      <input class="form-control input-sm" name="where" type="text" 
-                           required ng-model="layer.data.where"
-                           ng-model-options="{ updateOn: 'blur' }" />
-                      <span class="input-group-addon"><a ng-click="checkExpression(layer.data, 'where', linkedSources, layer.data.source, '', layer.data.where, 'Filter a collection. The expression must return true or false. If the returned value is false, the element will be removed from the collection.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                    </div>
-                    <input ng-if="!shoudDisplayCheckExpression(layer.data.source)" class="form-control input-sm" name="where" type="text" 
-                         required ng-model="layer.data.where"
-                         ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Sort field">
-                    <input class="form-control input-sm" name="orderField" type="text" 
-                         required ng-model="layer.data.order.field"
-                        ng-model-options="{ updateOn: 'blur' }" />
-                  </field>
-                  <field label="Ascending">
-                    <input class="checkbox" type="checkbox" ng-model="layer.data.order.ascending"/>
-                  </field>
-                </form>
+                <ng-include src="'views/layers/layer-object-data.html'"></ng-include>
               </div>
               <!-- display -->
               <div ng-show="shouldDisplayPanel('display')" class="layer-description-area">
-                <form name="displayForm" novalidate class="form-horizontal">
-                  <div class="shape" ng-show="shouldDisplayShapeArea(layer)">
-                    <legend>Shape <div class="pull-right"><span ng-click="removeDisplayShapeArea(layer)" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
-                    <field label="Shape">
-                      <select class="form-control input-sm" name="type" ng-model="layer.display.shape.type">
-                        <option value="circle">Circle</option>
-                        <option value="polygon">Polygon</option>
-                      </select>
-                    </field>
-                    <div ng-if="shouldDisplayDataCircleProperties(layer)">
-                      <field label="Radius">
-                        <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                          <input class="form-control input-sm" name="radius" type="text" 
-                               required ng-model="layer.display.shape.radius"
-                               ng-model-options="{ updateOn: 'blur' }" />
-                          <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'radius', linkedSources, layer.data.source, '', layer.display.shape.radius, 'Define shape radius. The expression must return a number.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                        </div>
-                        <input  ng-if="!shoudDisplayCheckExpression(layer.data.source)"
-                             class="form-control input-sm" name="radius" type="text" 
-                             required ng-model="layer.display.shape.radius"
-                             ng-model-options="{ updateOn: 'blur' }" />
-                      </field>
-                      <field label="Origin">
-                        <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                          <input class="form-control input-sm" name="origin" type="text" 
-                               required ng-model="layer.display.shape.origin"
-                               ng-model-options="{ updateOn: 'blur' }" />
-                          <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'radius', linkedSources, layer.data.source, '', layer.display.shape.origin, 'Define shape origin. The expression must return an array with two values (longitude and latitude).')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                        </div>
-                        <input  ng-if="!shoudDisplayCheckExpression(layer.data.source)"
-                             class="form-control input-sm" name="origin" type="text" 
-                             required ng-model="layer.display.shape.origin"
-                             ng-model-options="{ updateOn: 'blur' }" />
-                      </field>
-                      <field label="Opacity">
-                        <input class="form-control input-sm" name="opacity" type="text" 
-                             required ng-model="layer.display.shape.opacity"
-                            ng-model-options="{ updateOn: 'blur' }" />
-                      </field>
-                      <field label="Fill mode">
-                        <select class="form-control input-sm" name="fillMode" ng-model="layer.display.shape.fillMode">
-                          <option value="static">Static</option>
-                          <option value="threshold">Threshold</option>
-                          <option value="choropleth">Choropleth</option>
-                        </select>
-                      </field>
-                      <div ng-if="layer.display.shape.fillMode === 'static'">
-                        <field label="Color">
-                          <input colorpicker class="form-control input-sm" name="color" type="text" 
-                               required ng-model="layer.display.shape.color"
-                              ng-model-options="{ updateOn: 'blur' }" />
-                        </field>
-                      </div>
-                      <div ng-if="layer.display.shape.fillMode === 'threshold'">
-                        <field label="Palette">
-                          <palette-picker
-                            initial-name='{{layer.display.shape.threshold.paletteCode}}'
-                            initial-range='{{layer.display.shape.threshold.values.length}}'
-                            initial-reverse='false'
-                            on-select='selectBrewColors(item, isReverse)'
-                          />
-                        </field>
-                        <field label="Values (Range)">
-                          <input class="form-control input-sm" ng-list name="values" type="text" 
-                               required ng-model="layer.display.shape.threshold.values"
-                              ng-model-options="{ updateOn: 'blur' }" />
-                        </field>
-                        <field label="Code">
-                          <input class="form-control input-sm" name="paletteCode" type="text" 
-                               disabled ng-model="layer.display.shape.threshold.paletteCode"
-                               ng-model-options="{ updateOn: 'blur' }" />
-                        </field>
-                        <field label="Reverse">
-                          <input class="checkbox" type="checkbox" ng-model="layer.display.shape.threshold.paletteReverse"/>
-                        </field>
-                        <field label="Colors (Range)">
-                          <input class="form-control input-sm" ng-list name="colors" type="text" 
-                               disabled ng-model="layer.display.shape.threshold.colors"
-                              ng-model-options="{ updateOn: 'blur' }" />
-                        </field>
-                        <field label="Value">
-                          <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                            <input class="form-control input-sm" name="value" type="text" 
-                                 required ng-model="layer.display.shape.value"
-                                 ng-model-options="{ updateOn: 'blur' }" />
-                            <span class="input-group-addon"><a ng-click="checkExpression(layer.display.shape, 'value', linkedSources, layer.data.source, layer.data.rootObject, layer.display.shape.value, 'Define value. The expression must return a number that will be used define the color of the shape.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                          </div>
-                          <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
-                               class="form-control input-sm" name="value" type="text" 
-                               required ng-model="layer.display.shape.value"
-                               ng-model-options="{ updateOn: 'blur' }" />
-                        </field>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="legend" ng-show="shouldDisplayLegendArea(layer)">
-                    <legend>Legend <div class="pull-right"><span  ng-click="removeDisplayLegendArea(layer)" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
-                    <field label="Enabled">
-                      <input class="checkbox" type="checkbox" ng-model="layer.display.legend.enabled"/>
-                    </field>
-                    <field label="Label">
-                      <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                        <input class="form-control input-sm" name="value" type="text" 
-                             required ng-model="layer.display.legend.label"
-                             ng-model-options="{ updateOn: 'blur' }" />
-                        <span class="input-group-addon"><a ng-click="checkExpression(layer.display.legend, 'label', linkedSources, layer.data.source, layer.data.rootObject, layer.display.legend.label, 'Define legend label.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                      </div>
-                      <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
-                           class="form-control input-sm" name="label" type="text" 
-                           required ng-model="layer.display.legend.label"
-                          ng-model-options="{ updateOn: 'blur' }" />
-                    </field>
-                  </div>
-                  <div class="displayTooltip" ng-show="shouldDisplayTooltipArea(layer)">
-                    <legend>Tooltip <div class="pull-right"><span  ng-click="removeDisplayTooltipArea(layer)" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
-                    <field label="Enabled">
-                      <input class="checkbox" type="checkbox" ng-model="layer.display.tooltip.enabled"/>
-                    </field>
-                    <field label="Text">
-                      <div class="input-group" ng-if="shoudDisplayCheckExpression(layer.data.source)">
-                        <input class="form-control input-sm" name="value" type="text" 
-                             required ng-model="layer.display.tooltip.text"
-                             ng-model-options="{ updateOn: 'blur' }" />
-                        <span class="input-group-addon"><a ng-click="checkExpression(layer.display.tooltip, 'value', linkedSources, layer.data.source, layer.data.rootObject, layer.display.tooltip.text, 'Define tooltip text.')"><i class="glyphicon glyphicon-pencil"></i></a></span>
-                      </div>
-                      <input ng-if="!shoudDisplayCheckExpression(layer.data.source)"
-                           class="form-control input-sm" name="text" type="text" 
-                           required ng-model="layer.display.tooltip.text"
-                          ng-model-options="{ updateOn: 'blur' }" />
-                    </field>
-                  </div>
-                </form>
+                <ng-include src="'views/layers/layer-object-display.html'"></ng-include>
+              </div>
+              <!-- behavior -->
+              <div ng-show="shouldDisplayPanel('behavior')" class="layer-description-area">
+                <ng-include src="'views/layers/layer-object-behavior.html'"></ng-include>
               </div>
             </div>
           </accordion-group>
@@ -643,47 +160,16 @@
             </accordion-heading>
 
             <div ng-controller="UpdateSourceCtrl">
-              <div class="text-center">
-                <div class="btn-group" role="group">
-                  <button type="button" ng-click="displayPanel('preview')" ng-class="{active: isDisplayedPanel('preview')}" class="btn btn-default">Preview</button>
-                  <button type="button" ng-click="displayPanel('properties')"  ng-class="{active: isDisplayedPanel('properties')}" class="btn btn-default">Properties</button>
-                </div>
-              </div>
+              <ng-include src="'views/map/map-sources-tabs.html'"></ng-include>
 
               <!-- preview -->
               <div ng-show="shouldDisplayPanel('preview')" class="layer-description-area">
-                <form name="previewSourceForm" novalidate class="form-horizontal">
-                  <field label="Structure">
-                    <textarea class="form-control input-sm" name="structure"
-                         row="5" disabled>{{source.structure}}</textarea>
-                  </field>
-                  <field label="Samples">
-                    <textarea class="form-control input-sm" name="name"
-                         row="5" disabled>{{source}}</textarea>
-                  </field>
-                </form>
+                <ng-include src="'views/map/map-sources-preview.html'"></ng-include>
               </div>
 
               <!-- properties -->
               <div ng-show="shouldDisplayPanel('properties')" class="layer-description-area">
-                <form name="previewSourceForm" novalidate class="form-horizontal">
-                  <field label="Name">
-                    <input class="form-control input-sm" name="name" type="text" 
-                         disabled value="{{source.name}}"/>
-                  </field>
-                  <field label="Data type">
-                    <input class="form-control input-sm" name="type" type="text"
-                         row="5" disabled value="{{source.type}}"/>
-                  </field>
-                  <field label="Data URL">
-                    <input class="form-control input-sm" name="originUrl" type="text"
-                         row="5" disabled value="{{source.url}}"/>
-                  </field>
-                  <field label="Origin URL">
-                    <input class="form-control input-sm" name="originUrl" type="text"
-                         row="5" disabled value="{{source.originUrl}}"/>
-                  </field>
-                </form>
+                <ng-include src="'views/map/map-sources-properties.html'"></ng-include>
               </div>
             </div>
           </accordion-group>

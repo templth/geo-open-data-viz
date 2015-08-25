@@ -1,0 +1,27 @@
+<div class="displayShape" ng-show="shouldDisplayElementArea(layer, 'display', 'shape')">
+  <legend>Shape <div class="pull-right"><span ng-click="removeElementArea(layer, 'display', 'shape')" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
+  <field label="Shape">
+    <select class="form-control input-sm" name="type" ng-model="layer.display.shape.type">
+      <option value="circle">Circle</option>
+      <option value="polygon">Polygon</option>
+      <option value="square">Square</option>
+      <option value="line">Line</option>
+    </select>
+  </field>
+  <div ng-if="shouldDisplayDataCircleProperties(layer)">
+    <!-- Circle -->
+    <ng-include src="'views/layers/layer-display-shape-circle.html'"></ng-include>
+  </div>
+  <div ng-if="shouldDisplayDataPolygonProperties(layer)">
+    <!-- Circle -->
+    <ng-include src="'views/layers/layer-display-shape-polygon.html'"></ng-include>
+  </div>
+  <div ng-if="shouldDisplayDataSquareProperties(layer)">
+    <!-- Circle -->
+    <ng-include src="'views/layers/layer-display-shape-square.html'"></ng-include>
+  </div>
+  <div ng-if="shouldDisplayDataLineProperties(layer)">
+    <!-- Circle -->
+    <ng-include src="'views/layers/layer-display-shape-line.html'"></ng-include>
+  </div>
+</div>
