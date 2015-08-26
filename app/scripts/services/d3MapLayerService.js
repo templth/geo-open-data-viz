@@ -113,8 +113,12 @@ angular.module('mapManager.d3.services')
       var layerElement = d3Service.select(document.getElementById(
         currentMapId + '-' + layer.id));
       if (layerElement.empty()) {
+        var applyOn = layer.applyOn;
+        if (valueChecker.isNull(applyOn)) {
+          applyOn = 'layers';
+        }
         var sel = d3Service.select(document.getElementById(
-          currentMapId + '-' + layer.applyOn));
+          currentMapId + '-' + applyOn));
         if (valueChecker.isNull(sel)) {
           sel = svg;
         }
@@ -279,7 +283,7 @@ angular.module('mapManager.d3.services')
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createGraticuleLayer: function(svg, path, layer, additionalContext) {
+    createGraticuleLayer: function(svg, path, layer, layers, additionalContext) {
       consoleService.logMessage('info',
         'Creating graticule layer with identifier "' + layer.id + '"');
       if (layer.id === null) {
@@ -464,7 +468,7 @@ angular.module('mapManager.d3.services')
      * @param {Object} layer the layer
      * @param {Object} pathElements the path elements to apply on
     */
-    configureBehaviors: function(svg, path, layer, pathElements) {
+    configureBehaviors: function(svg, path, layer, layers, pathElements) {
       var eventsZoomBoundingBox = eventUtils.getDomainEvents(
         layer, 'zoomBoundingBox');
       var eventsSubMap = eventUtils.getDomainEvents(layer, 'subMap');
@@ -476,7 +480,7 @@ angular.module('mapManager.d3.services')
       } else if (valueChecker.isNotNull(layer.display) &&
           valueChecker.isNotNull(layer.display.subMap) &&
           valueChecker.isNotNull(eventsSubMap)) {
-        this.configureSubMapBehavior(svg, path, layer,
+        this.configureSubMapBehavior(svg, path, layer, layers,
           pathElements, eventsSubMap);
       }
 
@@ -566,13 +570,12 @@ angular.module('mapManager.d3.services')
      * @param {Object} additionalContext the additional context for expressions
     */
     applyLayersOnSubMap: function(svg, path,
-        layer, layerElement, additionalContext) {
+        layer, layers, layerElement, additionalContext) {
       var self = this;
 
       _.forEach(layer.display.subMap.layers, function(layer) {
-        var subLayer = _.find(
-          currentMapService.getCurrentMap().layers, 'id', layer);
-        self.createLayer(svg, path, subLayer, additionalContext);
+        var subLayer = _.find(layers, 'id', layer);
+        self.createLayer(svg, path, subLayer, layers, additionalContext);
       });
 
       self.configureSubMapLegend(svg, path, layer,
@@ -712,7 +715,7 @@ angular.module('mapManager.d3.services')
      * @param {Object} path the path
      * @param {Object} layer the layer
     */
-    configureSubMapBehavior: function(svg, path, layer, pathElements, events) {
+    configureSubMapBehavior: function(svg, path, layer, layers, pathElements, events) {
       var self = this;
       if (events.display === 'click') {
         pathElements.on('click', function(d) {
@@ -769,7 +772,7 @@ angular.module('mapManager.d3.services')
           var bds = self.getBounds(path2, d, width, height);
 
           self.executeShowSubMapTransition(d, projection2, path2, layerElements, function() {
-            self.applyLayersOnSubMap(svg, path2, layer, rootLayer,
+            self.applyLayersOnSubMap(svg, path2, layer, layers, rootLayer,
               { shape: d, bounds: bds.bounds });
             self.configureSubMapLegend(svg, path2, layer, mapElements.gMap,
               { shape: d, bounds: bds.bounds },
@@ -913,6 +916,32 @@ function normalise(x) {
 
     /**
      * @ngdoc method
+     * @name applyLayersOnSubMap
+     * @methodOf mapManager.d3.services:layerService
+     * @description
+     * Apply layers on sub map.
+     *
+     * @param {Object} svg the global SVG element
+     * @param {Object} path the path
+     * @param {Object} layer the layer
+     * @param {Object} layerElement the layer element
+     * @param {Object} additionalContext the additional context for expressions
+    */
+    applyDependentLayersOnLayer: function(svg, path,
+        layer, layers, layerElement, additionalContext) {
+      var self = this;
+
+      var dependentLayers = _.filter(layers, function(l) {
+        return (valueChecker.isNotNull(l.applyOn) && l.applyOn === layer.id);
+      });
+
+      _.forEach(dependentLayers, function(dependentLayer) {
+        self.createLayer(svg, path, dependentLayer, layers, additionalContext);
+      });
+    },
+
+    /**
+     * @ngdoc method
      * @name createGeoDataLayer
      * @methodOf mapManager.d3.services:layerService
      * @description
@@ -923,7 +952,8 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createGeoDataLayer: function(svg, path, layer, additionalContext) {
+    createGeoDataLayer: function(svg, path,
+        layer, layers, additionalContext) {
       var self = this;
       var layerElement = this.getLayerElement(svg, layer);
 
@@ -950,13 +980,19 @@ function normalise(x) {
           .attr('id', function(d) { return d.id; })
           .attr('d', path);
 
-          self.applyStylesForGeoDataLayer(layer, pathElements, additionalContext);
-          self.configureTooltip(layer, pathElements, additionalContext);
-          self.configureShapeBounds(layer, layerElement, path, features, additionalContext);
+          self.applyStylesForGeoDataLayer(
+            layer, pathElements, additionalContext);
+          self.configureTooltip(
+            layer, pathElements, additionalContext);
+          /* self.configureShapeBounds(layer,
+            layerElement, path, features, additionalContext); */
         }
 
-        self.configureBehaviors(svg, path, layer, pathElements);
-        //}
+        self.configureBehaviors(svg, path, layer, layers, pathElements);
+
+        // Create layers that depend on
+        self.applyDependentLayersOnLayer(svg, path,
+          layer, layers, layerElement, additionalContext);
       }
 
       // Actually create the layer based on provided data
@@ -1029,7 +1065,7 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createFillDataLayer: function(svg, layer, additionalContext) {
+    createFillDataLayer: function(svg, layer, layers, additionalContext) {
       var self = this;
       var value = $parse(layer.display.fill.value);
 
@@ -1037,12 +1073,13 @@ function normalise(x) {
         var values = {};
         _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
 
-        var sel = d3Service.select(document.getElementById(layer.applyOn));
+        var sel = d3Service.select('#map1-' + layer.applyOn);
 
         var styleHints = self.applyStylesForFillLayer(
           layer, sel, values);
 
-        self.configureTooltip(layer, styleHints.elements, values, additionalContext);
+        self.configureTooltip(layer, styleHints.elements,
+          values, additionalContext);
         self.configureLegend(layer, sel, styleHints, additionalContext);
       }
 
@@ -1129,8 +1166,9 @@ function normalise(x) {
     },
 
     configureLegend: function(layer, layerElement, styleHints) {
-      if (valueChecker.isNotNull(layer.display.legend) &&
-            layer.display.legend.enabled) {
+      if (valueChecker.isNotNull(layer.display) &&
+          valueChecker.isNotNull(layer.display.legend) &&
+          layer.display.legend.enabled) {
         var legendLabel = $parse(layer.display.legend.label);
 
         // TODO: Configure the rect ize according the number of values
@@ -1142,9 +1180,43 @@ function normalise(x) {
           .style('fill', '#fff')
           .style('opacity', '0.7');
 
+        console.log('>> layer.id = '+layer.id);
+
         var height = 500;
+
+        var values = null;
+        if (valueChecker.isNotNull(layer.display)) {
+          // In the case of shape
+          if (valueChecker.isNotNull(layer.display.shape)) {
+            // In the case of threshold
+            if (valueChecker.isNotNull(layer.display.shape.threshold) &&
+                valueChecker.isNotNull(layer.display.shape.threshold.values)) {
+              values = layer.display.shape.threshold.values;
+            // In the case of choropleth
+            } else if (valueChecker.isNotNull(layer.display.shape.choropleth) &&
+                valueChecker.isNotNull(layer.display.shape.choropleth.values)) {
+              values = layer.display.shape.choropleth.values;
+            }
+          // In the case of fill
+          } else if (valueChecker.isNotNull(layer.display.fill)) {
+            // In the case of threshold
+            if (valueChecker.isNotNull(layer.display.fill.threshold) &&
+                valueChecker.isNotNull(layer.display.fill.threshold.values)) {
+              values = layer.display.fill.threshold.values;
+            // In the case of choropleth
+            } else if (valueChecker.isNotNull(layer.display.fill.choropleth) &&
+                valueChecker.isNotNull(layer.display.fill.choropleth.values)) {
+              values = layer.display.fill.choropleth.values;
+            }
+          }
+        }
+
+        if (valueChecker.isNull(values)) {
+          values = [];
+        }
+
         var legend = layerElement.selectAll('g.legend')
-          .data(layer.display.shape.threshold.values)
+          .data(values)
           .enter()
           .append('g')
           .attr('class', 'legend');
@@ -1175,7 +1247,8 @@ function normalise(x) {
     },
 
     configureTooltip: function(layer, layerElements, values, additionalContext) {
-      if (valueChecker.isNotNull(layer.display.tooltip) &&
+      if (valueChecker.isNotNull(layer.display) &&
+          valueChecker.isNotNull(layer.display.tooltip) &&
           layer.display.tooltip.enabled) {
         console.log('>> ')
         var tooltipText = $parse(layer.display.tooltip.text);
@@ -1245,7 +1318,7 @@ function normalise(x) {
      * @param {Object} additionalContext the additional context
     */
     createCircleObjectsDataLayer: function(
-        svg, path, layer, additionalContext) {
+        svg, path, layer, layers, additionalContext) {
           function filterData(data, value, additionalContext, startValue) {
             return _.filter(data, function(d, i) {
               //console.log('d.year = '+d.year);
@@ -1453,7 +1526,8 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createImageObjectsDataLayer: function(svg, path, layer, additionalContext) {
+    createImageObjectsDataLayer: function(svg, path,
+        layer, layers, additionalContext) {
       // Experimental - Display image - Not working at the moment
       var origin = $parse(layer.display.shape.origin);
       // var radius = $parse(layer.display.shape.radius);
@@ -1512,7 +1586,8 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createLineObjectsDataLayer: function(svg, path, layer, additionalContext) {
+    createLineObjectsDataLayer: function(svg, path,
+        layer, layers, additionalContext) {
       var layerElement = this.getLayerElement(svg, layer);
       var value = $parse(layer.display.shape.value);
       var pointValue = $parse(layer.display.shape.pointValue);
@@ -1556,7 +1631,8 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createPolygonObjectsDataLayer: function(svg, path, layer, additionalContext) {
+    createPolygonObjectsDataLayer: function(svg, path,
+        layer, layers, additionalContext) {
       var layerElement = this.getLayerElement(svg, layer);
       var value = $parse(layer.display.shape.value);
       var pointValue = $parse(layer.display.shape.pointValue);
@@ -1619,16 +1695,21 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createObjectsDataLayer: function(svg, path, layer, additionalContext) {
+    createObjectsDataLayer: function(svg, path,
+        layer, layers, additionalContext) {
       if (layer.display.shape) {
         if (layer.display.shape.type === 'circle') {
-          this.createCircleObjectsDataLayer(svg, path, layer, additionalContext);
+          this.createCircleObjectsDataLayer(svg, path,
+            layer, layers, additionalContext);
         } else if (layer.display.shape.type === 'image') {
-          this.createImageObjectsDataLayer(svg, path, layer, additionalContext);
+          this.createImageObjectsDataLayer(svg, path,
+            layer, layers, additionalContext);
         } else if (layer.display.shape.type === 'line') {
-          this.createLineObjectsDataLayer(svg, path, layer, additionalContext);
+          this.createLineObjectsDataLayer(svg, path,
+            layer, layers, additionalContext);
         } else if (layer.display.shape.type === 'polygon') {
-          this.createPolygonObjectsDataLayer(svg, path, layer, additionalContext);
+          this.createPolygonObjectsDataLayer(svg, path,
+            layer, layers, additionalContext);
         }
       }
     },
@@ -1652,18 +1733,22 @@ function normalise(x) {
      * @param {Object} layer the layer
      * @param {Object} additionalContext the additional context
     */
-    createLayer: function(svg, path, layer, additionalContext) {
+    createLayer: function(svg, path, layer, layers, additionalContext) {
       consoleService.logMessage('info', 'Creating layer of type "' +
         layer.type + '" with identifier "' + layer.id + '"');
 
       if (layer.type === 'graticule') {
-        this.createGraticuleLayer(svg, path, layer, additionalContext);
+        console.log('>> create graticule layer');
+        this.createGraticuleLayer(svg, path, layer, layers, additionalContext);
       } else if (layer.type === 'data' && layer.mode === 'objects') {
-        this.createObjectsDataLayer(svg, path, layer, additionalContext);
+        console.log('>> create data objects layer');
+        this.createObjectsDataLayer(svg, path, layer, layers, additionalContext);
       } else if (layer.type === 'data' && layer.mode === 'fill') {
-        this.createFillDataLayer(svg, layer, additionalContext);
+        console.log('>> create data fill layer');
+        this.createFillDataLayer(svg, layer, layers, additionalContext);
       } else if (layer.type === 'geodata') {
-        this.createGeoDataLayer(svg, path, layer, additionalContext);
+        console.log('>> create geodata layer');
+        this.createGeoDataLayer(svg, path, layer, layers, additionalContext);
       }
     },
 

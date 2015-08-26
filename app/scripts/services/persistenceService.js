@@ -13,8 +13,11 @@ function generateUuid(uuid4) {
 }
 
 function copySamples(singularDomainSuffix, collection, samplesService) {
+  console.log('>> singularDomainSuffix = '+singularDomainSuffix);
   var samples = samplesService['get' + singularDomainSuffix + 'Samples']();
+  //console.log('>> samples = '+JSON.stringify(samples));
   _.forEach(samples, function(sample) {
+    console.log('>> sample.id = '+sample.id);
     if (!_.some(collection, 'id', sample.id)) {
       collection.push(sample);
     }
@@ -34,7 +37,14 @@ function createInMemoryPersistenceService(
   copySamples(singularDomainSuffix, collection, samplesService);
 
   service['get' + pluralDomainSuffix] = function() {
-    return createPromise($q, $timeout, collection);
+    var targetCollection = collection;
+    if (domain === 'layer' && arguments.length === 1) {
+      var filteringId = arguments[0];
+      targetCollection = _.filter(targetCollection, function(elt) {
+        return _.includes(elt.maps, filteringId);
+      });
+    }
+    return createPromise($q, $timeout, targetCollection);
   };
 
   service['add' + singularDomainSuffix] = function(item) {
@@ -78,7 +88,14 @@ function createLocalStoragePersistenceService(
 
   service['get' + pluralDomainSuffix] = function() {
     var collection = $localStorage[pluralDomain];
-    return createPromise($q, $timeout, collection);
+    var targetCollection = collection;
+    if (domain === 'layer' && arguments.length === 1) {
+      var filteringId = arguments[0];
+      targetCollection = _.filter(targetCollection, function(elt) {
+        return _.includes(elt.maps, filteringId);
+      });
+    }
+    return createPromise($q, $timeout, targetCollection);
   };
 
   service['add' + singularDomainSuffix] = function(item) {

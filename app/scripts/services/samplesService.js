@@ -5,46 +5,68 @@ angular.module('mapManager.samples', [  ])
   .service('samplesService', function() {
     return {
       getMapSamples: function() {
-        var sources = this.getSourceSamples();
-        return [
-          {
-            id: '1',
-            name: 'Meteorites',
-            type: 'd3js',
-            projection: 'orthographic',
-            //projection: 'mercator',
-            scale: 420,
-            center: {
-              lon: 60,
-              lat: -30
-            },
-            interactions: {
-              moving: 'mouseMove',
-              zooming: 'mouseWheel'
-            },
-            sources: sources
+        var maps = [];
+        maps.push(this.getMapSample1());
+        maps.push(this.getMapSample2());
+        return maps;
+      },
+
+      getMapSample1: function() {
+        var sources = this.getSourcesSample1();
+        return {
+          id: '1',
+          name: 'Meteorites',
+          type: 'd3js',
+          projection: 'orthographic',
+          //projection: 'mercator',
+          scale: 420,
+          center: {
+            lon: 60,
+            lat: -30
           },
-          {
-            id: '1',
-            name: 'US unemployment',
-            type: 'd3js',
-            projection: 'orthographic',
-            //projection: 'mercator',
-            scale: 420,
-            center: {
-              lon: 60,
-              lat: -30
-            },
-            interactions: {
-              moving: 'mouseMove',
-              zooming: 'mouseWheel'
-            },
-            sources: sources
-          }
-        ];
+          interactions: {
+            moving: 'mouseMove',
+            zooming: 'mouseWheel'
+          },
+          sources: sources
+        };
+      },
+
+      getMapSample2: function() {
+        var sources = this.getSourcesSample2();
+        return {
+          id: '2',
+          name: 'US unemployment',
+          type: 'd3js',
+          projection: 'orthographic',
+          //projection: 'mercator',
+          scale: 420,
+          center: {
+            lon: 60,
+            lat: -30
+          },
+          interactions: {
+            moving: 'mouseMove',
+            zooming: 'mouseWheel'
+          },
+          sources: sources
+        };
       },
 
       getLayerSamples: function() {
+        var layers = [];
+        var layers1 = this.getLayersSample1();
+        _.forEach(layers1, function(layer) {
+          layers.push(layer);
+        });
+        var layers2 = this.getLayersSample2();
+        _.forEach(layers2, function(layer) {
+          layers.push(layer);
+        });
+        return layers;
+      },
+
+      getLayersSample1: function() {
         return [
           // Map #1
           // Graticule
@@ -53,7 +75,6 @@ angular.module('mapManager.samples', [  ])
             type: 'graticule',
             rank: 1,
             name: 'Graticule',
-            applyOn: 'layers',
             applied: true,
             visible: true,
             maps: [ '1' ],
@@ -83,7 +104,6 @@ angular.module('mapManager.samples', [  ])
             id: 'worldLayer',
             type: 'geodata',
             rank: 2,
-            applyOn: 'layers',
             name: 'World',
             applied: true,
             visible: true,
@@ -171,6 +191,7 @@ angular.module('mapManager.samples', [  ])
             type: 'data',
             mode: 'objects',
             rank: 6,
+            maps: [ '1' ],
             data: {
               url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
               type: 'csv',
@@ -225,7 +246,6 @@ angular.module('mapManager.samples', [  ])
                 ]
               }
             },
-            applyOn: 'layers',
             applied: true,
             visible: true
           },
@@ -236,6 +256,7 @@ angular.module('mapManager.samples', [  ])
             type: 'data',
             mode: 'objects',
             rank: 7,
+            maps: [ '1' ],
             data: {
               url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
               type: 'csv',
@@ -294,7 +315,6 @@ angular.module('mapManager.samples', [  ])
                 ]
               }
             },
-            applyOn: 'layers',
             applied: false,
             visible: false
           },
@@ -305,6 +325,7 @@ angular.module('mapManager.samples', [  ])
             type: 'data',
             mode: 'objects',
             rank: 6,
+            maps: [ '1' ],
             data: {
               inline: '[{name: "Paris", lat: 48.50, lon: 2.20 }]',
               content: [],
@@ -332,7 +353,6 @@ angular.module('mapManager.samples', [  ])
                 }
               }
             },
-            applyOn: 'layers',
             applied: false,
             visible: false
           },
@@ -343,6 +363,7 @@ angular.module('mapManager.samples', [  ])
             type: 'data',
             mode: 'objects',
             rank: 6,
+            maps: [ '1' ],
             data: {
               inline: '[{ points: [ {lon: -74.007124, lat: 40.71455}, {lon: -118.245323, lat: 34.05349}, { lon: -92.888759, lat: 45.37399} ] }] ',
             },
@@ -360,20 +381,23 @@ angular.module('mapManager.samples', [  ])
                 strokeWidth: '1px'
               }
             },
-            applyOn: 'layers',
             applied: true,
             visible: true
-          },*/
+          }
+        ];
+      },
 
+      getLayersSample2: function() {
+        return [
           // Map #2
           {
-            id: 'graticuleLayer',
+            id: 'graticuleLayer2',
             type: 'graticule',
             rank: 1,
             name: 'Graticule',
-            applyOn: 'layers',
             applied: true,
             visible: true,
+            maps: [ '2' ],
             display: {
               background: true,
               lines: true,
@@ -395,59 +419,23 @@ angular.module('mapManager.samples', [  ])
             }
           },
           {
-            id: 'worldLayer',
-            type: 'geodata',
-            rank: 2,
-            data: {
-              url: 'http://localhost:9000/scripts/json/continent.json',
-              rootObject: 'countries',
-              type: 'topojson',
-              content: [],
-              loaded: false
-            },
-            applyOn: 'layers',
-            name: 'World',
-            applied: true,
-            visible: true
-          },
-          {
-            id: 'usLayer',
-            type: 'geodata',
-            rank: 3,
-            data: {
-              url: 'http://localhost:9000/scripts/json/us-light.json',
-              rootObject: 'counties',
-              type: 'topojson',
-              content: [],
-              loaded: false
-            },
-            styles: {
-              path: {
-                fill: 'none',
-                stroke: '#fff',
-                strokeLinejoin: 'round',
-                strokeLinecap: 'round'
-              },
-              d: {
-                strokeWidth: '1.5px'
-              }
-            },
-            applyOn: 'layers',
-            name: 'US',
-            applied: true,
-            visible: true
-          },
-          {
-            id: 'usLayer1',
+            id: 'usCounties',
             type: 'geodata',
             rank: 4,
+            maps: [ '2' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/us-light.json',
+              url: 'http://localhost:9000/scripts/json/us-counties.json',
               rootObject: 'counties',
               type: 'topojson',
               content: [],
-              loaded: false,
-              mesh: true
+              loaded: false
+            },
+            display: {
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: '"Name: "+d.properties.name',
+              }
             },
             styles: {
               path: {
@@ -460,15 +448,25 @@ angular.module('mapManager.samples', [  ])
                 strokeWidth: '0.5px'
               }
             },
-            applyOn: 'layers',
+            behavior: {
+              events: {
+                mouseover: {
+                  display: 'tooltip'
+                },
+                mouseout: {
+                  hide: 'tooltip'
+                }
+              }
+            },
             name: 'US counties',
             applied: true,
             visible: true
           },
-          {
+          /*{
             id: 'usLayer2',
             type: 'geodata',
             rank: 5,
+            maps: [ '2' ],
             data: {
               url: 'http://localhost:9000/scripts/json/us-light.json',
               rootObject: 'states',
@@ -492,12 +490,13 @@ angular.module('mapManager.samples', [  ])
             name: 'US states',
             applied: true,
             visible: true
-          },
-          {
-            id: 'layer1',
+          },*/
+          /*{
+            id: 'layer12',
             type: 'data',
             mode: 'objects',
             rank: 6,
+            maps: [ '2' ],
             data: {
               url: 'http://localhost:9000/scripts/json/test.csv',
               type: 'csv',
@@ -517,12 +516,13 @@ angular.module('mapManager.samples', [  ])
             applyOn: 'layers',
             applied: true,
             visible: true
-          },
-          {
-            id: 'layer1a',
+          },*/
+          /*{
+            id: 'layer12a',
             type: 'data',
             mode: 'objects',
             rank: 6,
+            maps: [ '2' ],
             data: {
               content: [],
               inline: '[{ rank:1, place: "New York", population: 8175133, lat: 40.71455, lon: -74.007124 }]',
@@ -541,12 +541,13 @@ angular.module('mapManager.samples', [  ])
             applyOn: 'layers',
             applied: true,
             visible: true
-          },
-          {
-            id: 'layer1b',
+          },*/
+          /*{
+            id: 'layer12b',
             type: 'data',
             mode: 'objects',
             rank: 6,
+            maps: [ '2' ],
             data: {
               content: [],
               inline: '[{ rank:1, place: "New York", population: 8175133, lat: 40.71455, lon: -74.007124 }]',
@@ -571,12 +572,13 @@ angular.module('mapManager.samples', [  ])
             applyOn: 'layers',
             applied: true,
             visible: true
-          },
+          },*/
           {
-            id: 'layer2',
+            id: 'layer22',
             type: 'data',
             mode: 'fill',
             rank: 7,
+            maps: [ '2' ],
             data: {
               url: 'http://localhost:9000/scripts/json/unemployment.tsv',
               type: 'tsv',
@@ -618,7 +620,7 @@ angular.module('mapManager.samples', [  ])
                 hide: 'mouseOut'
               }
             },
-            applyOn: 'usLayer',
+            applyOn: 'usCounties',
             applied: true,
             visible: true
           }
@@ -626,6 +628,19 @@ angular.module('mapManager.samples', [  ])
       },
 
       getSourceSamples: function() {
+        var sources = [];
+        var sources1 = this.getSourcesSample1();
+        _.forEach(sources1, function(source) {
+          sources.push(source);
+        });
+        var sources2 = this.getSourcesSample2();
+        _.forEach(sources2, function(source) {
+          sources.push(source);
+        });
+        return sources;
+      },
+
+      getSourcesSample1: function() {
         return [
           // List of meteorites
           {
@@ -649,5 +664,10 @@ angular.module('mapManager.samples', [  ])
           }
         ];
       },
+
+      getSourcesSample2: function() {
+        return [
+        ];
+      }
     };
   });

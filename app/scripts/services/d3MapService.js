@@ -128,8 +128,8 @@ angular.module('mapManager.d3.services', [
 
       // Create layers
       _.forEach(layers, function(layer) {
-        if (layer.applied) {
-          layerService.createLayer(svg, path, layer);
+        if (layer.applied && valueChecker.isNull(layer.applyOn)) {
+          layerService.createLayer(svg, path, layer, layers);
         }
       });
 
