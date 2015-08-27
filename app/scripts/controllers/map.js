@@ -121,7 +121,7 @@ angular.module('mapManagerApp')
    * Controller of the mapManagerApp
    */
   .controller('AddSourceCtrl', function($scope,
-      $modalInstance, commonsService, topojsonService) {
+      $modalInstance, commonsService, topojsonService, typeUtils) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
 
     $scope.shouldDisplayStructure = function() {
@@ -157,14 +157,53 @@ angular.module('mapManagerApp')
       if (loadFct != null) {
         loadFct($scope.sourceToAdd.url, function(data) {
           if ($scope.sourceToAdd.type === 'data') {
+            // Structure
             var structure = [];
             if (!_.isEmpty(data)) {
               for (var elt in data[0]) {
-                structure.push(elt);
+                structure.push({
+                  name: elt,
+                  type: typeUtils.getType(data[0][elt])
+                });
               }
             }
+
+            // Min / max
+            var minMax = {};
+            _.forEach(structure, function(elt) {
+              if (elt.type === 'integer' || elt.type === 'float' ||
+                  elt.type === 'date') {
+                minMax[elt.name] = [];
+                var min = _.min(data, function(d) {
+                  if (elt.type === 'integer') {
+                    return typeUtils.parseIntegerValue(d[elt.name]);
+                  } else if (elt.type === 'float') {
+                    return typeUtils.parseFloatValue(d[elt.name]);
+                  } else if (elt.type === 'date') {
+                    return typeUtils.parseDateValue(d[elt.name]);
+                  } else {
+                    return d[elt.name];
+                  }
+                });
+                minMax[elt.name].push(min[elt.name]);
+                var max = _.max(data, function(d) {
+                  if (elt.type === 'integer') {
+                    return typeUtils.parseIntegerValue(d[elt.name]);
+                  } else if (elt.type === 'float') {
+                    return typeUtils.parseFloatValue(d[elt.name]);
+                  } else if (elt.type === 'date') {
+                    return typeUtils.parseDateValue(d[elt.name]);
+                  } else {
+                    return d[elt.name];
+                  }
+                });
+                minMax[elt.name].push(max[elt.name]);
+              }
+            });
+
             $scope.sourceToAdd.structure = JSON.stringify(structure, null, 2);
             $scope.sourceToAdd.rowNumber = data.length;
+            $scope.sourceToAdd.minMax = JSON.stringify(minMax, null, 2);
 
             var sample = _.slice(data, 0, 5);
             $scope.sourceToAdd.sample = JSON.stringify(sample, null, 2);
@@ -215,6 +254,7 @@ angular.module('mapManagerApp')
     commonsService.registerCommonMapLayerFunctionsInScope($scope, $modal);
     commonsService.registerCommonMapLayerPanelFunctionsInScope($scope);
 
+    // Set the fill mode for shape
     if (valueChecker.isNotNull($scope.layer.display) &&
         valueChecker.isNotNull($scope.layer.display.shape)) {
       if (valueChecker.isNotNull($scope.layer.display.shape.threshold)) {
@@ -230,6 +270,25 @@ angular.module('mapManagerApp')
         $scope.layer.display.shape.threshold.paletteCode = item.name;
         $scope.layer.display.shape.threshold.paletteReverse = isReverse;
         $scope.layer.display.shape.threshold.colors = item.colors;
+      };
+    }
+
+    // Set the fill mode for fill
+    if (valueChecker.isNotNull($scope.layer.display) &&
+        valueChecker.isNotNull($scope.layer.display.fill)) {
+      if (valueChecker.isNotNull($scope.layer.display.fill.threshold)) {
+        $scope.layer.display.fill.fillMode = 'threshold';
+      } else if (valueChecker.isNotNull(
+        $scope.layer.display.fill.choropleth)) {
+        $scope.layer.display.fill.fillMode = 'choropleth';
+      } else {
+        $scope.layer.display.fill.fillMode = 'static';
+      }
+
+      $scope.selectBrewColors = function(item, isReverse) {
+        $scope.layer.display.fill.threshold.paletteCode = item.name;
+        $scope.layer.display.fill.threshold.paletteReverse = isReverse;
+        $scope.layer.display.fill.threshold.colors = item.colors;
       };
     }
   })

@@ -78,6 +78,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           });
 
           modalInstance.result.then(function(sourceToAdd) {
+            console.log('source = '+JSON.stringify(sourceToAdd));
             $scope.sources.push(sourceToAdd);
             toaster.pop('success', 'Source "' +
               sourceToAdd.name + '"',

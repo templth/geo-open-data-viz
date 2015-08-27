@@ -12,10 +12,10 @@ angular.module('mapManager.d3.services')
  * @description
  * Provide functions to create and manipulate layers of maps.
  */
-.service('layerService', [ '$parse', 'currentMapService', 'mapInteractionService',
+.service('layerService', [ 'currentMapService', 'mapInteractionService',
     'consoleService', 'valueChecker', 'expressionService', 'd3Service',
     'eventUtils', 'mapUtils', 'd3Utils', '$interval',
-    function($parse, currentMapService, mapInteractionService, consoleService, valueChecker,
+    function(currentMapService, mapInteractionService, consoleService, valueChecker,
       expressionService, d3Service, eventUtils, mapUtils, d3Utils, $interval) {
   return {
     // Utility function to update map
@@ -110,21 +110,30 @@ angular.module('mapManager.d3.services')
     getLayerElement: function(svg, layer) {
       var currentMapContext = currentMapService.getCurrentMapContext();
       var currentMapId = currentMapService.getCurrentMapId();
+      console.log('>> currentMapId = '+currentMapId);
       var layerElement = d3Service.select(document.getElementById(
         currentMapId + '-' + layer.id));
+      console.log('>> layerElement.empty() = '+layerElement.empty());
       if (layerElement.empty()) {
+        console.log('  >> 0');
         var applyOn = layer.applyOn;
         if (valueChecker.isNull(applyOn)) {
+          console.log('  >> 1');
           applyOn = 'layers';
         }
+        console.log('  >> 2');
         var sel = d3Service.select(document.getElementById(
           currentMapId + '-' + applyOn));
+        console.log('  >> 3 - '+currentMapId + '-' + applyOn);
         if (valueChecker.isNull(sel)) {
+          console.log('  >> 4');
           sel = svg;
         }
 
+        console.log('  >> 5');
         layerElement = sel.append('g')
             .attr('id', currentMapId + '-' + layer.id);
+        console.log('  >> 6');
       }
 
       return layerElement;
@@ -146,16 +155,31 @@ angular.module('mapManager.d3.services')
       if (layerData.loaded) {
         handleData(this.filterDataForLayer(layerData.content));
       } else if (valueChecker.isNotNullAndNotEmpty(layerData.inline)) {
-        var data = $parse(layerData.inline);
+        var data = expressionService.parseExpression(layerData.inline);
         handleData(self.filterDataForLayer(
           layerData, data(), additionalContext));
       } else {
+        var url = expressionService.parseExpression(layerData.url);
         var loadFct = self.getLoadFunction(layerData.type);
-        loadFct(layerData.url, function(data) {
+        loadFct(expressionService.evaluateExpression(
+            url, null, null, additionalContext), function(data) {
+          data = self.formatDataAsArray(layerData, data);
           handleData(self.filterDataForLayer(
             layerData, data, additionalContext));
         });
       }
+    },
+
+    formatDataAsArray: function(layerData, data) {
+      if (_.isObject(data) && layerData.formatDataAsArray) {
+        var formatedData = [];
+        _.forEach(data, function(n, key) {
+          formatedData.push(n);
+        });
+        return formatedData;
+      }
+
+      return data;
     },
 
     /**
@@ -170,7 +194,7 @@ angular.module('mapManager.d3.services')
     */
     filterDataForLayer: function(layerData, data, additionalContext) {
       if (valueChecker.isNotNull(layerData.where)) {
-        var dataWhere = $parse(layerData.where);
+        var dataWhere = expressionService.parseExpression(layerData.where);
         data = _.filter(data, function(d, i) {
           return dataWhere(expressionService.getExpressionContext(
             d, i, additionalContext));
@@ -214,14 +238,16 @@ angular.module('mapManager.d3.services')
               if (valueChecker.isNotNull(values)) {
                 context.value = values[d.d.id];
               }
-              return tooltipText(context);
+              return expressionService.evaluateExpression(
+                tooltipText, null, null, context);
             } else {
               var context = expressionService.getExpressionContext(
                 d, i, additionalContext);
               if (valueChecker.isNotNull(values)) {
                 context.value = values[d.id];
               }
-              return tooltipText(context);
+              return expressionService.evaluateExpression(
+                tooltipText, null, null, context);
             }
           })
              .style('left', (d3Service.event.pageX) + 'px')
@@ -380,8 +406,10 @@ angular.module('mapManager.d3.services')
      *
      * @param {Object} layer the layer
      * @param {Object} pathElements the path elements to apply styles on
+     * @param {Object} additionalContext the additional context for expressions
     */
-    applyStylesForGeoDataLayer: function(layer, pathElements) {
+    applyStylesForGeoDataLayer: function(
+        layer, pathElements, additionalContext) {
       if (valueChecker.isNotNull(layer.styles)) {
         if (valueChecker.isNotNull(layer.styles.background)) {
           var background = '#fff';
@@ -417,22 +445,28 @@ angular.module('mapManager.d3.services')
         if (valueChecker.isNotNull(layer.display.fill.categorical) &&
             valueChecker.isNotNull(layer.display.fill.categorical.value) &&
             valueChecker.isNotNull(layer.display.fill.categorical.name)) {
-          var value = $parse(layer.display.fill.categorical.value);
+          var value = expressionService.parseExpression(
+            layer.display.fill.categorical.value);
           // Experimental - random fill color
           // See http://bl.ocks.org/jczaplew/4444770
           // See https://github.com/mbostock/topojson/wiki/API-Reference
 
           // Supported values are: 10, 20, 20b, 20c
           var color = d3Service.scale.category20();
+          var colorRangeSize = 20;
           if (valueChecker.isNotNull(layer.display.fill.categorical.name)) {
             if (layer.display.fill.categorical.name === 'category10') {
               color = d3Service.scale.category10();
+              colorRangeSize = 10;
             } else if (layer.display.fill.categorical.name === 'category20') {
               color = d3Service.scale.category20();
+              colorRangeSize = 20;
             } else if (layer.display.fill.categorical.name === 'category20b') {
               color = d3Service.scale.category20b();
+              colorRangeSize = 20;
             } else if (layer.display.fill.categorical.name === 'category20c') {
               color = d3Service.scale.category20c();
+              colorRangeSize = 20;
             }
           }
           /*var countries = topojson.feature(data, data.objects[layer.data.rootObject]).features;
@@ -441,13 +475,16 @@ angular.module('mapManager.d3.services')
           console.log('neighbors = '+neighbors.length);*/
 
           pathElements.style('fill', function(d, i) {
-            return color(value({d: d, i: i}) % 20);
+            return color(expressionService.evaluateExpression(
+              value, d, i, additionalContext) % colorRangeSize);
           });
         } else if (valueChecker.isNotNull(layer.display.fill.value)) {
-          var value = $parse(layer.display.fill.value);
+          var value = expressionService.parseExpression(
+            layer.display.fill.value);
 
           pathElements.style('fill', function(d, i) {
-            return value({d: d, i: i});
+            return expressionService.evaluateExpression(
+              value, d, i, additionalContext);
           });
         }
       }
@@ -800,9 +837,11 @@ angular.module('mapManager.d3.services')
      * @param {Object} layerElement the layer element
      * @param {Object} additionalContext the additional context for expressions
     */
-    configureSubMapLegend: function(svg, path, layer, gMap, additionalContext, closeFct) {
+    configureSubMapLegend: function(svg, path, layer,
+        gMap, additionalContext, closeFct) {
       if (valueChecker.isNotNull(layer.display.subMap.legend)) {
-        var legendLabel = $parse(layer.display.subMap.legend.label);
+        var legendLabel = expressionService.parseExpression(
+          layer.display.subMap.legend.label);
 
         // TODO: Configure the rect ize according the number of values
         var legend = gMap.append('g')
@@ -820,8 +859,8 @@ angular.module('mapManager.d3.services')
           .attr('x', 75)
           .attr('y', 35)
           .text(function() {
-            return legendLabel(expressionService.getExpressionContext(
-              null, null, additionalContext));
+            return expressionService.evaluateExpression(
+              legendLabel, null, null, additionalContext);
           })
           .style('text-anchor', 'middle');
 
@@ -965,7 +1004,8 @@ function normalise(x) {
               data.objects[layer.data.rootObject],
               function(a, b) { return a.id !== b.id; }));
 
-          self.applyStylesForGeoDataLayer(layer, pathElements);
+          self.applyStylesForGeoDataLayer(
+            layer, pathElements, additionalContext);
 
           pathElements
             .attr('d', path);
@@ -1015,11 +1055,20 @@ function normalise(x) {
      * @param {Object} layer the layer
     */
     clearFillDataLayer: function(svg, layer) {
-      var sel = d3Service.select(document.getElementById(layer.applyOn));
+      var currentMapId = currentMapService.getCurrentMapId();
+
+      // Reset fill for applied on layer
+      var sel = d3Service.select('#' + currentMapId + '-' + layer.applyOn);
       sel.selectAll('path')
          .style('fill', function(d) {
         return '#000';
       });
+
+      // Remove legend and tooltip if any
+      var allLayersElement = d3Service.select('#' + currentMapId + '-layers');
+      allLayersElement.selectAll('g.legend').remove();
+      d3Service.select(document.getElementById(
+        'tooltip-' + layer.id)).remove();
       // TODO: the layer applied on should be reloaded
       // refreshLayerApplying
     },
@@ -1067,11 +1116,14 @@ function normalise(x) {
     */
     createFillDataLayer: function(svg, layer, layers, additionalContext) {
       var self = this;
-      var value = $parse(layer.display.fill.value);
+      var value = expressionService.parseExpression(layer.display.fill.value);
 
       function handleData(data) {
         var values = {};
-        _.forEach(data, function(d) { values[d.id] = +value({d: d}); });
+        _.forEach(data, function(d, i) {
+          values[d.id] = +expressionService.evaluateExpression(
+            value, d, i, additionalContext);
+        });
 
         var sel = d3Service.select('#map1-' + layer.applyOn);
 
@@ -1136,11 +1188,12 @@ function normalise(x) {
               .range(layer.display.shape.threshold.colors);
           styleHints.color = tColor;
 
-          var tValue = $parse(layer.display.shape.value);
+          var tValue = expressionService.parseExpression(
+            layer.display.shape.value);
 
           pathElements.style('fill', function(d, i) {
-              var val = tValue(expressionService.getExpressionContext(
-                d.d, i, additionalContext));
+              var val = expressionService.evaluateExpression(tValue,
+                d.d, i, additionalContext);
               return tColor(parseFloat(val));
             });
         } else if (valueChecker.isNotNull(layer.display.shape.choropleth)) {
@@ -1149,11 +1202,12 @@ function normalise(x) {
               .range(layer.display.shape.choropleth.colors);
           styleHints.color = cColor;
 
-          var cValue = $parse(layer.display.shape.value);
+          var cValue = expressionService.parseExpression(
+            layer.display.shape.value);
 
           pathElements.style('fill', function(d, i) {
-            var val = cValue(expressionService.getExpressionContext(
-              d.d, i, additionalContext));
+            var val = expressionService.evaluateExpression(
+              cValue, d.d, i, additionalContext);
             return cColor(parseFloat(val));
           });
         }
@@ -1165,11 +1219,12 @@ function normalise(x) {
       return styleHints;
     },
 
-    configureLegend: function(layer, layerElement, styleHints) {
+    configureLegend: function(layer, layerElement, styleHints, additionalContext) {
       if (valueChecker.isNotNull(layer.display) &&
           valueChecker.isNotNull(layer.display.legend) &&
           layer.display.legend.enabled) {
-        var legendLabel = $parse(layer.display.legend.label);
+        var legendLabel = expressionService.parseExpression(
+          layer.display.legend.label);
 
         // TODO: Configure the rect ize according the number of values
         layerElement.append('rect')
@@ -1179,8 +1234,6 @@ function normalise(x) {
           .attr('height', 150)
           .style('fill', '#fff')
           .style('opacity', '0.7');
-
-        console.log('>> layer.id = '+layer.id);
 
         var height = 500;
 
@@ -1241,7 +1294,8 @@ function normalise(x) {
             return height - (i * ls_h) - ls_h - 4;
           })
           .text(function(d, i) {
-            return legendLabel({d: d, i: i});
+            return expressionService.evaluateExpression(
+              legendLabel, d, i, additionalContext);
           });
       }
     },
@@ -1250,8 +1304,8 @@ function normalise(x) {
       if (valueChecker.isNotNull(layer.display) &&
           valueChecker.isNotNull(layer.display.tooltip) &&
           layer.display.tooltip.enabled) {
-        console.log('>> ')
-        var tooltipText = $parse(layer.display.tooltip.text);
+        var tooltipText = expressionService.parseExpression(
+          layer.display.tooltip.text);
 
         var tooltipDiv = d3Service.select('body').append('div')
           .attr('id', 'tooltip-' + layer.id)
@@ -1268,12 +1322,13 @@ function normalise(x) {
       }
     },
 
-    configureShapeLabel: function(layer, layerElement, data, origin) {
+    configureShapeLabel: function(layer, layerElement, data, origin, additionalContext) {
       if (valueChecker.isNotNull(layer.display.shape.label)) {
         // See this link https://dillieodigital.wordpress.com/2013/01/09/quick-tip-preserve-svg-text-size-after-scale-transform/
         // regarding scaling
         var projection = currentMapService.getCurrentMapContext().projection;
-        var labelText = $parse(layer.display.shape.label.text);
+        var labelText = expressionService.parseExpression(
+          layer.display.shape.label.text);
 
         var dx = 0;
         var dy = 0;
@@ -1288,22 +1343,23 @@ function normalise(x) {
 
         layerElement.selectAll('text').data(data).enter().append('text')
           .attr('x', function(d, i) {
-            var orig = origin(expressionService.getExpressionContext(d, i));
+            var orig = expressionService.evaluateExpression(
+              origin, d, i, additionalContext);
             return projection(orig)[0];
           })
           .attr('dx', dx)
           .attr('y', function(d, i) {
-            var orig = origin(expressionService.getExpressionContext(d, i));
+            var orig = expressionService.evaluateExpression(
+              origin, d, i, additionalContext);
             return projection(orig)[1];
           })
           .attr('dy', dy)
           .text(function(d, i) {
-            return labelText(expressionService.getExpressionContext(d, i));
+            return expressionService.evaluateExpression(
+              labelText, d, i, additionalContext);
           });
       }
     },
-
-    
 
     /**
      * @ngdoc method
@@ -1319,43 +1375,44 @@ function normalise(x) {
     */
     createCircleObjectsDataLayer: function(
         svg, path, layer, layers, additionalContext) {
-          function filterData(data, value, additionalContext, startValue) {
-            return _.filter(data, function(d, i) {
-              //console.log('d.year = '+d.year);
-              var val = value(expressionService.getExpressionContext(
-                d, i, additionalContext));
-              if (valueChecker.isNotNaN(val)) {
-                if (valueChecker.isNotNull(startValue)) {
-                  return (val > startValue);
-                } else {
-                  return true;
-                }
-              }
-              return false;
-            });
+      function filterData(data, value, additionalContext, startValue) {
+        return _.filter(data, function(d, i) {
+          var val = expressionService.evaluateExpression(
+            value, d, i, additionalContext);
+          if (valueChecker.isNotNaN(val)) {
+            if (valueChecker.isNotNull(startValue)) {
+              return (val > startValue);
+            } else {
+              return true;
+            }
           }
+          return false;
+        });
+      }
 
-          function getRange(data, value, additionalContext) {
-            var min = _.min(data, function(d, i) {
-              return value(expressionService.getExpressionContext(
-                d, i, additionalContext));
-            });
-            var max = _.max(data, function(d, i) {
-              return value(expressionService.getExpressionContext(
-                d, i, additionalContext));
-            });
+      function getRange(data, value, additionalContext) {
+        var min = _.min(data, function(d, i) {
+          return expressionService.evaluateExpression(value,
+            d, i, additionalContext);
+        });
+        var max = _.max(data, function(d, i) {
+          return expressionService.evaluateExpression(value,
+            d, i, additionalContext);
+        });
 
-            return {
-              min: value(expressionService.getExpressionContext(
-                min, 0, additionalContext)),
-              max: value(expressionService.getExpressionContext(
-                max, 0, additionalContext))
-            };
-          }
+        return {
+          min: expressionService.evaluateExpression(value,
+            min, 0, additionalContext),
+          max: expressionService.evaluateExpression(value,
+            max, 0, additionalContext)
+        };
+      }
 
       var self = this;
-      var origin = $parse(layer.display.shape.origin);
-      var radius = $parse(layer.display.shape.radius);
+      var origin = expressionService.parseExpression(
+        layer.display.shape.origin);
+      var radius = expressionService.parseExpression(
+        layer.display.shape.radius);
 
       consoleService.logMessage('info',
         'Creating data layer with identifier "' + layer.id + '"');
@@ -1372,13 +1429,15 @@ function normalise(x) {
         if (valueChecker.isNotNull(layer.behavior) &&
           valueChecker.isNotNull(layer.behavior.animation)) {
 
-          var animationValue = $parse(layer.behavior.animation.value);
+          var animationValue = expressionService.parseExpression(
+            layer.behavior.animation.value);
 
           var startValue = null;
           if (valueChecker.isNotNull(layer.behavior.animation.startValue)) {
             startValue = layer.behavior.animation.startValue;
           }
-          var filteredData = filterData(data, animationValue, additionalContext, startValue);
+          var filteredData = filterData(data, animationValue,
+            additionalContext, startValue);
 
           var elements = layerElement.selectAll('circle')
               .data(filteredData)
@@ -1388,12 +1447,12 @@ function normalise(x) {
           elements
             .datum(function(d, i) {
               //console.log('datum - d = '+JSON.stringify(d));
-              var orig = origin(expressionService.getExpressionContext(
-                d, i, additionalContext));
+              var orig = expressionService.evaluateExpression(origin,
+                d, i, additionalContext);
               orig[0] = parseFloat(orig[0]);
               orig[1] = parseFloat(orig[1]);
-              var rad = radius(expressionService.getExpressionContext(
-                d, i, additionalContext));
+              var rad = expressionService.evaluateExpression(radius,
+                d, i, additionalContext);
               rad = parseFloat(rad);
               var c = circle
                  .origin(orig)
@@ -1415,7 +1474,8 @@ function normalise(x) {
             layer, elements, additionalContext);
 
           self.configureTooltip(layer, elements, values, additionalContext);
-          self.configureLegend(layer, layerElement, styleHints, additionalContext);
+          self.configureLegend(layer, layerElement,
+            styleHints, additionalContext);
 
           var count = filteredData.length;
           var range = getRange(filteredData, animationValue, additionalContext);
@@ -1428,7 +1488,8 @@ function normalise(x) {
 
           var animationLabel = null;
           if (valueChecker.isNotNull(layer.behavior.animation.label)) {
-            animationLabel = $parse(layer.behavior.animation.label);
+            animationLabel = expressionService.parseExpression(
+              layer.behavior.animation.label);
           }
 
           var intrv = $interval(function() {
@@ -1454,8 +1515,8 @@ function normalise(x) {
           elements
             .transition()
             .delay(function(d, i) {
-              return (animationValue(expressionService.getExpressionContext(
-                   d.d, i, additionalContext)) - range.min) * duration;
+              return (expressionService.evaluateExpression(animationValue,
+                   d.d, i, additionalContext) - range.min) * duration;
             })
             .duration(function() {
               return duration;
@@ -1481,12 +1542,12 @@ function normalise(x) {
 
           elements
             .datum(function(d, i) {
-              var orig = origin(expressionService.getExpressionContext(
-                d, i, additionalContext));
+              var orig = expressionService.evaluateExpression(origin,
+                d, i, additionalContext);
               orig[0] = parseFloat(orig[0]);
               orig[1] = parseFloat(orig[1]);
-              var rad = radius(expressionService.getExpressionContext(
-                d, i, additionalContext));
+              var rad = expressionService.evaluateExpression(radius,
+                d, i, additionalContext);
               rad = parseFloat(rad);
               var c = circle
                  .origin(orig)
@@ -1501,12 +1562,15 @@ function normalise(x) {
             .attr('class', 'point')
             .attr('d', function(d) { return path(d); });
 
-          self.configureShapeLabel(layer, layerElement, data, origin);
+          self.configureShapeLabel(layer, layerElement,
+            data, origin, additionalContext);
 
-          var styleHints = self.applyStylesForShapeLayer(layer, elements, additionalContext);
+          var styleHints = self.applyStylesForShapeLayer(
+            layer, elements, additionalContext);
 
           self.configureTooltip(layer, elements, values, additionalContext);
-          self.configureLegend(layer, layerElement, styleHints, additionalContext);
+          self.configureLegend(layer, layerElement,
+            styleHints, additionalContext);
         }
       }
 
@@ -1529,8 +1593,8 @@ function normalise(x) {
     createImageObjectsDataLayer: function(svg, path,
         layer, layers, additionalContext) {
       // Experimental - Display image - Not working at the moment
-      var origin = $parse(layer.display.shape.origin);
-      // var radius = $parse(layer.display.shape.radius);
+      var origin = expressionService.parseExpression(layer.display.shape.origin);
+      // var radius = expressionService.parseExpression(layer.display.shape.radius);
 
       consoleService.logMessage('info',
         'Creating data layer with identifier "' + layer.id + '"');
@@ -1544,8 +1608,8 @@ function normalise(x) {
           .enter()
           .append('path')
           .datum(function(d, i) {
-            return circle.origin(origin(
-              expressionService.getExpressionContext(d, i)));
+            return circle.origin(expressionService.evaluateExpression(
+              origin, d, i, additionalContext));
           })
           .attr('class', 'point')
           .attr('d', path)
@@ -1557,7 +1621,7 @@ function normalise(x) {
             /*if (d.properties.name =='Rio de Janeiro'){return 'icon_51440.svg'}
             else{
             return ('icon_10684.svg')*/
-            return 'http://bl.ocks.org/mpmckenna8/raw/b87df1c44243aa1575cb/icon_51440.svg';
+            return 'http://localhost:9000/scripts/json/icon_51440.svg';
           }/*}*/)
           .attr('height', function(d){
             return '19'
@@ -1589,30 +1653,58 @@ function normalise(x) {
     createLineObjectsDataLayer: function(svg, path,
         layer, layers, additionalContext) {
       var layerElement = this.getLayerElement(svg, layer);
-      var value = $parse(layer.display.shape.value);
-      var pointValue = $parse(layer.display.shape.pointValue);
+      var value = expressionService.parseExpression(layer.display.shape.value);
+      var pointValue = expressionService.parseExpression(
+        layer.display.shape.pointValue);
 
       function handleData(data) {
-        layerElement.selectAll('path')
-          .data(data)
-          .enter()
-          .append('path')
-          .datum(function(d) {
-            var points = value({d: d});
-            var coordinates = [];
-            _.forEach(points, function(point) {
-              coordinates.push(pointValue({d: point}));
-            });
-            return {
-              type: 'LineString',
-              coordinates: coordinates,
-              d: d
-            };
-          })
-          .attr('d', path)
-          .style('fill', 'none')
-          .style('stroke', layer.styles.lines.stroke)
-          .style('stroke-width', layer.styles.lines.strokeWidth);
+        if (_.isArray(data)) {
+          layerElement.selectAll('path')
+            .data(data)
+            .enter()
+            .append('path')
+            .datum(function(d, i) {
+              var points = expressionService.evaluateExpression(
+                value, d, i, additionalContext);
+              var coordinates = [];
+              _.forEach(points, function(point, i) {
+                coordinates.push(expressionService.evaluateExpression(
+                  pointValue, point, i, additionalContext));
+              });
+              return {
+                type: 'LineString',
+                coordinates: coordinates,
+                d: d
+              };
+            })
+            .attr('d', path)
+            .style('fill', 'none')
+            .style('stroke', layer.styles.lines.stroke)
+            .style('stroke-width', layer.styles.lines.strokeWidth);
+        } else {
+          layerElement.selectAll('path')
+            .data(data)
+            .enter()
+            .append('path')
+            .datum(function(d, i) {
+              var points = expressionService.evaluateExpression(
+                value, d, i, additionalContext);
+              var coordinates = [];
+              _.forEach(points, function(point, i) {
+                coordinates.push(expressionService.evaluateExpression(
+                  pointValue, point, i, additionalContext));
+              });
+              return {
+                type: 'LineString',
+                coordinates: coordinates,
+                d: d
+              };
+            })
+            .attr('d', path)
+            .style('fill', 'none')
+            .style('stroke', layer.styles.lines.stroke)
+            .style('stroke-width', layer.styles.lines.strokeWidth);
+        }
       }
 
       // Actually create the layer based on provided data
@@ -1634,8 +1726,8 @@ function normalise(x) {
     createPolygonObjectsDataLayer: function(svg, path,
         layer, layers, additionalContext) {
       var layerElement = this.getLayerElement(svg, layer);
-      var value = $parse(layer.display.shape.value);
-      var pointValue = $parse(layer.display.shape.pointValue);
+      var value = expressionService.parseExpression(layer.display.shape.value);
+      var pointValue = expressionService.parseExpression(layer.display.shape.pointValue);
 
       function handleData(data) {
         // TODO: add support for conditional background (threshold, ...)
@@ -1647,8 +1739,9 @@ function normalise(x) {
           .datum(function(d) {
             var points = value({d: d});
             var coordinates = [];
-            _.forEach(points, function(point) {
-              coordinates.push(pointValue({d: point}));
+            _.forEach(points, function(point, i) {
+              coordinates.push(expressionService.evaluateExpression(
+                pointValue, point, i, additionalContext));
             });
 
             // Check if the polygon is closed
@@ -1799,8 +1892,7 @@ function normalise(x) {
       }
 
       // Remove legend and tooltip if any
-      var allLayersElement = d3Service.select(
-        document.getElementById('layers'));
+      var allLayersElement = d3Service.select('#map1-layers');
       allLayersElement.selectAll('g.legend').remove();
       d3Service.select(document.getElementById(
         'tooltip-' + layer.id)).remove();

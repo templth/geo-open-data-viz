@@ -37,6 +37,13 @@
            ng-model-options="{ updateOn: 'blur' }">
         </textarea>
       </field>
+      <field label="Min / max">
+        <textarea class="form-control input-sm" name="rowNumber"
+             rows="4" disabled
+             required ng-model="sourceToAdd.minMax"
+             ng-model-options="{ updateOn: 'blur' }">
+        </textarea>
+      </field>
     </div>
     <!-- context -->
     <div ng-show="shouldDisplayPanel('context')" class="layer-description-area">

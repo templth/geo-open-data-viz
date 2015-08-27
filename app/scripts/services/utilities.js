@@ -163,7 +163,7 @@ angular.module('mapManager.utilities', [ ])
 
 /**
  * @ngdoc service
- * @name mapManager.utilities:eventUtils
+ * @name mapManager.utilities:mapUtils
  * @description
  * Provide functions to check values.
  */
@@ -205,6 +205,83 @@ angular.module('mapManager.utilities', [ ])
 
     getMapElements: function() {
       return [ {type: 'path'}, {type: 'circle'}, {type: 'LineString'}];
+    }
+  };
+}])
+
+/**
+ * @ngdoc service
+ * @name mapManager.utilities:mapUtils
+ * @description
+ * Provide functions to check values.
+ */
+.service('typeUtils', [ 'valueChecker', function(valueChecker) {
+  return {
+    isIntegerNumber: function(value) {
+      // See http://stackoverflow.com/questions/3885817/how-to-check-that-a-number-is-float-or-integer
+      return value % 1 === 0;
+    },
+
+    isIntegerValue: function(val) {
+      if (_.isNumber(val) && this.isIntegerNumber(val)) {
+        return true;
+      } else {
+        return (valueChecker.isNotNaN(parseInt(val)));
+      }
+    },
+
+    parseIntegerValue: function(val) {
+      return parseInt(val);
+    },
+
+    isFloatValue: function(val) {
+      if (_.isNumber(val) && !this.isIntegerNumber(val)) {
+        return true;
+      } else {
+        return (valueChecker.isNotNaN(parseFloat(val)));
+      }
+    },
+
+    parseFloatValue: function(val) {
+      return parseFloat(val);
+    },
+
+    isBooleanValue: function(val) {
+      if (_.isBoolean(val)) {
+        return true;
+      } else {
+        return (val === 'true' || val === 'false');
+      }
+    },
+
+    parseBooleanValue: function(val) {
+      return (val === 'true');
+    },
+
+    isDateValue: function(val) {
+      if (_.isDate(val)) {
+        return true;
+      } else {
+        return (valueChecker.isNotNaN(new Date(val)));
+      }
+    },
+
+    parseDateValue: function(val) {
+      return new Date(val);
+    },
+
+    getType: function(val) {
+      if (this.isIntegerValue(val)) {
+        return 'integer';
+      } else if (this.isFloatValue(val)) {
+        return 'float';
+      } else if (_.isBoolean(val)) {
+        return 'boolean';
+      } else if (_.isDate(val)) {
+        return 'date';
+      } else {
+        return 'string';
+      }
     }
   };
 }]);

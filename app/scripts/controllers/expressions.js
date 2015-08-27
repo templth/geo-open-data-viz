@@ -8,7 +8,7 @@ angular.module('mapManagerApp')
    * # MainCtrl
    * Controller of the mapManagerApp
    */
-  .controller('CheckExpressionCtrl', function($scope, $parse, $modalInstance,
+  .controller('CheckExpressionCtrl', function($scope, $modalInstance,
                        valueChecker, expression, linkedSources,
                        sourceId, rootObject, description, domain, attribute,
                        commonsService, expressionService) {
@@ -16,8 +16,6 @@ angular.module('mapManagerApp')
 
     var data = '[{name:"test1"},{name:"test2"}]';
     var structure = '["name"]';
-    console.log('sourceId = '+sourceId);
-    console.log('linkedSources = '+JSON.stringify(linkedSources, null, 2));
     if (valueChecker.isNotNull(sourceId) &&
         valueChecker.isNotNull(linkedSources)) {
       var source = _.find(linkedSources, 'id', sourceId);
@@ -41,7 +39,8 @@ angular.module('mapManagerApp')
     };
 
     $scope.checkExpression = function() {
-      var dataFct = $parse($scope.expression.data);
+      var dataFct = expressionService.parseExpression(
+        $scope.expression.data);
       var jsData = dataFct();
 
       if (valueChecker.isNotNullAndNotEmpty($scope.expression.rootObject)) {
@@ -52,23 +51,25 @@ angular.module('mapManagerApp')
       }
 
       try {
-        var exprFct = $parse($scope.expression.value);
+        var exprFct = expressionService.parseExpression(
+          $scope.expression.value);
         var context = null;
         if (valueChecker.isNotNull($scope.expression.context)) {
-          var contextFct = $parse($scope.expression.context);
-          context = contextFct();
+          var contextFct = expressionService.parseExpression(
+            $scope.expression.context);
+          context = expressionService.evaluateExpression(contextFct);
         }
 
         if (_.isArray(jsData)) {
           var results = [];
           _.forEach(jsData, function(elt, i) {
-            results.push(exprFct(
-              expressionService.getExpressionContext(elt, i, context)));
+            results.push(expressionService.evaluateExpression(
+              exprFct, elt, i, context));
           });
           $scope.expression.result = JSON.stringify(results, null, 2);
         } else {
-          var result = exprFct(
-            expressionService.getExpressionContext(jsData, 0, context));
+          var result = expressionService.evaluateExpression(
+            exprFct, jsData, 0, context);
           $scope.expression.result = JSON.stringify(result, null, 2);
         }
         $scope.expression.success = true;

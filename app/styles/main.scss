@@ -236,6 +236,7 @@ rgb(31, 138, 112);
 */
 
 div.displayShape,
+div.displayFill,
 div.behaviorEvents,
 div.stylesBackground {
   border-left-color: rgb(255, 225, 26);
@@ -244,6 +245,7 @@ div.stylesBackground {
 }
 
 div.displayShape legend,
+div.displayFill legend,
 div.behaviorEvents legend,
 div.stylesBackground legend {
   border-left-color: none;

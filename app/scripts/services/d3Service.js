@@ -113,7 +113,7 @@ angular.module('d3', [])
       },
 
       updateMapElements: function(mapId, projection, mapElements) {
-        console.log('>> updateMapElements - mapId = '+mapId);
+        //console.log('>> updateMapElements - mapId = '+mapId);
         function cxFct(d) {
           if (!_.isNull(d)) {
             return projection([d.lon, d.lat])[0];
@@ -131,7 +131,7 @@ angular.module('d3', [])
         }
 
         _.forEach(mapElements, function(mapElement) {
-          console.log('- mapElement - type = '+mapElement.type);
+          //console.log('- mapElement - type = '+mapElement.type);
           if (mapElement.type === 'path') {
             var path = d3Service.geo.path().projection(projection);
             d3Service.select('#' + mapId + '-layers')

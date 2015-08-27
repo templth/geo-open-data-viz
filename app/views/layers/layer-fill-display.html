@@ -1,7 +1,4 @@
 <form name="displayForm" novalidate class="form-horizontal">
-  <field label="Value">
-    <input class="form-control input-sm" name="name" type="text" 
-         required ng-model="layer.display.fill.value"
-         ng-model-options="{ updateOn: 'blur' }" />
-  </field>
+  <!-- Tooltip -->
+  <ng-include src="'views/layers/layer-display-fill.html'"></ng-include>
 </form>

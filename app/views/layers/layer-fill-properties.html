@@ -15,9 +15,8 @@
          ng-model-options="{ updateOn: 'blur' }" />
   </field>
   <field label="Apply on layer">
-    <input type="text" class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-    <!-- select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
-      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
-    </select -->
+    <select class="form-control input-sm" name="applyOn" ng-model="layer.applyOn">
+      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" ng-selected="optionLayer.id === layer.applyOn" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
+    </select>
   </field>
 </form>

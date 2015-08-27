@@ -42,8 +42,8 @@ angular.module('mapManager.samples', [  ])
           //projection: 'mercator',
           scale: 420,
           center: {
-            lon: 60,
-            lat: -30
+            lon: 102,
+            lat: -47
           },
           interactions: {
             moving: 'mouseMove',
@@ -109,7 +109,7 @@ angular.module('mapManager.samples', [  ])
             visible: true,
             maps: [ '1' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/continent.json',
+              url: '"http://localhost:9000/scripts/json/continent.json"',
               rootObject: 'countries',
               type: 'topojson',
               source: 'continents-source',
@@ -193,7 +193,7 @@ angular.module('mapManager.samples', [  ])
             rank: 6,
             maps: [ '1' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
+              url: '"http://localhost:9000/scripts/json/Meteorite_Landings.csv"',
               type: 'csv',
               source: 'meteorites-source',
               content: [],
@@ -258,7 +258,7 @@ angular.module('mapManager.samples', [  ])
             rank: 7,
             maps: [ '1' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/Meteorite_Landings.csv',
+              url: '"http://localhost:9000/scripts/json/Meteorite_Landings.csv"',
               type: 'csv',
               source: 'meteorites-source',
               content: [],
@@ -357,6 +357,42 @@ angular.module('mapManager.samples', [  ])
             visible: false
           },
 
+          {
+            id: 'images',
+            type: 'data',
+            mode: 'objects',
+            rank: 6,
+            maps: [ '1' ],
+            data: {
+              inline: '[{name: "Paris", lat: 48.50, lon: 2.20 }]',
+              content: [],
+              loaded: false,
+              id: 'name'
+              //where: 'isInBounds([d.lon, d.lat], bounds)'
+              //,
+              //where: 'd.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)',
+              //order: {
+              //  field: 'mass',
+              //  ascending: false
+              //}
+            },
+            name: 'Cities (Country)',
+            display: {
+              shape: {
+                type: 'image',
+                radius: '.2',
+                origin: '[ d.lon, d.lat ]',
+                opacity: 0.75,
+                color: 'black',
+                label: {
+                  text: 'd.name',
+                  position: { x: 5, y: 5 }
+                }
+              }
+            },
+            applied: true,
+            visible: true
+          },
           // Test lines (inline)
           {
             id: 'test',
@@ -373,6 +409,37 @@ angular.module('mapManager.samples', [  ])
                 type: 'line',
                 value: 'd.points',
                 pointValue: '[d.lon, d.lat]'
+              }
+            },
+            styles: {
+              lines: {
+                stroke: '#f00',
+                strokeWidth: '1px'
+              }
+            },
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'race',
+            type: 'data',
+            mode: 'objects',
+            rank: 6,
+            maps: [ '1' ],
+            data: {
+              url: '"http://localhost:9000/scripts/json/M50_08.json"',
+              type: 'json',
+              source: 'meteorites-source',
+              formatDataAsArray: true,
+              content: [],
+              loaded: false,
+            },
+            name: 'Race',
+            display: {
+              shape: {
+                type: 'line',
+                value: 'd',
+                pointValue: '[d.lon_dec, d.lat_dec]'
               }
             },
             styles: {
@@ -424,7 +491,8 @@ angular.module('mapManager.samples', [  ])
             rank: 4,
             maps: [ '2' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/us-counties.json',
+              source: 'us-counties',
+              url: '"http://localhost:9000/scripts/json/us/us-counties.json"',
               rootObject: 'counties',
               type: 'topojson',
               content: [],
@@ -468,7 +536,7 @@ angular.module('mapManager.samples', [  ])
             rank: 5,
             maps: [ '2' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/us-light.json',
+              url: '"http://localhost:9000/scripts/json/us-light.json"',
               rootObject: 'states',
               type: 'topojson',
               content: [],
@@ -498,7 +566,7 @@ angular.module('mapManager.samples', [  ])
             rank: 6,
             maps: [ '2' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/test.csv',
+              url: '"http://localhost:9000/scripts/json/test.csv"',
               type: 'csv',
               content: [],
               loaded: false
@@ -580,7 +648,8 @@ angular.module('mapManager.samples', [  ])
             rank: 7,
             maps: [ '2' ],
             data: {
-              url: 'http://localhost:9000/scripts/json/unemployment.tsv',
+              source: 'us-unemployment',
+              url: '"http://localhost:9000/scripts/json/unemployment.tsv"',
               type: 'tsv',
               content: [],
               loaded: false
@@ -589,6 +658,8 @@ angular.module('mapManager.samples', [  ])
             display: {
               fill: {
                 threshold: {
+                  paletteCode: 'Purples',
+                  paletteReverse: false,
                   values: [ 0.02, 0.04, 0.06, 0.08, 0.10 ],
                   colors: [ '#f2f0f7', '#dadaeb', '#bcbddc',
                             '#9e9ac8', '#756bb1', '#54278f' ]
@@ -667,6 +738,26 @@ angular.module('mapManager.samples', [  ])
 
       getSourcesSample2: function() {
         return [
+          // US counties
+          {
+            id: 'us-counties',
+            name: 'US counties',
+            type: 'map',
+            url: 'http://localhost:9000/scripts/json/us-counties.json',
+            dataType: 'json',
+            sample: '{\n  \"type\": \"Topology\",\n  \"objects\": {\n    \"counties\": {\n      \"type\": \"GeometryCollection\",\n      \"bbox\": [\n        -179.1473399999999,\n        17.67439566600018,\n        179.7784800000003,\n        71.38921046500008\n      ],\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"id\": 53073,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30105,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30029,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 16021,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30071,\n          \"arcs\": []\n        }\n      ]\n    },\n    \"states\": {\n      \"type\": \"GeometryCollection\",\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 53\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 30\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 16\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 38\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 27\n        }\n      ]\n    },\n    \"land\": {\n      \"type\": \"MultiPolygon\",\n      \"arcs\": []\n    }\n  },\n  \"arcs\": [],\n  \"transform\": {\n    \"scale\": [\n      0.0003589261789261791,\n      0.0000537148685138684\n    ],\n    \"translate\": [\n      -179.1473399999999,\n      17.67439566600018\n    ]\n  }\n}'
+          },
+          // US unemployment
+          {
+            id: 'us-unemployment',
+            name: 'US unemployment',
+            type: 'data',
+            url: 'http://localhost:9000/scripts/json/unemployment.tsv',
+            dataType: 'tsv',
+            structure: '[\n  \"id\",\n  \"rate\"\n]',
+            rowNumber: 3218,
+            sample: '[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]'
+          }
         ];
       }
     };
