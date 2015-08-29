@@ -23,6 +23,8 @@ List of freely available sources:
  * Chili with animation: http://pnavarrc.github.io/earthquake/
 * US
   * States and counties: http://bl.ocks.org/mbostock/4090846
+  * States and counties (census): https://www.census.gov/geo/reference/codes/cou.html
+  * Cities: http://www.realestate3d.com/gps/latlong.htm
 
 # Mixing data
 

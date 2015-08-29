@@ -431,6 +431,10 @@ angular.module('mapManager.commons', [ 'mapManager.map',
               point[0] <= rightTop[0] &&
               point[1] >= leftBottom[1] &&
               point[1] <= rightTop[1]);
+          },
+          formatNumber: function(n, decimalNumber) {
+            var ratio = Math.pow(10, decimalNumber);
+            return (Math.round(n * ratio) / ratio).toFixed(decimalNumber);
           }
         };
 

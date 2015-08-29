@@ -139,6 +139,32 @@ angular.module('mapManager.d3.services')
       return layerElement;
     },
 
+    addPropertiesToData: function(layerData, data,
+        handleData, additionalContext) {
+      var self = this;
+
+      var propertiesUrl = expressionService.parseExpression(
+        layerData.properties.url);
+      var loadPropertiesFct = self.getLoadFunction(
+        layerData.properties.type);
+      loadPropertiesFct(expressionService.evaluateExpression(
+          propertiesUrl, null, null, additionalContext), function(properties) {
+        data = self.formatDataAsArray(layerData, data);
+
+        _.forEach(data.objects[layerData.rootObject].geometries, function(d) {
+          var prop = _.find(properties, 'id', d.id.toString());
+          if (valueChecker.isNotNull(prop)) {
+            d.properties = prop;
+          }
+        });
+
+        data.objects[layerData.rootObject].geometries = self.filterDataForLayer(
+          layerData, data.objects[layerData.rootObject].geometries, additionalContext);
+
+        handleData(data);
+      });
+    },
+
     /**
      * @ngdoc method
      * @name loadDataForLayer
@@ -153,7 +179,8 @@ angular.module('mapManager.d3.services')
     loadDataForLayer: function(layerData, additionalContext, handleData) {
       var self = this;
       if (layerData.loaded) {
-        handleData(this.filterDataForLayer(layerData.content));
+        handleData(this.filterDataForLayer(
+          layerData.content, layerData.properties));
       } else if (valueChecker.isNotNullAndNotEmpty(layerData.inline)) {
         var data = expressionService.parseExpression(layerData.inline);
         handleData(self.filterDataForLayer(
@@ -163,9 +190,16 @@ angular.module('mapManager.d3.services')
         var loadFct = self.getLoadFunction(layerData.type);
         loadFct(expressionService.evaluateExpression(
             url, null, null, additionalContext), function(data) {
-          data = self.formatDataAsArray(layerData, data);
-          handleData(self.filterDataForLayer(
-            layerData, data, additionalContext));
+          if (layerData.type === 'topojson' &&
+              valueChecker.isNotNull(layerData.properties) &&
+              valueChecker.isNotNull(layerData.properties.url)) {
+            self.addPropertiesToData(layerData, data,
+              handleData, additionalContext);
+          } else {
+            data = self.formatDataAsArray(layerData, data);
+            handleData(self.filterDataForLayer(
+              layerData, data, additionalContext));
+          }
         });
       }
     },
@@ -196,10 +230,18 @@ angular.module('mapManager.d3.services')
       if (valueChecker.isNotNull(layerData.where)) {
         var dataWhere = expressionService.parseExpression(layerData.where);
         data = _.filter(data, function(d, i) {
+          //console.log('>> d = '+JSON.stringify(d));
+          //console.log('>> additionalContext = '+JSON.stringify(additionalContext));
           return dataWhere(expressionService.getExpressionContext(
             d, i, additionalContext));
         });
       }
+
+          if (layerData.url === '"http://localhost:9000/scripts/json/us/us-main-cities.csv"') {
+            console.log('additionalContext = '+JSON.stringify(additionalContext));
+              console.log('data = '+JSON.stringify(data));
+            }
+
 
       if (valueChecker.isNotNull(layerData.order) &&
           valueChecker.isNotNull(layerData.order.field)) {
@@ -663,7 +705,8 @@ angular.module('mapManager.d3.services')
           };
         })
         .tween('scale', function() {
-          var r = d3Service.interpolate(projection.scale(), 1000);
+          //TODO: determine the right scale ratio
+          var r = d3Service.interpolate(projection.scale(), 3000);
           return function(t) {
             projection.scale(r(t));
             path = path.projection(projection);
@@ -1125,7 +1168,8 @@ function normalise(x) {
             value, d, i, additionalContext);
         });
 
-        var sel = d3Service.select('#map1-' + layer.applyOn);
+        var currentMapId = currentMapService.getCurrentMapId();
+        var sel = d3Service.select('#'+ currentMapId +'-' + layer.applyOn);
 
         var styleHints = self.applyStylesForFillLayer(
           layer, sel, values);
@@ -1357,7 +1401,10 @@ function normalise(x) {
           .text(function(d, i) {
             return expressionService.evaluateExpression(
               labelText, d, i, additionalContext);
-          });
+          })
+          //TODO: to be generalized via configuration
+          .style('fill', 'gray')
+          .style('font-size', '10px');
       }
     },
 
@@ -1883,8 +1930,8 @@ function normalise(x) {
 
       // Remove layer
       var currentMapId = currentMapService.getCurrentMapId();
-      var layerElement = d3Service.select(document.getElementById(
-        currentMapId + '-' + layer.id));
+      var layerElement = d3Service.select('#' +
+        currentMapId + '-' + layer.id);
       if (this.isLayerWithFillMode(layer)) {
         this.clearFillDataLayer(svg, layer);
       } else {

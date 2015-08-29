@@ -8,7 +8,7 @@ var csv = require('fast-csv');
 
 function getStateCodeFromCountyName(stateCountyLinks, county) {
   return _.find(stateCountyLinks, function(link) {
-  	console.log('>> link.countyName = '+link.countyName+', county.name = '+county.name);
+  	// console.log('>> link.countyName = '+link.countyName+', county.name = '+county.name);
     return (link.countyName === county.name);
   });
 }
@@ -66,18 +66,28 @@ async.parallel([
   var states = results[1];
   var counties = results[2];
   _.forEach(counties, function(county, i) {
+  	//console.log('>> country = '+JSON.stringify(county));
   	if (i === 0) {
   	  return;
   	}
 
-  	console.log('>> county = '+JSON.stringify(county));
     var stateCode = getStateCodeFromCountyName(
-      stateCountyLinks, county).stateCode;
-    var state = getStateFromCode(states, stateCode);
-    county.stateCode = stateCode;
-    county.stateId = state.id;
-    county.stateName = state.name;
+      stateCountyLinks, county);
+    if (stateCode != null) {
+      //console.log('  >> stateCode = '+JSON.stringify(stateCode));
+      var state = getStateFromCode(states, stateCode.stateCode);
+      if (state != null) {
+        county.stateCode = stateCode.stateCode;
+        county.stateId = state.id;
+        county.stateName = state.name;
+        //console.log('  >> updateCountry = '+JSON.stringify(county));
+      } else {
+        console.log('>> state not found = '+JSON.stringify(stateCode));
+      }
+    } else {
+  	  console.log('>> county not found = '+JSON.stringify(county));
+    }
   });
 
-  console.log('>> counties = '+JSON.stringify(counties));
+  //console.log('>> counties = '+JSON.stringify(counties));
 });

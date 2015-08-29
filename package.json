@@ -46,7 +46,8 @@
     "load-grunt-tasks": "^3.1.0",
     "markdown": "0.5.0",
     "request": "2.58.0",
-    "time-grunt": "^1.0.0"
+    "time-grunt": "^1.0.0",
+    "topojson": "^1.6.19"
   },
   "engines": {
     "node": ">=0.10.0"

@@ -8,6 +8,7 @@ angular.module('mapManager.samples', [  ])
         var maps = [];
         maps.push(this.getMapSample1());
         maps.push(this.getMapSample2());
+        maps.push(this.getMapSample3());
         return maps;
       },
 
@@ -53,6 +54,27 @@ angular.module('mapManager.samples', [  ])
         };
       },
 
+      getMapSample3: function() {
+        var sources = this.getSourcesSample2();
+        return {
+          id: '3',
+          name: 'US unemployment (1)',
+          type: 'd3js',
+          projection: 'orthographic',
+          //projection: 'mercator',
+          scale: 420,
+          center: {
+            lon: 102,
+            lat: -47
+          },
+          interactions: {
+            moving: 'mouseMove',
+            zooming: 'mouseWheel'
+          },
+          sources: sources
+        };
+      },
+
       getLayerSamples: function() {
         var layers = [];
         var layers1 = this.getLayersSample1();
@@ -61,6 +83,10 @@ angular.module('mapManager.samples', [  ])
         });
         var layers2 = this.getLayersSample2();
         _.forEach(layers2, function(layer) {
+          layers.push(layer);
+        });
+        var layers3 = this.getLayersSample3();
+        _.forEach(layers3, function(layer) {
           layers.push(layer);
         });
         return layers;
@@ -356,7 +382,6 @@ angular.module('mapManager.samples', [  ])
             applied: false,
             visible: false
           },
-
           {
             id: 'images',
             type: 'data',
@@ -493,6 +518,10 @@ angular.module('mapManager.samples', [  ])
             data: {
               source: 'us-counties',
               url: '"http://localhost:9000/scripts/json/us/us-counties.json"',
+              properties: {
+                url: '"http://localhost:9000/scripts/json/us/us-county-names2.csv"',
+                type: 'csv'
+              },
               rootObject: 'counties',
               type: 'topojson',
               content: [],
@@ -502,7 +531,7 @@ angular.module('mapManager.samples', [  ])
               tooltip: {
                 enabled: true,
                 fromScale: 300,
-                text: '"Name: "+d.properties.name',
+                text: '"Name: "+d.properties.name+"<br/>State: "+d.properties.stateName+"("+d.properties.stateCode+")"',
               }
             },
             styles: {
@@ -695,6 +724,281 @@ angular.module('mapManager.samples', [  ])
             applied: true,
             visible: true
           }
+        ];
+      },
+
+      getLayersSample3: function() {
+        return [
+          // Map #2
+          {
+            id: 'graticuleLayer3',
+            type: 'graticule',
+            rank: 1,
+            name: 'Graticule',
+            applied: true,
+            visible: true,
+            maps: [ '3' ],
+            display: {
+              background: true,
+              lines: true,
+              border: true
+            },
+            styles: {
+              background: {
+                fill: '#a4bac7'
+              },
+              border: {
+                stroke: '#000',
+                strokeWidth: '3px'
+              },
+              lines: {
+                stroke: '#777',
+                strokeWidth: '.5px',
+                strokeOpacity: '.5'
+              }
+            }
+          },
+          {
+            id: 'usStates3',
+            type: 'geodata',
+            rank: 4,
+            maps: [ '3' ],
+            data: {
+              source: 'us-counties',
+              url: '"http://localhost:9000/scripts/json/us/us-counties.json"',
+              properties: {
+                url: '"http://localhost:9000/scripts/json/us/us-state-names1.csv"',
+                type: 'csv'
+              },
+              rootObject: 'states',
+              type: 'topojson',
+              content: [],
+              loaded: false
+            },
+            display: {
+              fill: {
+                categorical: {
+                  name: 'category20b',
+                  value: 'i'
+                }//,
+                //value: 'd.id === 840 || d.id === 250 ? "#ff0000" : "#000000"'*/
+              },
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: '"Name: "+d.properties.name+" ("+d.properties.code+")"'
+              },
+              subMap: {
+                layers: [
+                  'usCounties3',
+                  'layer223',
+                  'usCities'
+                ],
+                variables: [
+                  'bounds', 'shape'
+                ],
+                legend: {
+                  label: 'shape.properties.name+" ("+shape.properties.code+")"'
+                }
+              }
+            },
+            styles: {
+              path: {
+                fill: 'none',
+                stroke: '#fff',
+                strokeLinejoin: 'round',
+                strokeLinecap: 'round'
+              },
+              d: {
+                strokeWidth: '0.5px'
+              }
+            },
+            behavior: {
+              events: {
+                click: {
+                  display: 'subMap'
+                },
+                mouseover: {
+                  display: 'tooltip'
+                },
+                mouseout: {
+                  hide: 'tooltip'
+                }
+              }
+            },
+            name: 'US states',
+            applied: true,
+            visible: true
+          },
+          {
+            id: 'usCounties3',
+            type: 'geodata',
+            rank: 4,
+            maps: [ '3' ],
+            data: {
+              source: 'us-counties',
+              url: '"http://localhost:9000/scripts/json/us/us-counties.json"',
+              properties: {
+                url: '"http://localhost:9000/scripts/json/us/us-county-names2.csv"',
+                type: 'csv'
+              },
+              rootObject: 'counties',
+              type: 'topojson',
+              where: 'shape.properties.code === d.properties.stateCode',
+              content: [],
+              loaded: false
+            },
+            display: {
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: '"Name: "+d.properties.name+" ("+d.properties.stateCode+")"'
+              }
+            },
+            styles: {
+              path: {
+                fill: 'none',
+                stroke: '#fff',
+                strokeLinejoin: 'round',
+                strokeLinecap: 'round'
+              },
+              d: {
+                strokeWidth: '0.5px'
+              }
+            },
+            /*behavior: {
+              events: {
+                mouseover: {
+                  display: 'tooltip'
+                },
+                mouseout: {
+                  hide: 'tooltip'
+                }
+              }
+            },*/
+            name: 'US counties',
+            applied: false,
+            visible: false
+          },
+          {
+            id: 'layer223',
+            type: 'data',
+            mode: 'fill',
+            rank: 7,
+            maps: [ '3' ],
+            data: {
+              source: 'us-unemployment',
+              url: '"http://localhost:9000/scripts/json/unemployment.tsv"',
+              type: 'tsv',
+              content: [],
+              loaded: false
+            },
+            name: 'Unemployment rate',
+            display: {
+              fill: {
+                threshold: {
+                  paletteCode: 'Purples',
+                  paletteReverse: false,
+                  values: [ 0.02, 0.04, 0.06, 0.08, 0.10 ],
+                  colors: [ '#f2f0f7', '#dadaeb', '#bcbddc',
+                            '#9e9ac8', '#756bb1', '#54278f' ]
+                },
+                value: 'd.rate'
+              },
+              legend: {
+                enabled: true,
+                label: '(d * 100) + " %"'
+              },
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: 'd.properties.name+" ("+d.properties.stateCode+")<br/>Rate: "+formatNumber(value*100, 2)+"%"',
+              }
+            },
+            styles: {
+              legend: {
+
+              },
+              tooltip: {
+
+              }
+            },
+            behavior: {
+              events: {
+                /*click: {
+                  display: 'tooltip'
+                },*/
+                mouseover: {
+                  display: 'tooltip'
+                },
+                mouseout: {
+                  hide: 'tooltip'
+                }
+                  //display: 'mouseOver',
+                  //hide: 'mouseOut'
+              }
+            },
+            applyOn: 'usCounties3',
+            applied: false,
+            visible: false
+          },
+          {
+            id: 'usCities',
+            type: 'data',
+            mode: 'objects',
+            rank: 6,
+            maps: [ '3' ],
+            data: {
+              url: '"http://localhost:9000/scripts/json/us/us-main-cities.csv"',
+              type: 'csv',
+              content: [],
+              loaded: false,
+              id: 'name',
+              where: 'shape.properties.code === d.stateCode && isInBounds([d.lon, d.lat], bounds)'
+              //,
+              //where: 'd.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)',
+              //order: {
+              //  field: 'mass',
+              //  ascending: false
+              //}
+            },
+            name: 'Cities (Country)',
+            display: {
+              shape: {
+                type: 'circle',
+                radius: '.1',
+                origin: '[ d.lon, d.lat ]',
+                opacity: 0.75,
+                color: 'gray'/*,
+                label: {
+                  text: 'd.name',
+                  position: { x: 5, y: 5 }
+                }*/
+              },
+              tooltip: {
+                enabled: true,
+                fromScale: 300,
+                text: 'd.name',
+              }
+            },
+            behavior: {
+              events: {
+                /*click: {
+                  display: 'tooltip'
+                },*/
+                mouseover: {
+                  display: 'tooltip'
+                },
+                mouseout: {
+                  hide: 'tooltip'
+                }
+                  //display: 'mouseOver',
+                  //hide: 'mouseOut'
+              }
+            },
+            applied: false,
+            visible: false
+          },
         ];
       },
 
