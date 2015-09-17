@@ -300,4 +300,42 @@ angular.module('mapManager.utilities', [ ])
       }
     }
   };
+})
+
+/**
+ * @ngdoc service
+ * @name mapManager.utilities:svgHelper
+ * @description
+ * Provide utility functions to handle svg.
+ */
+.service('svgHelper', function(d3Service) {
+  return {
+    removeSvgElement: function(element) {
+      var selection = d3Service.select(element[0]).select('svg');
+      if (!selection.empty()) {
+        d3Service.select(element[0]).select('svg').select('*').remove();
+      }
+    },
+
+    createSvgElement: function(element, width, height, mWidth, mHeight) {
+      var selection = d3Service.select(element[0]).select('svg');
+      console.log('>> createSvgElement - selection.empty = '+selection.empty());
+      if (selection.empty()) {
+        var svg = d3Service.select(element[0]).append('svg')
+          .attr('preserveAspectRatio', 'xMidYMid')
+          .attr('viewBox', '0 0 ' + width + ' ' + height)
+          .attr('width', mWidth)
+          .attr('height', mWidth * height / width);
+
+        svg.append('rect')
+          .attr('class', 'background')
+          .attr('width', width)
+          .attr('height', height);
+
+        return svg;
+      } else {
+        return selection;
+      }
+    }
+  };
 });

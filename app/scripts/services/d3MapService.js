@@ -13,7 +13,7 @@ angular.module('mapManager.d3.services', [
  */
 .service('mapCreatorService', function(currentMapService,
       mapInteractionService, layerService,
-      projectionService, d3Service, mapHelper, valueChecker) {
+      projectionService, d3Service, mapHelper, valueChecker, svgHelper) {
   return {
     /**
      * @ngdoc method
@@ -100,16 +100,8 @@ angular.module('mapManager.d3.services', [
 
       var path = projectionService.configurePathWithProjection(projection);
 
-      var svg = d3Service.select(element[0]).append('svg')
-          .attr('preserveAspectRatio', 'xMidYMid')
-          .attr('viewBox', '0 0 ' + width + ' ' + height)
-          .attr('width', mWidth)
-          .attr('height', mWidth * height / width);
-
-      svg.append('rect')
-          .attr('class', 'background')
-          .attr('width', width)
-          .attr('height', height);
+      //svgHelper.removeSvgElement(element);
+      var svg = svgHelper.createSvgElement(element, width, height, mWidth, mHeight);
 
       // Create structure elements for the map (map and layers)
       var mainMapElements = mapHelper.createMainMapStructure(svg);
@@ -121,6 +113,7 @@ angular.module('mapManager.d3.services', [
       });
 
       var layers = currentMapService.getCurrentMap().layers;
+      console.log('######################## layers = '+layers.length);
 
       // Preload data
       // TODO

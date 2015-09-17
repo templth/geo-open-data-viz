@@ -128,10 +128,10 @@ angular.module('mapManager.d3.services')
           sel = svg;
         }
 
-        console.log('  >> 5');
+        console.log('  >> 5- sel.empty() = '+sel.empty());
         layerElement = sel.append('g')
             .attr('id', currentMapId + '-' + layer.id);
-        console.log('  >> 6');
+        console.log('  >> 6 - '+currentMapId + '-' + layer.id);
       }
 
       return layerElement;
