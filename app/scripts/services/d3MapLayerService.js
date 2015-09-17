@@ -12,11 +12,9 @@ angular.module('mapManager.d3.services')
  * @description
  * Provide functions to create and manipulate layers of maps.
  */
-.service('layerService', [ 'currentMapService', 'mapInteractionService',
-    'consoleService', 'valueChecker', 'expressionService', 'd3Service',
-    'eventUtils', 'mapUtils', 'd3Utils', '$interval',
-    function(currentMapService, mapInteractionService, consoleService, valueChecker,
-      expressionService, d3Service, eventUtils, mapUtils, d3Utils, $interval) {
+.service('layerService', function(currentMapService, mapInteractionService,
+      consoleService, valueChecker, expressionService, d3Service, propertiesHelper,
+      mapHelper, d3Helper, $interval) {
   return {
     // Utility function to update map
 
@@ -548,9 +546,9 @@ angular.module('mapManager.d3.services')
      * @param {Object} pathElements the path elements to apply on
     */
     configureBehaviors: function(svg, path, layer, layers, pathElements) {
-      var eventsZoomBoundingBox = eventUtils.getDomainEvents(
+      var eventsZoomBoundingBox = propertiesHelper.getDomainEvents(
         layer, 'zoomBoundingBox');
-      var eventsSubMap = eventUtils.getDomainEvents(layer, 'subMap');
+      var eventsSubMap = propertiesHelper.getDomainEvents(layer, 'subMap');
 
       if (valueChecker.isNotNull(layer.behavior) &&
           valueChecker.isNotNull(layer.behavior.zoomBoundingBox)) {
@@ -706,7 +704,9 @@ angular.module('mapManager.d3.services')
         })
         .tween('scale', function() {
           //TODO: determine the right scale ratio
-          var r = d3Service.interpolate(projection.scale(), 3000);
+          //1000 for meteorites
+          //3000 for unemployment
+          var r = d3Service.interpolate(projection.scale(), 1000);
           return function(t) {
             projection.scale(r(t));
             path = path.projection(projection);
@@ -806,7 +806,7 @@ angular.module('mapManager.d3.services')
           var moveType = 'mouseMove';
           var zoomType = 'mouseWheel';
 
-          var mapElements = mapUtils.createSubMapStructure(svg, 2,
+          var mapElements = mapHelper.createSubMapStructure(svg, 2,
             { width: width, height: height },
             { fill: 'white', opacity: '0.75' });
 
@@ -831,10 +831,10 @@ angular.module('mapManager.d3.services')
 
           mapInteractionService.configureMoving(/*$scope*/null, svg, moveType, {
             type: currentMapService.getCurrentMap().projection, raw: projection2
-          }, mapUtils.getMapElements());
+          }, mapHelper.getMapElements());
           /*mapInteractionService.configureZooming(null, svg, zoomType, {
             type: currentMapService.getCurrentMap().projection, raw: projection2
-          }, mapUtils.getMapElements());*/
+          }, mapHelper.getMapElements());*/
 
           var layerElements = rootLayer.selectAll('path')
                  .data([ d ])
@@ -992,8 +992,14 @@ function normalise(x) {
           .style('stroke', '#000')
           .style('stroke-width', '1px')
           .style('pointer-events', 'none')*/
-          .style({'fill': '#94BF8B', 'fill-opacity': 0.25})
-    .style({'stroke': '#94BF8B', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+          .style({
+            fill: '#94BF8B',
+            'fill-opacity': 0.25})
+          .style({
+            stroke: '#94BF8B',
+            'stroke-width': 1,
+            'stroke-linejoin': 'round'
+          });
     },
 
     /**
@@ -1345,8 +1351,7 @@ function normalise(x) {
     },
 
     configureTooltip: function(layer, layerElements, values, additionalContext) {
-      if (valueChecker.isNotNull(layer.display) &&
-          valueChecker.isNotNull(layer.display.tooltip) &&
+      if (propertiesHelper.hasPropertyConfigured(layer, 'display', 'tooltip') &&
           layer.display.tooltip.enabled) {
         var tooltipText = expressionService.parseExpression(
           layer.display.tooltip.text);
@@ -1357,7 +1362,7 @@ function normalise(x) {
           .style('opacity', 0);
 
         // Events
-        var tooltipEvents = eventUtils.getDomainEvents(layer, 'tooltip');
+        var tooltipEvents = propertiesHelper.getDomainEvents(layer, 'tooltip');
         if (valueChecker.isNotNull(tooltipEvents)) {
           this.createTooltipEvents(layerElements, values, tooltipDiv,
                 tooltipText, tooltipEvents.display,
@@ -1473,9 +1478,8 @@ function normalise(x) {
         var values = {};
         _.forEach(data, function(d) { values[d[idName]] = d; });
 
-        if (valueChecker.isNotNull(layer.behavior) &&
-          valueChecker.isNotNull(layer.behavior.animation)) {
-
+        if (propertiesHelper.hasPropertyConfigured(
+            layer, 'behavior', 'animation')) {
           var animationValue = expressionService.parseExpression(
             layer.behavior.animation.value);
 
@@ -1963,4 +1967,4 @@ function normalise(x) {
       });
     }
   };
-}]);
+});

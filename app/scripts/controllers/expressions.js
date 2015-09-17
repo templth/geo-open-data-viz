@@ -3,9 +3,9 @@
 angular.module('mapManagerApp')
   /**
    * @ngdoc function
-   * @name mapManagerApp.controller:MapCtrl
+   * @name mapManagerApp.controller:CheckExpressionCtrl
    * @description
-   * # MainCtrl
+   * Controller that provides support to execute and check expressions.
    * Controller of the mapManagerApp
    */
   .controller('CheckExpressionCtrl', function($scope, $modalInstance,

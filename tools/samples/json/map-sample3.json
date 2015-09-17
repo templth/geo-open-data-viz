@@ -1,0 +1,35 @@
+{
+  "id": "3",
+  "name": "US unemployment (1)",
+  "type": "d3js",
+  "projection": "orthographic",
+  "scale": 420,
+  "center": {
+    "lon": 102,
+    "lat": -47
+  },
+  "interactions": {
+    "moving": "mouseMove",
+    "zooming": "mouseWheel"
+  },
+  "sources": [
+    {
+      "id": "us-counties",
+      "name": "US counties",
+      "type": "map",
+      "url": "http://localhost:9000/scripts/json/us-counties.json",
+      "dataType": "json",
+      "sample": "{\n  \"type\": \"Topology\",\n  \"objects\": {\n    \"counties\": {\n      \"type\": \"GeometryCollection\",\n      \"bbox\": [\n        -179.1473399999999,\n        17.67439566600018,\n        179.7784800000003,\n        71.38921046500008\n      ],\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"id\": 53073,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30105,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30029,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 16021,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30071,\n          \"arcs\": []\n        }\n      ]\n    },\n    \"states\": {\n      \"type\": \"GeometryCollection\",\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 53\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 30\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 16\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 38\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 27\n        }\n      ]\n    },\n    \"land\": {\n      \"type\": \"MultiPolygon\",\n      \"arcs\": []\n    }\n  },\n  \"arcs\": [],\n  \"transform\": {\n    \"scale\": [\n      0.0003589261789261791,\n      0.0000537148685138684\n    ],\n    \"translate\": [\n      -179.1473399999999,\n      17.67439566600018\n    ]\n  }\n}"
+    },
+    {
+      "id": "us-unemployment",
+      "name": "US unemployment",
+      "type": "data",
+      "url": "http://localhost:9000/scripts/json/unemployment.tsv",
+      "dataType": "tsv",
+      "structure": "[\n  \"id\",\n  \"rate\"\n]",
+      "rowNumber": 3218,
+      "sample": "[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]"
+    }
+  ]
+}

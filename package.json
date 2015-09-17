@@ -41,6 +41,7 @@
     "grunt-wiredep": "^2.0.0",
     "handlebars": "3.0.3",
     "jshint-stylish": "^1.0.0",
+    "jsonfile": "^2.2.2",
     "karma-jasmine": "*",
     "karma-phantomjs-launcher": "*",
     "load-grunt-tasks": "^3.1.0",
@@ -54,9 +55,9 @@
   },
   "scripts": {
     "test": "grunt test",
-    "map:sample:generate": "node tools/map-sample-serializer.js",
-    "schema:generate": "node tools/schema-entities-generator.js",
-    "apispark:install": "node tools/installer.js",
+    "map:sample:generate": "node tools/samples/sample-creator.js",
+    "schema:generate": "node tools/samples/generate-schema-from-samples.js ; node tools/apispark/schema-entities-generator.js",
+    "apispark:install": "node tools/apispark/installer.js",
     "site:generate": "node docs/templates/site-generator.js"
   }
 }

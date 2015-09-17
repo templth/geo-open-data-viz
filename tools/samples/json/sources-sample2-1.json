@@ -1,0 +1,10 @@
+{
+  "id": "us-unemployment",
+  "name": "US unemployment",
+  "type": "data",
+  "url": "http://localhost:9000/scripts/json/unemployment.tsv",
+  "dataType": "tsv",
+  "structure": "[\n  \"id\",\n  \"rate\"\n]",
+  "rowNumber": 3218,
+  "sample": "[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]"
+}

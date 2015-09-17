@@ -1,0 +1,71 @@
+{
+  "id": "worldLayer",
+  "type": "geodata",
+  "rank": 2,
+  "name": "World",
+  "applied": true,
+  "visible": true,
+  "maps": [
+    "1"
+  ],
+  "data": {
+    "url": "\"http://localhost:9000/scripts/json/continent.json\"",
+    "rootObject": "countries",
+    "type": "topojson",
+    "source": "continents-source",
+    "content": [],
+    "loaded": false
+  },
+  "display": {
+    "fill": {
+      "categorical": {
+        "name": "category20b",
+        "value": "i"
+      }
+    },
+    "bounds": {
+      "applyIf": ""
+    },
+    "tooltip": {
+      "enabled": true,
+      "fromScale": 300,
+      "text": "\"Name: \"+d.properties.name"
+    },
+    "subMap": {
+      "layers": [
+        "cities-country",
+        "meteorites-country"
+      ],
+      "variables": [
+        "bounds",
+        "shape"
+      ],
+      "legend": {
+        "label": "shape.properties.name"
+      }
+    }
+  },
+  "styles": {
+    "background": {
+      "fill": "#ff0000"
+    },
+    "lines": {
+      "stroke": "#fff",
+      "strokeWidth": "1px",
+      "strokeOpacity": "1"
+    }
+  },
+  "behavior": {
+    "events": {
+      "click": {
+        "display": "subMap"
+      },
+      "mouseover": {
+        "display": "tooltip"
+      },
+      "mouseout": {
+        "hide": "tooltip"
+      }
+    }
+  }
+}

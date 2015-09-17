@@ -82,16 +82,16 @@ angular.module('mapManager.utilities', [ ])
 
 /**
  * @ngdoc service
- * @name mapManager.utilities:eventUtils
+ * @name mapManager.utilities:propertiesUtils
  * @description
  * Provide functions to check values.
  */
-.service('eventUtils', [ 'valueChecker', function(valueChecker) {
+.service('propertiesHelper', function(valueChecker) {
   return {
     /**
      * @ngdoc method
      * @name getDomainEvents
-     * @methodOf mapManager.d3.services:layerService
+     * @methodOf mapManager.d3.services:propertiesUtils
      * @description
      * Get events associated to a particular domain. Supported events are:
      *
@@ -145,7 +145,7 @@ angular.module('mapManager.utilities', [ ])
     /**
      * @ngdoc method
      * @name isSupportedEvent
-     * @methodOf mapManager.utilities:attributeChecker
+     * @methodOf mapManager.utilities:propertiesUtils
      * @description
      * Check if the event type is correct and supported.
      *
@@ -157,9 +157,25 @@ angular.module('mapManager.utilities', [ ])
     isSupportedEvent: function(eventType) {
       return (eventType === 'click' || eventType === 'dblclick' ||
         eventType === 'mouseover' || eventType === 'mouseout');
+    },
+
+    /**
+     * @ngdoc method
+     * @name isSupportedEvent
+     * @methodOf mapManager.utilities:propertiesUtils
+     * @description
+     * Check if a property is defined for a specific domain in the layer.
+     *
+     * @param {Object} rootObject the root object to look in for
+     * @param {String} domain the property domain
+     * @param {String} domain the property in the domain
+    */
+    hasPropertyConfigured: function(rootObject, domain, property) {
+      return (valueChecker.isNotNull(rootObject[domain]) &&
+          valueChecker.isNotNull(rootObject[domain][property]));
     }
   };
-}])
+})
 
 /**
  * @ngdoc service
@@ -167,7 +183,7 @@ angular.module('mapManager.utilities', [ ])
  * @description
  * Provide functions to check values.
  */
-.service('mapUtils', [ 'valueChecker', function(valueChecker) {
+.service('mapHelper', function(valueChecker) {
   return {
     createSubMapStructure: function(svg, mapId, dimensions, background) {
       return this.createMapStructure(svg, mapId, {
@@ -207,7 +223,7 @@ angular.module('mapManager.utilities', [ ])
       return [ {type: 'path'}, {type: 'circle'}, {type: 'LineString'}];
     }
   };
-}])
+})
 
 /**
  * @ngdoc service
@@ -215,7 +231,7 @@ angular.module('mapManager.utilities', [ ])
  * @description
  * Provide functions to check values.
  */
-.service('typeUtils', [ 'valueChecker', function(valueChecker) {
+.service('typeHelper', function(valueChecker) {
   return {
     isIntegerNumber: function(value) {
       // See http://stackoverflow.com/questions/3885817/how-to-check-that-a-number-is-float-or-integer
@@ -284,4 +300,4 @@ angular.module('mapManager.utilities', [ ])
       }
     }
   };
-}]);
+});

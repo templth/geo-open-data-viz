@@ -1,0 +1,85 @@
+<!-- Header -->
+    <div class="header">
+      <div class="navbar navbar-default" role="navigation">
+        <div class="container">
+          <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#js-navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href="#/">Map Visualization</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+<div class="container">
+  <div class="row providers">
+
+    <h3>Map providers</h3>
+
+    <accordion close-others="oneAtATime">
+      <!-- In-memory -->
+      <accordion-group heading="In-memory">
+        <div class="well">
+          The maps will be stored in memory but all data will be lost when closing or reloading the current
+          page.
+        </div>
+
+        <div class="text-center">
+          <button type="button" class="btn btn-default" ng-click="selectInMemoryProvider()">Select</button>
+        </div>
+      </accordion-group>
+      <!-- Browser storage -->
+      <accordion-group heading="Browser storage">
+        <div class="well">
+          The maps will be stored within the browser storage. Data won't be lost when closing or reloading the current
+          page. But you won't access them using a Web API and share them.
+        </div>
+
+        <div class="text-center">
+          <button type="button" class="btn btn-default" ng-click="selectBrowserStorageProvider()">Select</button>
+        </div>
+      </accordion-group>
+      <!-- In-memory -->
+      <accordion-group heading="Web API">
+        <div class="well">
+          The maps will be stored using a Web API. You will be able to access them using a Web API and share them.
+        </div>
+        
+        <form name="providersForm" novalidate class="form-horizontal">
+          <field label="URL">
+            <input class="form-control input-sm" name="url" type="text" 
+               placeholder="URL" required ng-model="providers.webapi.url" />
+          </field>
+          <field label="Read-only">
+              <input class="checkbox" type="checkbox" ng-model="providers.webapi.readonly">
+          </field>
+          <field label="Secured">
+              <input class="checkbox" type="checkbox" ng-model="providers.webapi.secured">
+          </field>
+          <div ng-show="shouldBeSecuredWebApiProvider()">
+            <field label="Username">
+              <input class="form-control input-sm" name="username" type="text" 
+                 placeholder="Username" required ng-model="providers.webapi.username" />
+            </field>
+            <field label="Password">
+              <input class="form-control input-sm" name="password" type="text" 
+                 placeholder="Password" required ng-model="providers.webapi.password" />
+            </field>
+          </div>
+
+          <div class="text-center">
+            <button type="button" class="btn btn-default" ng-click="selectWebApiProvider()">Select</button>
+          </div>
+        </form>
+      </accordion-group>
+    </accordion>
+
+  </div>
+</div>

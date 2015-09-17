@@ -2,7 +2,7 @@
   "entities": [
     {
       "name": "Map",
-      "pkPolicy": "auto-generated",
+      "pkPolicy": "user-generated",
       "properties": [
         {
           "name": "id",
@@ -12,11 +12,54 @@
           "primaryKey": true
         },
         {
+          "name": "name",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "type",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
           "name": "projection",
           "type": "String",
           "required": false,
           "list": false,
           "primaryKey": false
+        },
+        {
+          "name": "scale",
+          "type": "Integer",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "center",
+          "type": "composite",
+          "required": false,
+          "list": false,
+          "properties": [
+            {
+              "name": "lon",
+              "type": "Integer",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "lat",
+              "type": "Integer",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            }
+          ]
         },
         {
           "name": "interactions",
@@ -39,12 +82,76 @@
               "primaryKey": false
             }
           ]
+        },
+        {
+          "name": "sources",
+          "type": "composite",
+          "required": false,
+          "list": true,
+          "properties": [
+            {
+              "name": "id",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "name",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "type",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "dataType",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "structure",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "rowNumber",
+              "type": "Integer",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "sample",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            }
+          ]
         }
       ]
     },
     {
       "name": "Layer",
-      "pkPolicy": "auto-generated",
+      "pkPolicy": "user-generated",
       "properties": [
         {
           "name": "id",
@@ -61,14 +168,14 @@
           "primaryKey": false
         },
         {
-          "name": "name",
-          "type": "String",
+          "name": "rank",
+          "type": "Integer",
           "required": false,
           "list": false,
           "primaryKey": false
         },
         {
-          "name": "applyOn",
+          "name": "name",
           "type": "String",
           "required": false,
           "list": false,
@@ -86,6 +193,13 @@
           "type": "Boolean",
           "required": false,
           "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "maps",
+          "type": "String",
+          "required": false,
+          "list": true,
           "primaryKey": false
         },
         {
@@ -116,45 +230,32 @@
               "primaryKey": false
             },
             {
-              "name": "shape",
+              "name": "fill",
               "type": "composite",
               "required": false,
               "list": false,
               "properties": [
                 {
-                  "name": "type",
-                  "type": "String",
+                  "name": "categorical",
+                  "type": "composite",
                   "required": false,
                   "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "radius",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "origin",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "fill",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "opacity",
-                  "type": "Float",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
+                  "properties": [
+                    {
+                      "name": "name",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "value",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    }
+                  ]
                 },
                 {
                   "name": "threshold",
@@ -202,64 +303,13 @@
               ]
             },
             {
-              "name": "fill",
+              "name": "bounds",
               "type": "composite",
               "required": false,
               "list": false,
               "properties": [
                 {
-                  "name": "threshold",
-                  "type": "composite",
-                  "required": false,
-                  "list": false,
-                  "properties": [
-                    {
-                      "name": "values",
-                      "type": "Float",
-                      "required": false,
-                      "list": true,
-                      "primaryKey": false
-                    },
-                    {
-                      "name": "colors",
-                      "type": "String",
-                      "required": false,
-                      "list": true,
-                      "primaryKey": false
-                    }
-                  ]
-                },
-                {
-                  "name": "value",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "color",
-                  "type": "String",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                }
-              ]
-            },
-            {
-              "name": "legend",
-              "type": "composite",
-              "required": false,
-              "list": false,
-              "properties": [
-                {
-                  "name": "enabled",
-                  "type": "Boolean",
-                  "required": false,
-                  "list": false,
-                  "primaryKey": false
-                },
-                {
-                  "name": "label",
+                  "name": "applyIf",
                   "type": "String",
                   "required": false,
                   "list": false,
@@ -293,9 +343,191 @@
                   "required": false,
                   "list": false,
                   "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "subMap",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "layers",
+                  "type": "String",
+                  "required": false,
+                  "list": true,
+                  "primaryKey": false
                 },
                 {
-                  "name": "event",
+                  "name": "variables",
+                  "type": "String",
+                  "required": false,
+                  "list": true,
+                  "primaryKey": false
+                },
+                {
+                  "name": "legend",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "label",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "shape",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "type",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "radius",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "origin",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "opacity",
+                  "type": "Float",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "threshold",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "paletteCode",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "paletteReverse",
+                      "type": "Boolean",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "values",
+                      "type": "Integer",
+                      "required": false,
+                      "list": true,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "colors",
+                      "type": "String",
+                      "required": false,
+                      "list": true,
+                      "primaryKey": false
+                    }
+                  ]
+                },
+                {
+                  "name": "value",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "color",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "label",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "text",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    },
+                    {
+                      "name": "position",
+                      "type": "composite",
+                      "required": false,
+                      "list": false,
+                      "properties": [
+                        {
+                          "name": "x",
+                          "type": "Integer",
+                          "required": false,
+                          "list": false,
+                          "primaryKey": false
+                        },
+                        {
+                          "name": "y",
+                          "type": "Integer",
+                          "required": false,
+                          "list": false,
+                          "primaryKey": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "pointValue",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
+            {
+              "name": "legend",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "enabled",
+                  "type": "Boolean",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "label",
                   "type": "String",
                   "required": false,
                   "list": false,
@@ -458,6 +690,13 @@
               "primaryKey": false
             },
             {
+              "name": "source",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
               "name": "content",
               "type": "String",
               "required": false,
@@ -467,20 +706,6 @@
             {
               "name": "loaded",
               "type": "Boolean",
-              "required": false,
-              "list": false,
-              "primaryKey": false
-            },
-            {
-              "name": "mesh",
-              "type": "Boolean",
-              "required": false,
-              "list": false,
-              "primaryKey": false
-            },
-            {
-              "name": "source",
-              "type": "String",
               "required": false,
               "list": false,
               "primaryKey": false
@@ -520,22 +745,44 @@
                   "primaryKey": false
                 }
               ]
+            },
+            {
+              "name": "inline",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "formatDataAsArray",
+              "type": "Boolean",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
+              "name": "properties",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "url",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "type",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
             }
           ]
-        },
-        {
-          "name": "mode",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "rank",
-          "type": "Integer",
-          "required": false,
-          "list": false,
-          "primaryKey": false
         },
         {
           "name": "behavior",
@@ -543,6 +790,109 @@
           "required": false,
           "list": false,
           "properties": [
+            {
+              "name": "events",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "click",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "display",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    }
+                  ]
+                },
+                {
+                  "name": "mouseover",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "display",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    }
+                  ]
+                },
+                {
+                  "name": "mouseout",
+                  "type": "composite",
+                  "required": false,
+                  "list": false,
+                  "properties": [
+                    {
+                      "name": "hide",
+                      "type": "String",
+                      "required": false,
+                      "list": false,
+                      "primaryKey": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "animation",
+              "type": "composite",
+              "required": false,
+              "list": false,
+              "properties": [
+                {
+                  "name": "value",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "startValue",
+                  "type": "Integer",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "ascending",
+                  "type": "Boolean",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "interval",
+                  "type": "Integer",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "showAllAtEnd",
+                  "type": "Boolean",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                },
+                {
+                  "name": "label",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
+                }
+              ]
+            },
             {
               "name": "tooltip",
               "type": "composite",
@@ -555,16 +905,37 @@
                   "required": false,
                   "list": false,
                   "primaryKey": false
+                },
+                {
+                  "name": "hide",
+                  "type": "String",
+                  "required": false,
+                  "list": false,
+                  "primaryKey": false
                 }
               ]
             }
           ]
+        },
+        {
+          "name": "mode",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "applyOn",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
         }
       ]
     },
     {
       "name": "Source",
-      "pkPolicy": "auto-generated",
+      "pkPolicy": "user-generated",
       "properties": [
         {
           "name": "id",
@@ -581,77 +952,14 @@
           "primaryKey": false
         },
         {
-          "name": "category",
+          "name": "type",
           "type": "String",
           "required": false,
           "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "source",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "tags",
-          "type": "String",
-          "required": false,
-          "list": true,
           "primaryKey": false
         },
         {
           "name": "url",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "originUrl",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "imported",
-          "type": "Boolean",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "importFile",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "structure",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "importEntity",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "sample",
-          "type": "String",
-          "required": false,
-          "list": false,
-          "primaryKey": false
-        },
-        {
-          "name": "type",
           "type": "String",
           "required": false,
           "list": false,
@@ -665,8 +973,22 @@
           "primaryKey": false
         },
         {
+          "name": "structure",
+          "type": "String",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
           "name": "rowNumber",
           "type": "Integer",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "sample",
+          "type": "String",
           "required": false,
           "list": false,
           "primaryKey": false

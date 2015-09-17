@@ -1,25 +1,50 @@
 {
-  "id": "myid",
-  "name": "My map",
-  "projection": "orthographic",
+  "id": "3",
+  "name": "US unemployment (1)",
   "type": "d3js",
-  "scale": 320,
+  "projection": "orthographic",
+  "scale": 420,
   "center": {
-    "lon": 60,
-    "lat": -30
+    "lon": 102,
+    "lat": -47
   },
   "interactions": {
     "moving": "mouseMove",
     "zooming": "mouseWheel"
   },
+  "sources": [
+    {
+      "id": "us-counties",
+      "name": "US counties",
+      "type": "map",
+      "url": "http://localhost:9000/scripts/json/us-counties.json",
+      "dataType": "json",
+      "structure": "[\n  \"name\",\n  \"id\",\n  \"nametype\",\n  \"recclass\",\n  \"mass\",\n  \"fall\",\n  \"year\",\n  \"reclat\",\n  \"reclong\",\n  \"GeoLocation\"\n]",
+      "rowNumber": 45716,
+      "sample": "{\n  \"type\": \"Topology\",\n  \"objects\": {\n    \"counties\": {\n      \"type\": \"GeometryCollection\",\n      \"bbox\": [\n        -179.1473399999999,\n        17.67439566600018,\n        179.7784800000003,\n        71.38921046500008\n      ],\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"id\": 53073,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30105,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30029,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 16021,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30071,\n          \"arcs\": []\n        }\n      ]\n    },\n    \"states\": {\n      \"type\": \"GeometryCollection\",\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 53\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 30\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 16\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 38\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 27\n        }\n      ]\n    },\n    \"land\": {\n      \"type\": \"MultiPolygon\",\n      \"arcs\": []\n    }\n  },\n  \"arcs\": [],\n  \"transform\": {\n    \"scale\": [\n      0.0003589261789261791,\n      0.0000537148685138684\n    ],\n    \"translate\": [\n      -179.1473399999999,\n      17.67439566600018\n    ]\n  }\n}"
+    },
+    {
+      "id": "us-unemployment",
+      "name": "US unemployment",
+      "type": "data",
+      "url": "http://localhost:9000/scripts/json/unemployment.tsv",
+      "dataType": "tsv",
+      "sample": "[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]",
+      "structure": "[\n  \"id\",\n  \"rate\"\n]",
+      "rowNumber": 3218
+    }
+  ],
   "layers": [
     {
       "id": "graticuleLayer",
       "type": "graticule",
+      "rank": 1,
       "name": "Graticule",
-      "applyOn": "layers",
       "applied": true,
       "visible": true,
+      "maps": [
+        "1"
+      ],
       "display": {
         "background": true,
         "lines": true,
@@ -43,54 +68,405 @@
     {
       "id": "worldLayer",
       "type": "geodata",
-      "data": {
-        "url": "http://localhost:9000/scripts/json/continent.json",
-        "rootObject": "countries",
-        "type": "topojson",
-        "content": [],
-        "loaded": false
-      },
-      "applyOn": "layers",
+      "rank": 2,
       "name": "World",
       "applied": true,
+      "visible": true,
+      "maps": [
+        "1"
+      ],
+      "data": {
+        "url": "\"http://localhost:9000/scripts/json/continent.json\"",
+        "rootObject": "countries",
+        "type": "topojson",
+        "source": "continents-source",
+        "content": [],
+        "loaded": false
+      },
+      "display": {
+        "fill": {
+          "categorical": {
+            "name": "category20b",
+            "value": "i"
+          }
+        },
+        "bounds": {
+          "applyIf": ""
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "\"Name: \"+d.properties.name"
+        },
+        "subMap": {
+          "layers": [
+            "cities-country",
+            "meteorites-country"
+          ],
+          "variables": [
+            "bounds",
+            "shape"
+          ],
+          "legend": {
+            "label": "shape.properties.name"
+          }
+        }
+      },
+      "styles": {
+        "background": {
+          "fill": "#ff0000"
+        },
+        "lines": {
+          "stroke": "#fff",
+          "strokeWidth": "1px",
+          "strokeOpacity": "1"
+        }
+      },
+      "behavior": {
+        "events": {
+          "click": {
+            "display": "subMap"
+          },
+          "mouseover": {
+            "display": "tooltip"
+          },
+          "mouseout": {
+            "hide": "tooltip"
+          }
+        }
+      }
+    },
+    {
+      "id": "meteorites",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "maps": [
+        "1"
+      ],
+      "data": {
+        "url": "\"http://localhost:9000/scripts/json/Meteorite_Landings.csv\"",
+        "type": "csv",
+        "source": "meteorites-source",
+        "content": [],
+        "loaded": false,
+        "id": "name",
+        "where": "d.mass > 10000",
+        "order": {
+          "field": "mass",
+          "ascending": false
+        }
+      },
+      "name": "Meteorites",
+      "display": {
+        "shape": {
+          "type": "circle",
+          "radius": "d.mass / 5000000",
+          "origin": "[ d.reclong, d.reclat ]",
+          "opacity": 0.75,
+          "threshold": {
+            "paletteCode": "YlOrRd",
+            "paletteReverse": false,
+            "values": [
+              1800,
+              1900,
+              1950,
+              2000,
+              2015
+            ],
+            "colors": [
+              "#ffffb2",
+              "#fed976",
+              "#feb24c",
+              "#fd8d3c",
+              "#f03b20",
+              "#bd0026"
+            ]
+          },
+          "value": "parseDate(d.year).getFullYear()"
+        },
+        "legend": {
+          "enabled": true,
+          "label": "d"
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "\"Name: \"+d.name+\"<br/>Year: \"+parseDate(d.year).getFullYear()+\"<br/>Mass: \"+d.mass/1000+\" kg\""
+        }
+      },
+      "behavior": {
+        "events": {
+          "click": {
+            "display": "tooltip"
+          }
+        }
+      },
+      "applied": true,
       "visible": true
     },
     {
-      "id": "usLayer",
-      "type": "geodata",
+      "id": "meteorites-country",
+      "type": "data",
+      "mode": "objects",
+      "rank": 7,
+      "maps": [
+        "1"
+      ],
       "data": {
-        "url": "http://localhost:9000/scripts/json/us-light.json",
+        "url": "\"http://localhost:9000/scripts/json/Meteorite_Landings.csv\"",
+        "type": "csv",
+        "source": "meteorites-source",
+        "content": [],
+        "loaded": false,
+        "id": "name",
+        "where": "d.mass < 100000 && isInBounds([d.reclong, d.reclat], bounds)",
+        "order": {
+          "field": "mass",
+          "ascending": false
+        }
+      },
+      "name": "Meteorites (Country)",
+      "display": {
+        "shape": {
+          "type": "circle",
+          "radius": "d.mass / 50000",
+          "origin": "[ d.reclong, d.reclat ]",
+          "opacity": 0.75,
+          "threshold": {
+            "paletteCode": "YlOrRd",
+            "paletteReverse": false,
+            "values": [
+              1800,
+              1900,
+              1950,
+              2000,
+              2015
+            ],
+            "colors": [
+              "#ffffb2",
+              "#fed976",
+              "#feb24c",
+              "#fd8d3c",
+              "#f03b20",
+              "#bd0026"
+            ]
+          },
+          "value": "parseDate(d.year).getFullYear()"
+        },
+        "legend": {
+          "enabled": true,
+          "label": "d"
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "\"Name: \"+d.name+\"<br/>Year: \"+parseDate(d.year).getFullYear()+\"<br/>Mass: \"+d.mass/1000+\" kg\""
+        }
+      },
+      "behavior": {
+        "animation": {
+          "value": "parseDate(d.year).getFullYear()",
+          "startValue": 1950,
+          "ascending": true,
+          "interval": 500,
+          "showAllAtEnd": true,
+          "label": "\"Year: \"+d"
+        },
+        "events": {
+          "click": {
+            "display": "tooltip"
+          }
+        }
+      },
+      "applied": false,
+      "visible": false
+    },
+    {
+      "id": "cities-country",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "maps": [
+        "1"
+      ],
+      "data": {
+        "inline": "[{name: \"Paris\", lat: 48.50, lon: 2.20 }]",
+        "content": [],
+        "loaded": false,
+        "id": "name",
+        "where": "isInBounds([d.lon, d.lat], bounds)"
+      },
+      "name": "Cities (Country)",
+      "display": {
+        "shape": {
+          "type": "circle",
+          "radius": ".2",
+          "origin": "[ d.lon, d.lat ]",
+          "opacity": 0.75,
+          "color": "black",
+          "label": {
+            "text": "d.name",
+            "position": {
+              "x": 5,
+              "y": 5
+            }
+          }
+        }
+      },
+      "applied": false,
+      "visible": false
+    },
+    {
+      "id": "images",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "maps": [
+        "1"
+      ],
+      "data": {
+        "inline": "[{name: \"Paris\", lat: 48.50, lon: 2.20 }]",
+        "content": [],
+        "loaded": false,
+        "id": "name"
+      },
+      "name": "Cities (Country)",
+      "display": {
+        "shape": {
+          "type": "image",
+          "radius": ".2",
+          "origin": "[ d.lon, d.lat ]",
+          "opacity": 0.75,
+          "color": "black",
+          "label": {
+            "text": "d.name",
+            "position": {
+              "x": 5,
+              "y": 5
+            }
+          }
+        }
+      },
+      "applied": true,
+      "visible": true
+    },
+    {
+      "id": "test",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "maps": [
+        "1"
+      ],
+      "data": {
+        "inline": "[{ points: [ {lon: -74.007124, lat: 40.71455}, {lon: -118.245323, lat: 34.05349}, { lon: -92.888759, lat: 45.37399} ] }] "
+      },
+      "name": "Test line",
+      "display": {
+        "shape": {
+          "type": "line",
+          "value": "d.points",
+          "pointValue": "[d.lon, d.lat]"
+        }
+      },
+      "styles": {
+        "lines": {
+          "stroke": "#f00",
+          "strokeWidth": "1px"
+        }
+      },
+      "applied": true,
+      "visible": true
+    },
+    {
+      "id": "race",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "maps": [
+        "1"
+      ],
+      "data": {
+        "url": "\"http://localhost:9000/scripts/json/M50_08.json\"",
+        "type": "json",
+        "source": "meteorites-source",
+        "formatDataAsArray": true,
+        "content": [],
+        "loaded": false
+      },
+      "name": "Race",
+      "display": {
+        "shape": {
+          "type": "line",
+          "value": "d",
+          "pointValue": "[d.lon_dec, d.lat_dec]"
+        }
+      },
+      "styles": {
+        "lines": {
+          "stroke": "#f00",
+          "strokeWidth": "1px"
+        }
+      },
+      "applied": true,
+      "visible": true
+    },
+    {
+      "id": "graticuleLayer2",
+      "type": "graticule",
+      "rank": 1,
+      "name": "Graticule",
+      "applied": true,
+      "visible": true,
+      "maps": [
+        "2"
+      ],
+      "display": {
+        "background": true,
+        "lines": true,
+        "border": true
+      },
+      "styles": {
+        "background": {
+          "fill": "#a4bac7"
+        },
+        "border": {
+          "stroke": "#000",
+          "strokeWidth": "3px"
+        },
+        "lines": {
+          "stroke": "#777",
+          "strokeWidth": ".5px",
+          "strokeOpacity": ".5"
+        }
+      }
+    },
+    {
+      "id": "usCounties",
+      "type": "geodata",
+      "rank": 4,
+      "maps": [
+        "2"
+      ],
+      "data": {
+        "source": "us-counties",
+        "url": "\"http://localhost:9000/scripts/json/us/us-counties.json\"",
+        "properties": {
+          "url": "\"http://localhost:9000/scripts/json/us/us-county-names2.csv\"",
+          "type": "csv"
+        },
         "rootObject": "counties",
         "type": "topojson",
         "content": [],
         "loaded": false
       },
-      "styles": {
-        "path": {
-          "fill": "none",
-          "stroke": "#fff",
-          "strokeLinejoin": "round",
-          "strokeLinecap": "round"
-        },
-        "d": {
-          "strokeWidth": "1.5px"
+      "display": {
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "\"Name: \"+d.properties.name+\"<br/>State: \"+d.properties.stateName+\"(\"+d.properties.stateCode+\")\""
         }
-      },
-      "applyOn": "layers",
-      "name": "US",
-      "applied": true,
-      "visible": true
-    },
-    {
-      "id": "usLayer1",
-      "type": "geodata",
-      "data": {
-        "url": "http://localhost:9000/scripts/json/us-light.json",
-        "rootObject": "counties",
-        "type": "topojson",
-        "content": [],
-        "loaded": false,
-        "mesh": true
       },
       "styles": {
         "path": {
@@ -103,73 +479,31 @@
           "strokeWidth": "0.5px"
         }
       },
-      "applyOn": "layers",
+      "behavior": {
+        "events": {
+          "mouseover": {
+            "display": "tooltip"
+          },
+          "mouseout": {
+            "hide": "tooltip"
+          }
+        }
+      },
       "name": "US counties",
       "applied": true,
       "visible": true
     },
     {
-      "id": "usLayer2",
-      "type": "geodata",
-      "data": {
-        "url": "http://localhost:9000/scripts/json/us-light.json",
-        "rootObject": "states",
-        "type": "topojson",
-        "content": [],
-        "loaded": false,
-        "mesh": true
-      },
-      "styles": {
-        "path": {
-          "fill": "none",
-          "stroke": "#fff",
-          "strokeLinejoin": "round",
-          "strokeLinecap": "round"
-        },
-        "d": {
-          "strokeWidth": "1.5px"
-        }
-      },
-      "behavior": {
-        "zoomBoundingBox": {
-          "display": "click"
-        }
-      },
-      "applyOn": "layers",
-      "name": "US states",
-      "applied": true,
-      "visible": true
-    },
-    {
-      "id": "layer1",
-      "type": "data",
-      "mode": "objects",
-      "data": {
-        "url": "http://localhost:9000/scripts/json/test.csv",
-        "type": "csv",
-        "content": [],
-        "loaded": false
-      },
-      "name": "Cities",
-      "display": {
-        "shape": {
-          "type": "circle",
-          "radius": "d.population / 3000000",
-          "origin": "[ d.lon, d.lat ]",
-          "fill": "yellow",
-          "opacity": 0.75
-        }
-      },
-      "applyOn": "layers",
-      "applied": true,
-      "visible": true
-    },
-    {
-      "id": "layer2",
+      "id": "layer22",
       "type": "data",
       "mode": "fill",
+      "rank": 7,
+      "maps": [
+        "2"
+      ],
       "data": {
-        "url": "http://localhost:9000/scripts/json/unemployment.tsv",
+        "source": "us-unemployment",
+        "url": "\"http://localhost:9000/scripts/json/unemployment.tsv\"",
         "type": "tsv",
         "content": [],
         "loaded": false
@@ -178,6 +512,8 @@
       "display": {
         "fill": {
           "threshold": {
+            "paletteCode": "Purples",
+            "paletteReverse": false,
             "values": [
               0.02,
               0.04,
@@ -194,65 +530,280 @@
               "#54278f"
             ]
           },
-          "value": "d.rate",
-          "color": "d.something"
-        }
-      },
-      "applyOn": "usLayer",
-      "applied": true,
-      "visible": true
-    },
-    {
-      "id": "meteorites",
-      "type": "data",
-      "mode": "objects",
-      "rank": 6,
-      "data": {
-        "url": "http://localhost:9000/scripts/json/Meteorite_Landings.csv",
-        "type": "csv",
-        "source": "meteoritesSource",
-        "id": "name",
-        "where": "d.mass > 100000",
-        "order": {
-          "field": "mass",
-          "ascending": false
-        }
-      },
-      "name": "Meteorites",
-      "display": {
-        "shape": {
-          "type": "circle",
-          "radius": "d.mass / 5000000",
-          "origin": "[ d.reclong, d.reclat ]",
-          "opacity": 0.75,
-          "threshold": {
-            "paletteCode": "YlOrRd",
-            "paletteReverse": false,
-            "values": [ 1800.45, 1900.44, 1950.44, 2000.34, 2015.34 ],
-            "colors": [ "#ffffb2", "#fed976", "#feb24c",
-                      "#fd8d3c", "#f03b20", "#bd0026" ]
-          },
-          "value": "parseDate(d.year).getFullYear()"
+          "value": "d.rate"
         },
         "legend": {
           "enabled": true,
-          "label": "d"
+          "label": "(d * 100) + \" %\""
         },
         "tooltip": {
           "enabled": true,
           "fromScale": 300,
-          "text": "'Name: '+d.name+'<br/>Year: '+d.year+'<br/>Mass (g): '+d.mass",
-          "event": "click"
+          "text": "\"Value: \"+value"
         }
       },
       "behavior": {
         "tooltip": {
-          "display": "click"
+          "display": "mouseOver",
+          "hide": "mouseOut"
         }
       },
-      "applyOn": "layers",
+      "applyOn": "usCounties",
       "applied": true,
       "visible": true
+    },
+    {
+      "id": "graticuleLayer3",
+      "type": "graticule",
+      "rank": 1,
+      "name": "Graticule",
+      "applied": true,
+      "visible": true,
+      "maps": [
+        "3"
+      ],
+      "display": {
+        "background": true,
+        "lines": true,
+        "border": true
+      },
+      "styles": {
+        "background": {
+          "fill": "#a4bac7"
+        },
+        "border": {
+          "stroke": "#000",
+          "strokeWidth": "3px"
+        },
+        "lines": {
+          "stroke": "#777",
+          "strokeWidth": ".5px",
+          "strokeOpacity": ".5"
+        }
+      }
+    },
+    {
+      "id": "usStates3",
+      "type": "geodata",
+      "rank": 4,
+      "maps": [
+        "3"
+      ],
+      "data": {
+        "source": "us-counties",
+        "url": "\"http://localhost:9000/scripts/json/us/us-counties.json\"",
+        "properties": {
+          "url": "\"http://localhost:9000/scripts/json/us/us-state-names1.csv\"",
+          "type": "csv"
+        },
+        "rootObject": "states",
+        "type": "topojson",
+        "content": [],
+        "loaded": false
+      },
+      "display": {
+        "fill": {
+          "categorical": {
+            "name": "category20b",
+            "value": "i"
+          }
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "\"Name: \"+d.properties.name+\" (\"+d.properties.code+\")\""
+        },
+        "subMap": {
+          "layers": [
+            "usCounties3",
+            "layer223",
+            "usCities"
+          ],
+          "variables": [
+            "bounds",
+            "shape"
+          ],
+          "legend": {
+            "label": "shape.properties.name+\" (\"+shape.properties.code+\")\""
+          }
+        }
+      },
+      "styles": {
+        "path": {
+          "fill": "none",
+          "stroke": "#fff",
+          "strokeLinejoin": "round",
+          "strokeLinecap": "round"
+        },
+        "d": {
+          "strokeWidth": "0.5px"
+        }
+      },
+      "behavior": {
+        "events": {
+          "click": {
+            "display": "subMap"
+          },
+          "mouseover": {
+            "display": "tooltip"
+          },
+          "mouseout": {
+            "hide": "tooltip"
+          }
+        }
+      },
+      "name": "US states",
+      "applied": true,
+      "visible": true
+    },
+    {
+      "id": "usCounties3",
+      "type": "geodata",
+      "rank": 4,
+      "maps": [
+        "3"
+      ],
+      "data": {
+        "source": "us-counties",
+        "url": "\"http://localhost:9000/scripts/json/us/us-counties.json\"",
+        "properties": {
+          "url": "\"http://localhost:9000/scripts/json/us/us-county-names2.csv\"",
+          "type": "csv"
+        },
+        "rootObject": "counties",
+        "type": "topojson",
+        "where": "shape.properties.code === d.properties.stateCode",
+        "content": [],
+        "loaded": false
+      },
+      "display": {
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "\"Name: \"+d.properties.name+\" (\"+d.properties.stateCode+\")\""
+        }
+      },
+      "styles": {
+        "path": {
+          "fill": "none",
+          "stroke": "#fff",
+          "strokeLinejoin": "round",
+          "strokeLinecap": "round"
+        },
+        "d": {
+          "strokeWidth": "0.5px"
+        }
+      },
+      "name": "US counties",
+      "applied": false,
+      "visible": false
+    },
+    {
+      "id": "layer223",
+      "type": "data",
+      "mode": "fill",
+      "rank": 7,
+      "maps": [
+        "3"
+      ],
+      "data": {
+        "source": "us-unemployment",
+        "url": "\"http://localhost:9000/scripts/json/unemployment.tsv\"",
+        "type": "tsv",
+        "content": [],
+        "loaded": false
+      },
+      "name": "Unemployment rate",
+      "display": {
+        "fill": {
+          "threshold": {
+            "paletteCode": "Purples",
+            "paletteReverse": false,
+            "values": [
+              0.02,
+              0.04,
+              0.06,
+              0.08,
+              0.1
+            ],
+            "colors": [
+              "#f2f0f7",
+              "#dadaeb",
+              "#bcbddc",
+              "#9e9ac8",
+              "#756bb1",
+              "#54278f"
+            ]
+          },
+          "value": "d.rate"
+        },
+        "legend": {
+          "enabled": true,
+          "label": "(d * 100) + \" %\""
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "d.properties.name+\" (\"+d.properties.stateCode+\")<br/>Rate: \"+formatNumber(value*100, 2)+\"%\""
+        }
+      },
+      "behavior": {
+        "events": {
+          "mouseover": {
+            "display": "tooltip"
+          },
+          "mouseout": {
+            "hide": "tooltip"
+          }
+        }
+      },
+      "applyOn": "usCounties3",
+      "applied": false,
+      "visible": false
+    },
+    {
+      "id": "usCities",
+      "type": "data",
+      "mode": "objects",
+      "rank": 6,
+      "maps": [
+        "3"
+      ],
+      "data": {
+        "url": "\"http://localhost:9000/scripts/json/us/us-main-cities.csv\"",
+        "type": "csv",
+        "content": [],
+        "loaded": false,
+        "id": "name",
+        "where": "shape.properties.code === d.stateCode && isInBounds([d.lon, d.lat], bounds)"
+      },
+      "name": "Cities (Country)",
+      "display": {
+        "shape": {
+          "type": "circle",
+          "radius": ".1",
+          "origin": "[ d.lon, d.lat ]",
+          "opacity": 0.75,
+          "color": "gray"
+        },
+        "tooltip": {
+          "enabled": true,
+          "fromScale": 300,
+          "text": "d.name"
+        }
+      },
+      "behavior": {
+        "events": {
+          "mouseover": {
+            "display": "tooltip"
+          },
+          "mouseout": {
+            "hide": "tooltip"
+          }
+        }
+      },
+      "applied": false,
+      "visible": false
     }
   ]
 }

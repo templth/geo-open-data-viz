@@ -61,7 +61,7 @@ function executeWebApiRequest(configuration, apiId,
     path, method, data, callback) {
   executeApiRequest(configuration, '/apis/' + apiId +
       '/versions/1/access', 'GET', null, function(err, access) {
-        console.log('>> access = '+JSON.stringify(access));
+    // console.log('>> access = '+JSON.stringify(access));
     var options = {
       url: getRootUrl(access.rootUrl) + path,
       method: method,
@@ -164,7 +164,7 @@ function createEndpointObject(protocol, domain, api) {
 // Service functions
 
 exports.loadApisparkConfiguration = function(callback) {
-  fs.readFile('tools/apispark.json', 'utf8', function(err, data) {
+  fs.readFile('tools/apispark/apispark.json', 'utf8', function(err, data) {
     if (err) {
       throw err;
     }
@@ -354,7 +354,8 @@ exports.importData = function(configuration, webApiId,
     domain, fileName, callback) {
   fs.readFile(fileName, function(err, data) {
     if (err) {
-      throw err;
+      callback(err);
+      return;
     }
 
     executeWebApiRequest(configuration, webApiId, domain + '/',

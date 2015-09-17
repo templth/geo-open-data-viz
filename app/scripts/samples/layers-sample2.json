@@ -1,0 +1,142 @@
+[
+  {
+    "id": "graticuleLayer2",
+    "type": "graticule",
+    "rank": 1,
+    "name": "Graticule",
+    "applied": true,
+    "visible": true,
+    "maps": [
+      "2"
+    ],
+    "display": {
+      "background": true,
+      "lines": true,
+      "border": true
+    },
+    "styles": {
+      "background": {
+        "fill": "#a4bac7"
+      },
+      "border": {
+        "stroke": "#000",
+        "strokeWidth": "3px"
+      },
+      "lines": {
+        "stroke": "#777",
+        "strokeWidth": ".5px",
+        "strokeOpacity": ".5"
+      }
+    }
+  },
+  {
+    "id": "usCounties",
+    "type": "geodata",
+    "rank": 4,
+    "maps": [
+      "2"
+    ],
+    "data": {
+      "source": "us-counties",
+      "url": "\"http://localhost:9000/scripts/json/us/us-counties.json\"",
+      "properties": {
+        "url": "\"http://localhost:9000/scripts/json/us/us-county-names2.csv\"",
+        "type": "csv"
+      },
+      "rootObject": "counties",
+      "type": "topojson",
+      "content": [],
+      "loaded": false
+    },
+    "display": {
+      "tooltip": {
+        "enabled": true,
+        "fromScale": 300,
+        "text": "\"Name: \"+d.properties.name+\"<br/>State: \"+d.properties.stateName+\"(\"+d.properties.stateCode+\")\""
+      }
+    },
+    "styles": {
+      "path": {
+        "fill": "none",
+        "stroke": "#fff",
+        "strokeLinejoin": "round",
+        "strokeLinecap": "round"
+      },
+      "d": {
+        "strokeWidth": "0.5px"
+      }
+    },
+    "behavior": {
+      "events": {
+        "mouseover": {
+          "display": "tooltip"
+        },
+        "mouseout": {
+          "hide": "tooltip"
+        }
+      }
+    },
+    "name": "US counties",
+    "applied": true,
+    "visible": true
+  },
+  {
+    "id": "layer22",
+    "type": "data",
+    "mode": "fill",
+    "rank": 7,
+    "maps": [
+      "2"
+    ],
+    "data": {
+      "source": "us-unemployment",
+      "url": "\"http://localhost:9000/scripts/json/unemployment.tsv\"",
+      "type": "tsv",
+      "content": [],
+      "loaded": false
+    },
+    "name": "Unemployment rate",
+    "display": {
+      "fill": {
+        "threshold": {
+          "paletteCode": "Purples",
+          "paletteReverse": false,
+          "values": [
+            0.02,
+            0.04,
+            0.06,
+            0.08,
+            0.1
+          ],
+          "colors": [
+            "#f2f0f7",
+            "#dadaeb",
+            "#bcbddc",
+            "#9e9ac8",
+            "#756bb1",
+            "#54278f"
+          ]
+        },
+        "value": "d.rate"
+      },
+      "legend": {
+        "enabled": true,
+        "label": "(d * 100) + \" %\""
+      },
+      "tooltip": {
+        "enabled": true,
+        "fromScale": 300,
+        "text": "\"Value: \"+value"
+      }
+    },
+    "behavior": {
+      "tooltip": {
+        "display": "mouseOver",
+        "hide": "mouseOut"
+      }
+    },
+    "applyOn": "usCounties",
+    "applied": true,
+    "visible": true
+  }
+]

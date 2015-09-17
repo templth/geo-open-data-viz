@@ -86,9 +86,15 @@ angular
           }
         }
       })
+      .when('/providers', {
+        templateUrl: 'views/providers.html',
+        controller: 'ProvidersCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
+
+
   })
   .config(function($resourceProvider) {
     $resourceProvider.defaults.stripTrailingSlashes = false;
@@ -107,4 +113,20 @@ angular
     var encodedCurrentUser = btoa(currentUser.username +
       ':' + currentUser.password);
     $http.defaults.headers.common.Authorization = 'Basic ' + encodedCurrentUser;
-  });
+  })
+  .run(function($localStorage, providerService) {
+    providerService.currentProvider = $localStorage.currentProvider;
+  })
+  /*.run(function($rootScope, $location, $route, providerService) {
+    $rootScope.$on('$locationChangeStart', function(event, next, current) {
+      console.log('>> $locationChangeStart');
+      var nextRoute = $route.routes[$location.path()];
+      if (!providerService.hasCurrentProvider()) {
+        console.log('>> redirect');
+        event.preventDefault();
+        $location.path('/providers');
+        return;
+      }
+      console.log('>> $locationChangeStart = '+JSON.stringify(next))
+    });
+  })*/;

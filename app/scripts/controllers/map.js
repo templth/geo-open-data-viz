@@ -121,7 +121,7 @@ angular.module('mapManagerApp')
    * Controller of the mapManagerApp
    */
   .controller('AddSourceCtrl', function($scope,
-      $modalInstance, commonsService, topojsonService, typeUtils) {
+      $modalInstance, commonsService, topojsonService, typeHelper) {
     commonsService.registerCommonPanelFunctionsInScope($scope);
 
     $scope.shouldDisplayStructure = function() {
@@ -163,7 +163,7 @@ angular.module('mapManagerApp')
               for (var elt in data[0]) {
                 structure.push({
                   name: elt,
-                  type: typeUtils.getType(data[0][elt])
+                  type: typeHelper.getType(data[0][elt])
                 });
               }
             }
@@ -176,11 +176,11 @@ angular.module('mapManagerApp')
                 minMax[elt.name] = [];
                 var min = _.min(data, function(d) {
                   if (elt.type === 'integer') {
-                    return typeUtils.parseIntegerValue(d[elt.name]);
+                    return typeHelper.parseIntegerValue(d[elt.name]);
                   } else if (elt.type === 'float') {
-                    return typeUtils.parseFloatValue(d[elt.name]);
+                    return typeHelper.parseFloatValue(d[elt.name]);
                   } else if (elt.type === 'date') {
-                    return typeUtils.parseDateValue(d[elt.name]);
+                    return typeHelper.parseDateValue(d[elt.name]);
                   } else {
                     return d[elt.name];
                   }
@@ -188,11 +188,11 @@ angular.module('mapManagerApp')
                 minMax[elt.name].push(min[elt.name]);
                 var max = _.max(data, function(d) {
                   if (elt.type === 'integer') {
-                    return typeUtils.parseIntegerValue(d[elt.name]);
+                    return typeHelper.parseIntegerValue(d[elt.name]);
                   } else if (elt.type === 'float') {
-                    return typeUtils.parseFloatValue(d[elt.name]);
+                    return typeHelper.parseFloatValue(d[elt.name]);
                   } else if (elt.type === 'date') {
-                    return typeUtils.parseDateValue(d[elt.name]);
+                    return typeHelper.parseDateValue(d[elt.name]);
                   } else {
                     return d[elt.name];
                   }

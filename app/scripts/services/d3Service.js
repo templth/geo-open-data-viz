@@ -12,7 +12,7 @@ angular.module('d3', [])
     return d3;
   })
 
-  .service('d3Utils', function(d3Service) {
+  .service('d3Helper', function(d3Service) {
     return {
       interpolatedProjection: function (a, b) {
         function raw(λ, φ) {

@@ -25,7 +25,7 @@ function copySamples(singularDomainSuffix, collection, samplesService) {
 }
 
 function createInMemoryPersistenceService(
-	domain, $q, $timeout, uuid4,
+    domain, $q, $timeout, uuid4,
 	samplesService) {
   var service = {};
 
@@ -74,8 +74,8 @@ function createInMemoryPersistenceService(
 }
 
 function createLocalStoragePersistenceService(
-	domain, $q, $timeout, $localStorage, uuid4,
-	samplesService) {
+    domain, $q, $timeout, $localStorage, uuid4,
+    samplesService) {
   var service = {};
 
   var pluralDomain = domain + 's';
@@ -84,7 +84,7 @@ function createLocalStoragePersistenceService(
 
   $localStorage[pluralDomain] = [];
 
-  copySamples(domain, $localStorage[pluralDomain], samplesService);
+  //copySamples(domain, $localStorage[pluralDomain], samplesService);
 
   service['get' + pluralDomainSuffix] = function() {
     var collection = $localStorage[pluralDomain];
@@ -128,111 +128,286 @@ function createLocalStoragePersistenceService(
   return service;
 }
 
-function createWebApiPersistenceService(
-	domain, $resource) {
+function createAuthorizationHeader(currentProvider) {
+  return 'Basic ' + btoa(currentProvider.username + ':' + currentProvider.password);
+}
+
+function createWebApiPersistenceService(domain, $http, providerService) {
   var service = {};
 
   var pluralDomain = domain + 's';
   var pluralDomainSuffix = _.capitalize(domain) + 's';
   var singularDomainSuffix = _.capitalize(domain);
 
-  var resource = $resource(
-    pluralDomain + '/:id',
-    { id: '@id' },
-    {
-      add: {method: 'POST'},
-      save: {method: 'PUT'}
-    }
-  );
-
   service['get' + pluralDomainSuffix] = function() {
-    return resource.query().$promise;
+    console.log('>> get + pluralDomainSuffix = '+'get' + pluralDomainSuffix);
+    console.log('currentProvider.url = '+providerService.currentProvider.url);
+    var currentProvider = providerService.getCurrentProvider();
+    var options = {
+      headers: { Authorization: createAuthorizationHeader(currentProvider) }
+    };
+    if (domain === 'layer') {
+      options.params = { maps: arguments[0] };
+    }
+    return $http.get(currentProvider.url + pluralDomain + '/', options).then(function(response) {
+      return response.data;
+    });
   };
 
   service['add' + singularDomainSuffix] = function(item) {
     delete item.id;
-    return resource.add(item).$promise;
+    var currentProvider = providerService.getCurrentProvider();
+    return $http.post(currentProvider.url + pluralDomain + '/', item, {
+      headers: { Authorization: createAuthorizationHeader(currentProvider) }
+    }).then(function(response) {
+      return response.data;
+    });
   };
 
   service['get' + singularDomainSuffix] = function(itemId) {
-    return resource.get({id: itemId}).$promise;
+    var currentProvider = providerService.getCurrentProvider();
+    return $http.get(currentProvider.url + pluralDomain + '/' + itemId, {
+      headers: { Authorization: createAuthorizationHeader(currentProvider) }
+    }).then(function(response) {
+      return response.data;
+    });
   };
 
   service['save' + singularDomainSuffix] = function(item) {
-    return resource.save(item).$promise;
+    var currentProvider = providerService.getCurrentProvider();
+    return $http.put(currentProvider.url + pluralDomain + '/' + item.id, item, {
+      headers: { Authorization: createAuthorizationHeader(currentProvider) }
+    }).then(function(response) {
+      return response.data;
+    });
   };
 
   service['delete' + singularDomainSuffix] = function(itemId) {
-    return resource.delete({id: itemId}).$promise;
+    var currentProvider = providerService.getCurrentProvider();
+    return $http.delete(currentProvider.url + pluralDomain + '/' + itemId, {
+      headers: { Authorization: createAuthorizationHeader(currentProvider) }
+    });
   };
 
   return service;
 }
 
-function isInMemoryStorageType(storageType) {
-  return storageType === 'inmemory';
-}
+function createPersistenceService(
+    domain, providerService, inMemoryProvider,
+    browserStorageProvider, webApiProvider) {
+  var service = {};
 
-function isLocalStorageStorageType(storageType) {
-  return storageType === 'browserstorage';
-}
+  var pluralDomainSuffix = _.capitalize(domain) + 's';
+  var singularDomainSuffix = _.capitalize(domain);
 
-function isWebApiStorageType(storageType) {
-  return storageType === 'webapi';
+  service['get' + pluralDomainSuffix] = function() {
+    console.log('provider = '+JSON.stringify(providerService.currentProvider));
+    if (providerService.isInMemoryCurrentProvider()) {
+      console.log('1');     return inMemoryProvider['get' + pluralDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isBrowserStorageCurrentProvider()) {
+      console.log('2');
+      return browserStorageProvider['get' + pluralDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isWebApiCurrentProvider()) {
+      console.log('3');
+      return webApiProvider['get' + pluralDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    }
+    console.log('4');
+  };
+
+  service['add' + singularDomainSuffix] = function(item) {
+    if (providerService.isInMemoryCurrentProvider()) {
+      return inMemoryProvider['add' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isBrowserStorageCurrentProvider()) {
+      return browserStorageProvider['add' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isWebApiCurrentProvider()) {
+      return webApiProvider['add' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    }
+  };
+
+  service['get' + singularDomainSuffix] = function(itemId) {
+    if (providerService.isInMemoryCurrentProvider()) {
+      return inMemoryProvider['get' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isBrowserStorageCurrentProvider()) {
+      return browserStorageProvider['get' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isWebApiCurrentProvider()) {
+      return webApiProvider['get' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    }
+  };
+
+  service['save' + singularDomainSuffix] = function(item) {
+    if (providerService.isInMemoryCurrentProvider()) {
+      return inMemoryProvider['save' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isBrowserStorageCurrentProvider()) {
+      return browserStorageProvider['save' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isWebApiCurrentProvider()) {
+      return webApiProvider['save' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    }
+  };
+
+  service['delete' + singularDomainSuffix] = function(itemId) {
+    if (providerService.isInMemoryCurrentProvider()) {
+      return inMemoryProvider['delete' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isBrowserStorageCurrentProvider()) {
+      return browserStorageProvider['delete' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    } else if (providerService.isWebApiCurrentProvider()) {
+      return webApiProvider['delete' + singularDomainSuffix]
+        .apply(inMemoryProvider, arguments);
+    }
+  };
+
+  return service;
 }
 
 angular.module('mapManager.persistence', [ 'app.config', 'mapManager.samples' ])
 
+  // Provider
+  .service('providerService', function($localStorage) {
+    return {
+      currentProvider: null,
+      getCurrentProvider: function() {
+        return this.currentProvider;
+      },
+      hasCurrentProvider: function() {
+        return (this.currentProvider != null);
+      },
+      isInMemoryCurrentProvider: function() {
+        return this.hasCurrentProvider() &&
+          this.currentProvider.type === 'inmemory';
+      },
+      isBrowserStorageCurrentProvider: function() {
+        return this.hasCurrentProvider() &&
+          this.currentProvider.type === 'browserstorage';
+      },
+      isWebApiCurrentProvider: function() {
+        return this.hasCurrentProvider() &&
+          this.currentProvider.type === 'webapi';
+      },
+      selectInMemoryProvider: function() {
+        this.currentProvider = {
+          type: 'inmemory'
+        };
+        $localStorage.currentProvider = this.currentProvider;
+      },
+      selectBrowserStorageInMemoryProvider: function() {
+        this.currentProvider = {
+          type: 'browserstorage'
+        };
+        $localStorage.currentProvider = this.currentProvider;
+      },
+      selectWebApiProvider: function(data) {
+        this.currentProvider = {
+          type: 'webapi',
+          url: data.url,
+          username: data.username,
+          password: data.password,
+          readonly: data.readonly,
+          secured: data.secured
+        };
+        $localStorage.currentProvider = this.currentProvider;
+      }
+    };
+  })
+
   // Map resource
-  .factory('mapResource', function($q, $timeout,
+
+  .factory('mapInMemoryResource', function($q, $timeout,
       $localStorage, $resource, storageType, addSamples, apiBaseUrl,
       uuid4, samplesService) {
-    if (isInMemoryStorageType(storageType)) {
-      return createInMemoryPersistenceService(
-        'map', $q, $timeout, uuid4, samplesService,
-        addSamples);
-    } else if (isLocalStorageStorageType(storageType)) {
-      return createLocalStoragePersistenceService(
-        'map', $q, $timeout, $localStorage, uuid4,
-        samplesService, addSamples);
-    } else if (isWebApiStorageType(storageType)) {
-      return createWebApiPersistenceService(
-        'map', $resource, apiBaseUrl);
-    }
+    return createInMemoryPersistenceService(
+      'map', $q, $timeout, uuid4, samplesService,
+      addSamples);
+  })
+
+  .factory('mapBrowserStorageResource', function($q, $timeout,
+      $localStorage, $resource, storageType, addSamples, apiBaseUrl,
+      uuid4, samplesService) {
+    return createLocalStoragePersistenceService(
+      'map', $q, $timeout, $localStorage, uuid4,
+      samplesService, addSamples);
+  })
+
+  .factory('mapWebApiResource', function($http, providerService, apiBaseUrl) {
+    return createWebApiPersistenceService(
+      'map', $http, providerService, apiBaseUrl);
+  })
+
+  .factory('mapResource', function(providerService, mapInMemoryResource,
+      mapBrowserStorageResource, mapWebApiResource) {
+    return createPersistenceService(
+      'map', providerService, mapInMemoryResource,
+      mapBrowserStorageResource, mapWebApiResource);
   })
 
   // Layer resource
-  .service('layerResource', function($q, $timeout,
+
+  .factory('layerInMemoryResource', function($q, $timeout,
       $localStorage, $resource, storageType, addSamples, apiBaseUrl,
       uuid4, samplesService) {
-    if (isInMemoryStorageType(storageType)) {
-      return createInMemoryPersistenceService(
-        'layer', $q, $timeout, uuid4, samplesService,
-        addSamples);
-    } else if (isLocalStorageStorageType(storageType)) {
-      return createLocalStoragePersistenceService(
-        'layer', $q, $timeout, $localStorage, uuid4,
-        samplesService, addSamples);
-    } else if (isWebApiStorageType(storageType)) {
-      return createWebApiPersistenceService(
-        'layer', $resource, apiBaseUrl);
-    }
+    return createInMemoryPersistenceService(
+      'layer', $q, $timeout, uuid4, samplesService,
+      addSamples);
+  })
+
+  .factory('layerBrowserStorageResource', function($q, $timeout,
+      $localStorage, $resource, storageType, addSamples, apiBaseUrl,
+      uuid4, samplesService) {
+    return createLocalStoragePersistenceService(
+      'layer', $q, $timeout, $localStorage, uuid4,
+      samplesService, addSamples);
+  })
+
+  .factory('layerWebApiResource', function($http, providerService, apiBaseUrl) {
+    return createWebApiPersistenceService(
+      'layer', $http, providerService, apiBaseUrl);
+  })
+
+  .factory('layerResource', function(providerService, layerInMemoryResource,
+      layerBrowserStorageResource, layerWebApiResource) {
+    return createPersistenceService(
+      'layer', providerService, layerInMemoryResource,
+      layerBrowserStorageResource, layerWebApiResource);
   })
 
   // Source resource
-  .service('sourceResource', function($q, $timeout,
+
+  .factory('sourceInMemoryResource', function($q, $timeout,
       $localStorage, $resource, storageType, addSamples, apiBaseUrl,
       uuid4, samplesService) {
-    if (isInMemoryStorageType(storageType)) {
-      return createInMemoryPersistenceService(
-        'source', $q, $timeout, uuid4, samplesService,
-        addSamples);
-    } else if (isLocalStorageStorageType(storageType)) {
-      return createLocalStoragePersistenceService(
-        'source', $q, $timeout, $localStorage, uuid4,
-        samplesService, addSamples);
-    } else if (isWebApiStorageType(storageType)) {
-      return createWebApiPersistenceService(
-        'source', $resource, apiBaseUrl);
-    }
+    return createInMemoryPersistenceService(
+      'source', $q, $timeout, uuid4, samplesService,
+      addSamples);
+  })
+
+  .factory('sourceBrowserStorageResource', function($q, $timeout,
+      $localStorage, $resource, storageType, addSamples, apiBaseUrl,
+      uuid4, samplesService) {
+    return createLocalStoragePersistenceService(
+      'source', $q, $timeout, $localStorage, uuid4,
+      samplesService, addSamples);
+  })
+
+  .factory('sourceWebApiResource', function($http, providerService, apiBaseUrl) {
+    return createWebApiPersistenceService(
+      'source', $http, providerService, apiBaseUrl);
+  })
+
+  .factory('sourceResource', function(providerService, sourceInMemoryResource,
+      sourceBrowserStorageResource, sourceWebApiResource) {
+    return createPersistenceService(
+      'source', providerService, sourceInMemoryResource,
+      sourceBrowserStorageResource, sourceWebApiResource);
   });

@@ -90,7 +90,8 @@ function isPrimitive(value) {
 
 function initializeEntity(entity, name) {
   entity.name = name;
-  entity.pkPolicy = 'auto-generated';
+  // entity.pkPolicy = 'auto-generated';
+  entity.pkPolicy = 'user-generated';
   entity.properties = [];
 }
 

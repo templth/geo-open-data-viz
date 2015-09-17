@@ -1,0 +1,51 @@
+{
+  "id": "usCounties",
+  "type": "geodata",
+  "rank": 4,
+  "maps": [
+    "2"
+  ],
+  "data": {
+    "source": "us-counties",
+    "url": "\"http://localhost:9000/scripts/json/us/us-counties.json\"",
+    "properties": {
+      "url": "\"http://localhost:9000/scripts/json/us/us-county-names2.csv\"",
+      "type": "csv"
+    },
+    "rootObject": "counties",
+    "type": "topojson",
+    "content": [],
+    "loaded": false
+  },
+  "display": {
+    "tooltip": {
+      "enabled": true,
+      "fromScale": 300,
+      "text": "\"Name: \"+d.properties.name+\"<br/>State: \"+d.properties.stateName+\"(\"+d.properties.stateCode+\")\""
+    }
+  },
+  "styles": {
+    "path": {
+      "fill": "none",
+      "stroke": "#fff",
+      "strokeLinejoin": "round",
+      "strokeLinecap": "round"
+    },
+    "d": {
+      "strokeWidth": "0.5px"
+    }
+  },
+  "behavior": {
+    "events": {
+      "mouseover": {
+        "display": "tooltip"
+      },
+      "mouseout": {
+        "hide": "tooltip"
+      }
+    }
+  },
+  "name": "US counties",
+  "applied": true,
+  "visible": true
+}

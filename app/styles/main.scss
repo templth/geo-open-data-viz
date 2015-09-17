@@ -93,7 +93,7 @@ body {
 #map {
   background-color: #fff;
   border: 1px solid #ccc;
-  height: 554px;
+  height: 665px;
 }
 .background {
   fill: none;
@@ -312,4 +312,9 @@ div.stylesBorder legend {
 
 legend span.glyphicon {
   cursor: pointer;
+}
+
+.providers h3 {
+  text-align: center;
+  margin-bottom: 50px;
 }

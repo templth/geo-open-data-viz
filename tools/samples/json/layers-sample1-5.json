@@ -1,0 +1,34 @@
+{
+  "id": "images",
+  "type": "data",
+  "mode": "objects",
+  "rank": 6,
+  "maps": [
+    "1"
+  ],
+  "data": {
+    "inline": "[{name: \"Paris\", lat: 48.50, lon: 2.20 }]",
+    "content": [],
+    "loaded": false,
+    "id": "name"
+  },
+  "name": "Cities (Country)",
+  "display": {
+    "shape": {
+      "type": "image",
+      "radius": ".2",
+      "origin": "[ d.lon, d.lat ]",
+      "opacity": 0.75,
+      "color": "black",
+      "label": {
+        "text": "d.name",
+        "position": {
+          "x": 5,
+          "y": 5
+        }
+      }
+    }
+  },
+  "applied": true,
+  "visible": true
+}

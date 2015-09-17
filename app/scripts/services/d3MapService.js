@@ -11,10 +11,9 @@ angular.module('mapManager.d3.services', [
  * @description
  * Provide functions to create and refresh map rendering.
  */
-.service('mapCreatorService', [ 'currentMapService', 'mapInteractionService',
-    'layerService', 'projectionService', 'd3Service', 'mapUtils', 'valueChecker',
-    function(currentMapService, mapInteractionService, layerService,
-      projectionService, d3Service, mapUtils, valueChecker) {
+.service('mapCreatorService', function(currentMapService,
+      mapInteractionService, layerService,
+      projectionService, d3Service, mapHelper, valueChecker) {
   return {
     /**
      * @ngdoc method
@@ -113,7 +112,7 @@ angular.module('mapManager.d3.services', [
           .attr('height', height);
 
       // Create structure elements for the map (map and layers)
-      var mainMapElements = mapUtils.createMainMapStructure(svg);
+      var mainMapElements = mapHelper.createMainMapStructure(svg);
 
       // Save current map context
       currentMapService.registerCurrentMapContext(svg, path, projection,
@@ -141,7 +140,7 @@ angular.module('mapManager.d3.services', [
       if (!_.isNull(interactions) && !_.isNull(interactions.moving)) {
         mapInteractionService.configureMoving($scope, svg, interactions.moving, {
           type: currentMapService.getCurrentMap().projection, raw: projection
-        }, mapUtils.getMapElements());
+        }, mapHelper.getMapElements());
       }
 
       // Configure zooming
@@ -149,7 +148,7 @@ angular.module('mapManager.d3.services', [
         mapInteractionService.configureZooming($scope, svg, interactions.zooming, {
           type: currentMapService.getCurrentMap().projection, raw: projection}, {
           width: '', height: ''
-        }, mapUtils.getMapElements());
+        }, mapHelper.getMapElements());
       }
     },
 
@@ -193,7 +192,7 @@ angular.module('mapManager.d3.services', [
       this.refreshMap($scope, currentMapService.getCurrentMapElement());
     }
   };
-}])
+})
 
 // Projection service
 
@@ -203,7 +202,7 @@ angular.module('mapManager.d3.services', [
  * @description
  * Provide functions to create and configure projections for a map.
  */
-.service('projectionService', [ 'd3Service', function(d3Service) {
+.service('projectionService', function(d3Service) {
   return {
     /**
      * @ngdoc method
@@ -312,7 +311,7 @@ angular.module('mapManager.d3.services', [
       return path;
     }
   };
-}])
+})
 
 /**
  * @ngdoc service
@@ -320,9 +319,8 @@ angular.module('mapManager.d3.services', [
  * @description
  * Provide functions to configure the interactions like map moving and zooming.
  */
-.service('mapInteractionService', [ 'consoleService', 'currentMapService',
-  'd3Service', 'd3Utils', 'valueChecker',
-	function(consoleService, currentMapService, d3Service, d3Utils, valueChecker) {
+.service('mapInteractionService', function(consoleService,
+    currentMapService, d3Service, d3Helper, valueChecker) {
   return {
     // See https://github.com/mbostock/d3/wiki/Drag-Behavior
     // See https://github.com/mbostock/d3/wiki/Zoom-Behavior
@@ -361,7 +359,7 @@ angular.module('mapManager.d3.services', [
           projection.rotate([-o1[0], -o1[1]]);
 
           // Update the map
-          d3Utils.updateMapElements(mapId, projection, mapElements);
+          d3Helper.updateMapElements(mapId, projection, mapElements);
 
           // Update current map context
           $scope.$apply(function() {
@@ -405,22 +403,22 @@ angular.module('mapManager.d3.services', [
       function mousedown() {
         console.log('>> mousedown');
         // Remember where the mouse was pressed, in canvas coords
-        m0 = d3Utils.trackballAngles(projection, d3Service.mouse(svg[0][0]));
+        m0 = d3Helper.trackballAngles(projection, d3Service.mouse(svg[0][0]));
         o0 = projection.rotate();
         d3Service.event.preventDefault();
       }
 
       function mousemove() {
         if (m0) {
-          var m1 = d3Utils.trackballAngles(projection, d3Service.mouse(svg[0][0]));
-          o1 = d3Utils.composedRotation(o0[0], o0[1], o0[2],
+          var m1 = d3Helper.trackballAngles(projection, d3Service.mouse(svg[0][0]));
+          o1 = d3Helper.composedRotation(o0[0], o0[1], o0[2],
             m1[0] - m0[0], m1[1] - m0[1]);
 
           projection.rotate(o1);
 
           // Update the map
           console.log('>> mapElements = '+JSON.stringify(mapElements));
-          d3Utils.updateMapElements(mapId, projection, mapElements);
+          d3Helper.updateMapElements(mapId, projection, mapElements);
 
           // Update current map context
           //$scope.$apply(function() {
@@ -433,7 +431,7 @@ angular.module('mapManager.d3.services', [
           }
           //});
 
-          /* console.log('view box = '+svg.attr('viewBox'));
+          console.log('view box = '+svg.attr('viewBox'));
           console.log('bbox = '+svg.node().getBBox());
           // SVGRect
           var bbox = svg.node().getBBox();
@@ -448,7 +446,7 @@ angular.module('mapManager.d3.services', [
           var y2 = bbox.y+bbox.height;
           console.log('x1 = '+x1+', y1 = '+y2+', x2 = '+x2+', y2 = '+y2);
 
-          console.log('lon1 / lat1 = '+projection.invert([x1, y1])+', lon2 / lat2 = '+projection.invert([x2, y2])); */
+          console.log('lon1 / lat1 = '+projection.invert([x1, y1])+', lon2 / lat2 = '+projection.invert([x2, y2]));
         }
       }
 
@@ -483,7 +481,7 @@ angular.module('mapManager.d3.services', [
     */
     configureMovingForMercatorProjection: function($scope, svg, projection, mapElements) {
       // See this link http://bl.ocks.org/patricksurry/6621971
-      var m0, o0;
+      /*var m0, o0;
       var drag = d3.behavior.drag()
       .on('dragstart', function() {
         console.log('>> dragstart');
@@ -501,7 +499,7 @@ angular.module('mapManager.d3.services', [
       });
 
       var mapId = currentMapService.getCurrentMapId();
-      d3Service.select('#' + mapId).call(drag);
+      d3Service.select('#' + mapId).call(drag);*/
       //svg.attr("transform", "translate(" + d3.event.translate + ")");
     },
 
@@ -535,8 +533,8 @@ angular.module('mapManager.d3.services', [
             $scope, svg, projection.raw, mapElements);
         }
       } else if (projection.type === 'mercator') {
-        this.configureMovingForMercatorProjection(
-          $scope, svg, projection.raw, mapElements);
+        /*this.configureMovingForMercatorProjection(
+          $scope, svg, projection.raw, mapElements);*/
       }
     },
 
@@ -555,7 +553,7 @@ angular.module('mapManager.d3.services', [
         projection/*.translate(d3Service.event.translate)*/.scale(d3Service.event.scale);
 
         // Update the map
-        d3Utils.updateMapElements(mapId, projection, mapElements);
+        d3Helper.updateMapElements(mapId, projection, mapElements);
 
         // Update current map context
         //$scope.$apply(function() {
@@ -571,11 +569,14 @@ angular.module('mapManager.d3.services', [
 
     configureZoomingWithMouseWheelForMercatorProjection: function($scope, svg/*, projection, dimension, mapElements*/) {
       var mapId = currentMapService.getCurrentMapId();
+      var dimensions = currentMapService.getCurrentMapContext().dimensions;
+      var width = dimensions.width;
+      var height = dimensions.height;
 
       // Configure zooming
-      var zoom = d3Service.behavior.zoom()
-           /*.translate(projection.translate())
-           .scale(projection.scale())*/
+      /*var zoom = d3Service.behavior.zoom()
+           //.translate(projection.translate())
+           //.scale(projection.scale())
            //.scaleExtent([dimension.height, 8 * dimension.height])
            .on('zoom', function() {
         consoleService.logMessage('debug', 'Updated scale to ' + zoom.scale());
@@ -584,21 +585,57 @@ angular.module('mapManager.d3.services', [
             d3Service.event.translate.join(',') + ')scale(' + d3Service.event.scale + ')');
 
         // Update the map
-        //d3Utils.updateMapElements(mapId, projection, mapElements);
+        //d3Helper.updateMapElements(mapId, projection, mapElements);
 
         // Update current map context
         currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
         // Throw a "Error: [$rootScope:inprog] $digest already in progress"
         // See http://stackoverflow.com/questions/12729122/prevent-error-digest-already-in-progress-when-calling-scope-apply/23102223#23102223
-        /*$scope.$apply(function() {
-          currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
-        });*/
+        //$scope.$apply(function() {
+        //  currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
+        //});
       });
 
       // Apply zoom behavior
       var map = d3Service.select('#' + mapId);
       map.call(zoom);
-      map.call(zoom.event);
+      map.call(zoom.event);*/
+
+      var map = d3Service.select('#' + mapId);
+
+      function move() {
+        console.log('>> move');
+        var t = d3.event.translate;
+        var s = d3.event.scale; 
+        var zscale = s;
+        var h = height/4;
+
+        console.log('>> s = '+s);
+        console.log('>> height = '+height);
+        console.log('>> width = '+width);
+        console.log('>> h = '+h);
+
+        t[0] = Math.min(
+            (width / height)  * (s - 1),
+            Math.max(width * (1 - s), t[0])
+        );
+
+        t[1] = Math.min(
+            h * (s - 1) + h * s,
+            Math.max(height  * (1 - s) - h * s, t[1])
+        );
+
+        zoom.translate(t);
+        map.attr("transform", "translate("  + t + ")scale(" + s + ")");
+      }
+
+      console.log('>> zoom');
+      var zoom = d3.behavior.zoom()
+          .scaleExtent([1, 9])
+          .on('zoom', move);
+
+      map.call(zoom);
+
     },
 
     configureDefaultZoomingWithMouseWheel: function($scope, svg) {
@@ -671,4 +708,4 @@ angular.module('mapManager.d3.services', [
       }
     }
   };
-}]);
+});

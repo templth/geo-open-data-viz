@@ -1,0 +1,28 @@
+{
+  "id": "test",
+  "type": "data",
+  "mode": "objects",
+  "rank": 6,
+  "maps": [
+    "1"
+  ],
+  "data": {
+    "inline": "[{ points: [ {lon: -74.007124, lat: 40.71455}, {lon: -118.245323, lat: 34.05349}, { lon: -92.888759, lat: 45.37399} ] }] "
+  },
+  "name": "Test line",
+  "display": {
+    "shape": {
+      "type": "line",
+      "value": "d.points",
+      "pointValue": "[d.lon, d.lat]"
+    }
+  },
+  "styles": {
+    "lines": {
+      "stroke": "#f00",
+      "strokeWidth": "1px"
+    }
+  },
+  "applied": true,
+  "visible": true
+}
