@@ -161,6 +161,20 @@ function createEndpointObject(protocol, domain, api) {
   };
 }
 
+function createRepresentationFormattingObject(
+    outputFormattingStrategy, collectionFormattingStrategy, api) {
+  return {
+    id: api + '#1',
+    cell: {
+      id: api,
+      type: 'fullwebapi'
+    },
+    majorNumber: '1',
+    outputFormattingStrategy: outputFormattingStrategy,
+    collectionFormattingStrategy: collectionFormattingStrategy
+  };
+}
+
 // Service functions
 
 exports.loadApisparkConfiguration = function(callback) {
@@ -232,6 +246,21 @@ exports.configureHttpEndpoint = function(configuration, cellId, callback) {
     }
   ], function(err) {
     callback(err);
+  });
+};
+
+exports.configureRepresentationFormatting = function(configuration, cellId,
+    outputFormattingStrategy, collectionFormattingStrategy, callback) {
+  var representationFormatting = createRepresentationFormattingObject(
+    outputFormattingStrategy, collectionFormattingStrategy);
+  executeApiRequest(configuration, '/apis/' + cellId +
+      '/versions/1?field=outputFormattingStrategy&field=collectionFormattingStrategy',
+      'PUT', representationFormatting, function(err, updatedVersion) {
+    if (err == null) {
+      callback(err, updatedVersion);
+    } else {
+      callback(err);
+    }
   });
 };
 

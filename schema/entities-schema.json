@@ -139,6 +139,13 @@
               "primaryKey": false
             },
             {
+              "name": "minMax",
+              "type": "String",
+              "required": false,
+              "list": false,
+              "primaryKey": false
+            },
+            {
               "name": "sample",
               "type": "String",
               "required": false,
@@ -982,6 +989,13 @@
         {
           "name": "rowNumber",
           "type": "Integer",
+          "required": false,
+          "list": false,
+          "primaryKey": false
+        },
+        {
+          "name": "minMax",
+          "type": "String",
           "required": false,
           "list": false,
           "primaryKey": false

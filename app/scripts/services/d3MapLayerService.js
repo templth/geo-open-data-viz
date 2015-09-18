@@ -235,12 +235,6 @@ angular.module('mapManager.d3.services')
         });
       }
 
-          if (layerData.url === '"http://localhost:9000/scripts/json/us/us-main-cities.csv"') {
-            console.log('additionalContext = '+JSON.stringify(additionalContext));
-              console.log('data = '+JSON.stringify(data));
-            }
-
-
       if (valueChecker.isNotNull(layerData.order) &&
           valueChecker.isNotNull(layerData.order.field)) {
         var field = layerData.order.field;

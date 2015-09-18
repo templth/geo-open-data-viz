@@ -101,6 +101,7 @@ angular.module('mapManager.d3.services', [
       var path = projectionService.configurePathWithProjection(projection);
 
       //svgHelper.removeSvgElement(element);
+      //element.find('svg').children().remove();
       var svg = svgHelper.createSvgElement(element, width, height, mWidth, mHeight);
 
       // Create structure elements for the map (map and layers)

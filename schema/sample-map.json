@@ -21,6 +21,7 @@
       "dataType": "json",
       "structure": "[\n  \"name\",\n  \"id\",\n  \"nametype\",\n  \"recclass\",\n  \"mass\",\n  \"fall\",\n  \"year\",\n  \"reclat\",\n  \"reclong\",\n  \"GeoLocation\"\n]",
       "rowNumber": 45716,
+      "minMax": "{\n  \"id\": [\n    \"1\",\n    \"57458\"\n  ],\n  \"mass\": [\n    \"0.5\",\n    \"60000000\"\n  ],\n  \"year\": [\n    \"01/01/1880 12:00:00 AM\",\n    \"12/24/1399 12:00:00 AM\"\n  ],\n  \"reclat\": [\n    \"-87.366670\",\n    \"81.166670\"\n  ],\n  \"reclong\": [\n    \"-165.116670\",\n    \"354.473330\"\n  ]\n}",
       "sample": "{\n  \"type\": \"Topology\",\n  \"objects\": {\n    \"counties\": {\n      \"type\": \"GeometryCollection\",\n      \"bbox\": [\n        -179.1473399999999,\n        17.67439566600018,\n        179.7784800000003,\n        71.38921046500008\n      ],\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"id\": 53073,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30105,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30029,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 16021,\n          \"arcs\": []\n        },\n        {\n          \"type\": \"Polygon\",\n          \"id\": 30071,\n          \"arcs\": []\n        }\n      ]\n    },\n    \"states\": {\n      \"type\": \"GeometryCollection\",\n      \"geometries\": [\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 53\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 30\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 16\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 38\n        },\n        {\n          \"type\": \"MultiPolygon\",\n          \"arcs\": [],\n          \"id\": 27\n        }\n      ]\n    },\n    \"land\": {\n      \"type\": \"MultiPolygon\",\n      \"arcs\": []\n    }\n  },\n  \"arcs\": [],\n  \"transform\": {\n    \"scale\": [\n      0.0003589261789261791,\n      0.0000537148685138684\n    ],\n    \"translate\": [\n      -179.1473399999999,\n      17.67439566600018\n    ]\n  }\n}"
     },
     {
@@ -31,7 +32,8 @@
       "dataType": "tsv",
       "sample": "[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]",
       "structure": "[\n  \"id\",\n  \"rate\"\n]",
-      "rowNumber": 3218
+      "rowNumber": 3218,
+      "minMax": "{\n  \"id\": [\n    \"1001\",\n    \"72153\"\n  ],\n  \"rate\": [\n    \".012\",\n    \".301\"\n  ]\n}"
     }
   ],
   "layers": [

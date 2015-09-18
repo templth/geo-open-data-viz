@@ -1026,6 +1026,7 @@ angular.module('mapManager.samples', [  ])
             dataType: 'csv',
             structure: '[\n  \"name\",\n  \"id\",\n  \"nametype\",\n  \"recclass\",\n  \"mass\",\n  \"fall\",\n  \"year\",\n  \"reclat\",\n  \"reclong\",\n  \"GeoLocation\"\n]',
             rowNumber: 45716,
+            minMax: '{\n  "id": [\n    "1",\n    "57458"\n  ],\n  "mass": [\n    "0.5",\n    "60000000"\n  ],\n  "year": [\n    "01/01/1880 12:00:00 AM",\n    "12/24/1399 12:00:00 AM"\n  ],\n  "reclat": [\n    "-87.366670",\n    "81.166670"\n  ],\n  "reclong": [\n    "-165.116670",\n    "354.473330"\n  ]\n}',
             sample: '[\n  {\n    \"name\": \"Aachen\",\n    \"id\": \"1\",\n    \"nametype\": \"Valid\",\n    \"recclass\": \"L5\",\n    \"mass\": \"21\",\n    \"fall\": \"Fell\",\n    \"year\": \"01/01/1880 12:00:00 AM\",\n    \"reclat\": \"50.775000\",\n    \"reclong\": \"6.083330\",\n    \"GeoLocation\": \"(50.775000, 6.083330)\"\n  },\n  {\n    \"name\": \"Aarhus\",\n    \"id\": \"2\",\n    \"nametype\": \"Valid\",\n    \"recclass\": \"H6\",\n    \"mass\": \"720\",\n    \"fall\": \"Fell\",\n    \"year\": \"01/01/1951 12:00:00 AM\",\n    \"reclat\": \"56.183330\",\n    \"reclong\": \"10.233330\",\n    \"GeoLocation\": \"(56.183330, 10.233330)\"\n  },\n  {\n    \"name\": \"Abee\",\n    \"id\": \"6\",\n    \"nametype\": \"Valid\",\n    \"recclass\": \"EH4\",\n    \"mass\": \"107000\",\n    \"fall\": \"Fell\",\n    \"year\": \"01/01/1952 12:00:00 AM\",\n    \"reclat\": \"54.216670\",\n    \"reclong\": \"-113.000000\",\n    \"GeoLocation\": \"(54.216670, -113.000000)\"\n  },\n  {\n    \"name\": \"Acapulco\",\n    \"id\": \"10\",\n    \"nametype\": \"Valid\",\n    \"recclass\": \"Acapulcoite\",\n    \"mass\": \"1914\",\n    \"fall\": \"Fell\",\n    \"year\": \"01/01/1976 12:00:00 AM\",\n    \"reclat\": \"16.883330\",\n    \"reclong\": \"-99.900000\",\n    \"GeoLocation\": \"(16.883330, -99.900000)\"\n  },\n  {\n    \"name\": \"Achiras\",\n    \"id\": \"370\",\n    \"nametype\": \"Valid\",\n    \"recclass\": \"L6\",\n    \"mass\": \"780\",\n    \"fall\": \"Fell\",\n    \"year\": \"01/01/1902 12:00:00 AM\",\n    \"reclat\": \"-33.166670\",\n    \"reclong\": \"-64.950000\",\n    \"GeoLocation\": \"(-33.166670, -64.950000)\"\n  }\n]'
           },
           // Contient map
@@ -1060,6 +1061,7 @@ angular.module('mapManager.samples', [  ])
             dataType: 'tsv',
             structure: '[\n  \"id\",\n  \"rate\"\n]',
             rowNumber: 3218,
+            minMax: '{\n  "id": [\n    "1001",\n    "72153"\n  ],\n  "rate": [\n    ".012",\n    ".301"\n  ]\n}',
             sample: '[\n  {\n    \"id\": \"1001\",\n    \"rate\": \".097\"\n  },\n  {\n    \"id\": \"1003\",\n    \"rate\": \".091\"\n  },\n  {\n    \"id\": \"1005\",\n    \"rate\": \".134\"\n  },\n  {\n    \"id\": \"1007\",\n    \"rate\": \".121\"\n  },\n  {\n    \"id\": \"1009\",\n    \"rate\": \".099\"\n  }\n]'
           }
         ];

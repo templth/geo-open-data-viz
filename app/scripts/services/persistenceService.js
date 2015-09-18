@@ -129,7 +129,8 @@ function createLocalStoragePersistenceService(
 }
 
 function createAuthorizationHeader(currentProvider) {
-  return 'Basic ' + btoa(currentProvider.username + ':' + currentProvider.password);
+  return 'Basic ' + btoa(currentProvider.username +
+    ':' + currentProvider.password);
 }
 
 function createWebApiPersistenceService(domain, $http, providerService) {
@@ -140,14 +141,15 @@ function createWebApiPersistenceService(domain, $http, providerService) {
   var singularDomainSuffix = _.capitalize(domain);
 
   service['get' + pluralDomainSuffix] = function() {
-    console.log('>> get + pluralDomainSuffix = '+'get' + pluralDomainSuffix);
-    console.log('currentProvider.url = '+providerService.currentProvider.url);
     var currentProvider = providerService.getCurrentProvider();
     var options = {
       headers: { Authorization: createAuthorizationHeader(currentProvider) }
     };
     if (domain === 'layer') {
-      options.params = { maps: arguments[0] };
+      options.params = {
+        maps: arguments[0],
+        $sort: 'rank ASC'
+      };
     }
     return $http.get(currentProvider.url + pluralDomain + '/', options).then(function(response) {
       return response.data;
@@ -201,20 +203,16 @@ function createPersistenceService(
   var singularDomainSuffix = _.capitalize(domain);
 
   service['get' + pluralDomainSuffix] = function() {
-    console.log('provider = '+JSON.stringify(providerService.currentProvider));
     if (providerService.isInMemoryCurrentProvider()) {
-      console.log('1');     return inMemoryProvider['get' + pluralDomainSuffix]
+     return inMemoryProvider['get' + pluralDomainSuffix]
         .apply(inMemoryProvider, arguments);
     } else if (providerService.isBrowserStorageCurrentProvider()) {
-      console.log('2');
       return browserStorageProvider['get' + pluralDomainSuffix]
         .apply(inMemoryProvider, arguments);
     } else if (providerService.isWebApiCurrentProvider()) {
-      console.log('3');
       return webApiProvider['get' + pluralDomainSuffix]
         .apply(inMemoryProvider, arguments);
     }
-    console.log('4');
   };
 
   service['add' + singularDomainSuffix] = function(item) {

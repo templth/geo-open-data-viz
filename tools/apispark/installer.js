@@ -158,6 +158,18 @@ function configureHttpEndpoinTask(configuration, msg) {
   };
 }
 
+function configureIncludeStrategy(configuration, msg) {
+  return {
+    message: msg,
+    processing: function(callback) {
+      apisparkService.configureRepresentationFormatting(configuration, cells.webApi.id,
+          'NON_NULL', 'unwrapped', function(err) {
+        callback((err == null));
+      });
+    }
+  };
+}
+
 function deployWebApiTask(configuration, msg) {
   return {
     message: msg,
@@ -259,6 +271,9 @@ apisparkService.loadApisparkConfiguration(function(configuration) {
 
     // Configure for HTTP
     configureHttpEndpoinTask(configuration, 'Configure HTTP endpoint'),
+
+    // Configure include stategy for Web API
+    configureIncludeStrategy(configuration, 'Configure include stategy for Web API'),
 
     // Deploy all cells
     createGroupMessage('Deploy cells'),

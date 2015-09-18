@@ -96,37 +96,25 @@ angular
 
 
   })
-  .config(function($resourceProvider) {
-    $resourceProvider.defaults.stripTrailingSlashes = false;
-  })
-
   .config(['$httpProvider', function($httpProvider) {
     // See http://stackoverflow.com/questions/23823010/how-to-enable-cors-in-angularjs
     $httpProvider.defaults.useXDomain = true;
     delete $httpProvider.defaults.headers.common['X-Requested-With'];
   }])
-  .run(function($http) {
-    var currentUser = {
-      username: 'daf3b0cd-d8b8-49a7-85b5-47cdb47e8aad',
-      password: 'fcfa853b-0359-44a9-8372-ff55ca7c6815'
-    };
-    var encodedCurrentUser = btoa(currentUser.username +
-      ':' + currentUser.password);
-    $http.defaults.headers.common.Authorization = 'Basic ' + encodedCurrentUser;
-  })
   .run(function($localStorage, providerService) {
     providerService.currentProvider = $localStorage.currentProvider;
   })
-  /*.run(function($rootScope, $location, $route, providerService) {
+  .run(function($rootScope, $location, $route, providerService) {
     $rootScope.$on('$locationChangeStart', function(event, next, current) {
       console.log('>> $locationChangeStart');
-      var nextRoute = $route.routes[$location.path()];
+      /*var nextRoute = $route.routes[$location.path()];
       if (!providerService.hasCurrentProvider()) {
         console.log('>> redirect');
         event.preventDefault();
         $location.path('/providers');
         return;
       }
-      console.log('>> $locationChangeStart = '+JSON.stringify(next))
+      console.log('>> $locationChangeStart = '+JSON.stringify(next))*/
+      console.log('>> hasCurrentProvider = ' + providerService.hasCurrentProvider());
     });
-  })*/;
+  });
