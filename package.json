@@ -58,6 +58,7 @@
     "map:sample:generate": "node tools/samples/sample-creator.js",
     "schema:generate": "node tools/samples/generate-schema-from-samples.js ; node tools/apispark/schema-entities-generator.js",
     "apispark:install": "node tools/apispark/installer.js",
+    "apispark:inject": "node tools/apispark/injector.js",
     "site:generate": "node docs/templates/site-generator.js"
   }
 }

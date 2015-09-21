@@ -49,11 +49,18 @@ function executeApiRequest(configuration, path, method, data, callback) {
       });
 }
 
-function getRootUrl(rootUrl) {
+function getRootUrl(rootUrl, configuration) {
+  // Fix: handle case where protocol is http://https
+  if (rootUrl.indexOf('http://https') === 0) {
+    rootUrl = rootUrl.substr(7);
+  }
+
   var rootUrlElts = urlApi.parse(rootUrl);
   // For dev environment
   rootUrlElts.host = null;
-  rootUrlElts.port = 8182;
+  if (configuration.isLocal) {
+    rootUrlElts.port = 8182;
+  }
   return urlApi.format(rootUrlElts);
 }
 
@@ -61,9 +68,9 @@ function executeWebApiRequest(configuration, apiId,
     path, method, data, callback) {
   executeApiRequest(configuration, '/apis/' + apiId +
       '/versions/1/access', 'GET', null, function(err, access) {
-    // console.log('>> access = '+JSON.stringify(access));
+    //console.log('>> access = '+JSON.stringify(access));
     var options = {
-      url: getRootUrl(access.rootUrl) + path,
+      url: getRootUrl(access.rootUrl, configuration) + path,
       method: method,
       headers: {
         accept: 'application/json'
@@ -73,7 +80,7 @@ function executeWebApiRequest(configuration, apiId,
         pass: access.token
       }
     };
-    // console.log('url = ' + options.url);
+    //console.log('url = ' + options.url);
 
     if (data !== null) {
       options.json = data;
@@ -177,8 +184,8 @@ function createRepresentationFormattingObject(
 
 // Service functions
 
-exports.loadApisparkConfiguration = function(callback) {
-  fs.readFile('tools/apispark/apispark.json', 'utf8', function(err, data) {
+exports.loadApisparkConfiguration = function(env, callback) {
+  fs.readFile('tools/apispark/apispark-' + env + '.json', 'utf8', function(err, data) {
     if (err) {
       throw err;
     }
@@ -212,6 +219,12 @@ exports.createCell = function(configuration, name, type, callback) {
 };
 
 exports.configureHttpEndpoint = function(configuration, cellId, callback) {
+  // Only in local mode
+  if (!configuration.local) {
+    callback();
+    return;
+  }
+
   async.waterfall([
     function(callback) {
       executeApiRequest(configuration, '/apis/' + cellId + '/versions/1/endpoints/',

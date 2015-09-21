@@ -1,5 +1,6 @@
 'use strict';
 
+var process = require('process');
 var async = require('async');
 var _ = require('lodash');
 require('colors');
@@ -218,7 +219,12 @@ function importDataTask(configuration, msg, domain, fileName) {
   };
 }
 
-apisparkService.loadApisparkConfiguration(function(configuration) {
+var env = 'dev';
+if (process.argv.length >= 1) {
+  env = process.argv[0];
+}
+
+apisparkService.loadApisparkConfiguration(env, function(configuration) {
   var tasks = [
     // Creating cells
 
@@ -291,39 +297,39 @@ apisparkService.loadApisparkConfiguration(function(configuration) {
       'maps', 'tools/samples/json/map-sample3.json'),
     // Layers #1
     importDataTask(configuration, 'Import data for sample layers #1 (0)',
-      'layers', 'tools/samples/json/layers-sample1-0.json'),
+      'layers', 'tools/samples/json/layers-sample1-0-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (1)',
-      'layers', 'tools/samples/json/layers-sample1-1.json'),
+      'layers', 'tools/samples/json/layers-sample1-1-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (2)',
-      'layers', 'tools/samples/json/layers-sample1-2.json'),
+      'layers', 'tools/samples/json/layers-sample1-2-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (3)',
-      'layers', 'tools/samples/json/layers-sample1-3.json'),
+      'layers', 'tools/samples/json/layers-sample1-3-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (4)',
-      'layers', 'tools/samples/json/layers-sample1-4.json'),
+      'layers', 'tools/samples/json/layers-sample1-4-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (5)',
-      'layers', 'tools/samples/json/layers-sample1-5.json'),
+      'layers', 'tools/samples/json/layers-sample1-5-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (6)',
-      'layers', 'tools/samples/json/layers-sample1-6.json'),
+      'layers', 'tools/samples/json/layers-sample1-6-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (7)',
-      'layers', 'tools/samples/json/layers-sample1-7.json'),
+      'layers', 'tools/samples/json/layers-sample1-7-' + env + '.json'),
     // Layers #2
     importDataTask(configuration, 'Import data for sample layers #2 (0)',
-      'layers', 'tools/samples/json/layers-sample2-0.json'),
+      'layers', 'tools/samples/json/layers-sample2-0-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #2 (1)',
-      'layers', 'tools/samples/json/layers-sample2-1.json'),
+      'layers', 'tools/samples/json/layers-sample2-1-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #2 (2)',
-      'layers', 'tools/samples/json/layers-sample2-2.json'),
+      'layers', 'tools/samples/json/layers-sample2-2-' + env + '.json'),
     // Layers #3
     importDataTask(configuration, 'Import data for sample layers #3 (0)',
-      'layers', 'tools/samples/json/layers-sample3-0.json'),
+      'layers', 'tools/samples/json/layers-sample3-0-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (1)',
-      'layers', 'tools/samples/json/layers-sample3-1.json'),
+      'layers', 'tools/samples/json/layers-sample3-1-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (2)',
-      'layers', 'tools/samples/json/layers-sample3-2.json'),
+      'layers', 'tools/samples/json/layers-sample3-2-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (3)',
-      'layers', 'tools/samples/json/layers-sample3-3.json'),
+      'layers', 'tools/samples/json/layers-sample3-3-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (4)',
-      'layers', 'tools/samples/json/layers-sample3-4.json'),
+      'layers', 'tools/samples/json/layers-sample3-4-' + env + '.json'),
     // Sources #1
     importDataTask(configuration, 'Import data for sample sources #1 (0)',
       'sources', 'tools/samples/json/sources-sample1-0.json'),

@@ -542,7 +542,7 @@ module.exports = function (grunt) {
       'clean:server',
       'ngconstant:' + env,
       'wiredep',
-      'html2js:main',
+      //'html2js:main',
       'concurrent:server',
       'autoprefixer:server',
       'connect:livereload',
@@ -566,7 +566,7 @@ module.exports = function (grunt) {
       'wiredep',
       'concurrent:test',
       'autoprefixer',
-      'html2js',
+      //'html2js',
       'connect:test',
       'karma'
     ];
@@ -586,7 +586,7 @@ module.exports = function (grunt) {
       'useminPrepare',
       'concurrent:dist',
       'autoprefixer',
-      'html2js',
+      //'html2js',
       'concat',
       'ngAnnotate',
       'copy:dist',
