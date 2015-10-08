@@ -1,38 +1,33 @@
-Use maps as a Service
+# Overview
 
+This project aims to provide support to create and manage your maps as a service. It
+provides an abstraction upon the raw-level technologies to display maps on the Web.
+With such approach, you don't need anymore the knowledge of these technologies.
 
-The probject contains a set of modules:
+The following figure provides the big picture of the project.
 
-| Modules        | Description                             |
-|----------------|-----------------------------------------|
-| Web UI         |                                         |
-| Web API        |                                         |
-| Code generator |                                         |
-| Installers     |                                         |
+![Overview](map-dsl.png)
 
-# Web UI
+# Modules
 
-The Web UI is the module that displays the configured maps.
+## Map DSL
 
-# Web API
+A complete DSL (Domain Specific Language) that allows to define the map and its content
+without writing any line of code from D3.
 
-The Web API allows to configure maps, their layers and the used sources. It leverages a
-dedicated DSL for the exchanged formats.
+See more details in the [DSL section](dsl.html) of the documentation.
 
-A complete description of this DSL is described in the documentation: ["Map DSL"](http://) 
+## Web API
+
+The Web API allows to configure maps, their layers and the used sources. It leverages the
+map DSL for the exchanged formats.
 
 This Web API can also contain data to display and link to maps.
 
-# Code generator
+## Web UI
+
+The Web UI is the module that displays the configured maps.
+
+## Code generator
 
 Generate D3 JavaScript code according to configured maps.
-
-# Tools
-
-## Manage your maps and data
-
-Install map and data sets
-
-## Install MapVisualize on execution platforms
-
-Install application on executing platform like APISpark

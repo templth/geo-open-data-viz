@@ -13,11 +13,9 @@ function generateUuid(uuid4) {
 }
 
 function copySamples(singularDomainSuffix, collection, samplesService) {
-  console.log('>> singularDomainSuffix = '+singularDomainSuffix);
   var samples = samplesService['get' + singularDomainSuffix + 'Samples']();
   //console.log('>> samples = '+JSON.stringify(samples));
   _.forEach(samples, function(sample) {
-    console.log('>> sample.id = '+sample.id);
     if (!_.some(collection, 'id', sample.id)) {
       collection.push(sample);
     }

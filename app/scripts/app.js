@@ -25,6 +25,7 @@ angular
     'uuid4',
     'ngStorage',
     'app.config',
+    'mapManager.errors',
     'mapManager.form',
     'mapManager.console',
     'mapManager.map',
@@ -100,6 +101,8 @@ angular
     // See http://stackoverflow.com/questions/23823010/how-to-enable-cors-in-angularjs
     $httpProvider.defaults.useXDomain = true;
     delete $httpProvider.defaults.headers.common['X-Requested-With'];
+
+    $httpProvider.interceptors.push('errorsHandler');
   }])
   .run(function($localStorage, providerService) {
     providerService.currentProvider = $localStorage.currentProvider;

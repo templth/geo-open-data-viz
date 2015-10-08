@@ -67,10 +67,9 @@ angular.module('mapManager.d3.services', [
     createMap: function($scope, element) {
       var mWidth = element.width();
       var mHeight = element.height();
-      console.log('mWidth = '+mWidth+', mHeight = '+mHeight);
 
       var width = 938;
-      var height = 500;
+      var height = 570;
 
       var projection = projectionService.createProjection(
         currentMapService.getCurrentMap().projection,
@@ -94,7 +93,6 @@ angular.module('mapManager.d3.services', [
       if (!_.isNull(projection) &&
           currentMapService.getCurrentMap().projection === 'orthographic' &&
           valueChecker.isNotNull(currentMapService.getCurrentMap().clipAngle)) {
-        console.log('clipAngle = '+currentMapService.getCurrentMap().clipAngle);
         projection.clipAngle(currentMapService.getCurrentMap().clipAngle);
       }
 
@@ -114,7 +112,6 @@ angular.module('mapManager.d3.services', [
       });
 
       var layers = currentMapService.getCurrentMap().layers;
-      console.log('######################## layers = '+layers.length);
 
       // Preload data
       // TODO
@@ -386,7 +383,6 @@ angular.module('mapManager.d3.services', [
     */
     configureMovingWithMouseMoveForOrthographicProjection: function(
         $scope, svg, projection, mapElements) {
-      console.log('>> configureMovingWithMouseMoveForOrthographicProjection');
       // See http://bl.ocks.org/patricksurry/5721459
       var m0 = null;
       var o0;
@@ -395,7 +391,6 @@ angular.module('mapManager.d3.services', [
       var mapId = currentMapService.getCurrentMapId();
 
       function mousedown() {
-        console.log('>> mousedown');
         // Remember where the mouse was pressed, in canvas coords
         m0 = d3Helper.trackballAngles(projection, d3Service.mouse(svg[0][0]));
         o0 = projection.rotate();
@@ -411,7 +406,6 @@ angular.module('mapManager.d3.services', [
           projection.rotate(o1);
 
           // Update the map
-          console.log('>> mapElements = '+JSON.stringify(mapElements));
           d3Helper.updateMapElements(mapId, projection, mapElements);
 
           // Update current map context
@@ -425,35 +419,34 @@ angular.module('mapManager.d3.services', [
           }
           //});
 
-          console.log('view box = '+svg.attr('viewBox'));
-          console.log('bbox = '+svg.node().getBBox());
+          //console.log('view box = '+svg.attr('viewBox'));
+          //console.log('bbox = '+svg.node().getBBox());
           // SVGRect
           var bbox = svg.node().getBBox();
-          for (var elt in bbox) {
+          /*for (var elt in bbox) {
             console.log('>> elt = '+elt);
           }
-          console.log('x = '+bbox.x+', y = '+bbox.y+', width = '+bbox.width+', height = '+bbox.height);
+          console.log('x = '+bbox.x+', y = '+bbox.y+', width = '+bbox.width+', height = '+bbox.height);*/
 
           var x1 = bbox.x;
           var y1 = bbox.y;
           var x2 = bbox.x+bbox.width;
           var y2 = bbox.y+bbox.height;
-          console.log('x1 = '+x1+', y1 = '+y2+', x2 = '+x2+', y2 = '+y2);
+          //console.log('x1 = '+x1+', y1 = '+y2+', x2 = '+x2+', y2 = '+y2);
 
-          console.log('lon1 / lat1 = '+projection.invert([x1, y1])+', lon2 / lat2 = '+projection.invert([x2, y2]));
+          //console.log('lon1 / lat1 = '+projection.invert([x1, y1])+', lon2 / lat2 = '+projection.invert([x2, y2]));
         }
       }
 
       function mouseup() {
         if (m0) {
-          console.log('>> mouseup');
+          //console.log('>> mouseup');
           mousemove();
           m0 = null;
         }
       }
 
       var mapId = currentMapService.getCurrentMapId();
-      console.log('>> mapId = '+mapId);
       d3Service.select('#' + mapId)
         .on('mousedown', mousedown)
         .on('mousemove', mousemove)
@@ -598,16 +591,16 @@ angular.module('mapManager.d3.services', [
       var map = d3Service.select('#' + mapId);
 
       function move() {
-        console.log('>> move');
+        //console.log('>> move');
         var t = d3.event.translate;
         var s = d3.event.scale; 
         var zscale = s;
         var h = height/4;
 
-        console.log('>> s = '+s);
+        /*console.log('>> s = '+s);
         console.log('>> height = '+height);
         console.log('>> width = '+width);
-        console.log('>> h = '+h);
+        console.log('>> h = '+h);*/
 
         t[0] = Math.min(
             (width / height)  * (s - 1),
@@ -623,7 +616,7 @@ angular.module('mapManager.d3.services', [
         map.attr("transform", "translate("  + t + ")scale(" + s + ")");
       }
 
-      console.log('>> zoom');
+      //console.log('>> zoom');
       var zoom = d3.behavior.zoom()
           .scaleExtent([1, 9])
           .on('zoom', move);

@@ -1,6 +1,6 @@
 'use strict';
 
-var process = require('process');
+//var process = require('process');
 var async = require('async');
 var _ = require('lodash');
 require('colors');
@@ -220,9 +220,9 @@ function importDataTask(configuration, msg, domain, fileName) {
 }
 
 var env = 'dev';
-if (process.argv.length >= 1) {
+/*if (process.argv.length >= 1) {
   env = process.argv[0];
-}
+}*/
 
 apisparkService.loadApisparkConfiguration(env, function(configuration) {
   var tasks = [

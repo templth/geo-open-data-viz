@@ -77,9 +77,9 @@ function importDataTask(configuration, msg, domain, fileName) {
 }
 
 var env = 'dev';
-if (process.argv.length >= 1) {
+/*if (process.argv.length >= 1) {
   env = process.argv[0];
-}
+}*/
 
 apisparkService.loadApisparkConfiguration(env, function(configuration) {
   cells.webApi.id = configuration.cells.webApi;
@@ -90,56 +90,56 @@ apisparkService.loadApisparkConfiguration(env, function(configuration) {
     // Import sample data
     createGroupMessage('Import sample data'),
     importDataTask(configuration, 'Import data for sample map #1',
-      'maps', 'tools/samples/json/map-sample1.json'),
+      'maps', 'tools/samples/json/map-sample1-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample map #2',
-      'maps', 'tools/samples/json/map-sample2.json'),
+      'maps', 'tools/samples/json/map-sample2-' + env + '.json'),
     importDataTask(configuration, 'Import data for sample map #3',
-      'maps', 'tools/samples/json/map-sample3.json'),
+      'maps', 'tools/samples/json/map-sample3-' + env + '.json'),
     // Layers #1
     importDataTask(configuration, 'Import data for sample layers #1 (0)',
-      'layers', 'tools/samples/json/layers-sample1-0-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-0.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (1)',
-      'layers', 'tools/samples/json/layers-sample1-1-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-1.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (2)',
-      'layers', 'tools/samples/json/layers-sample1-2-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-2.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (3)',
-      'layers', 'tools/samples/json/layers-sample1-3-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-3.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (4)',
-      'layers', 'tools/samples/json/layers-sample1-4-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-4.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (5)',
-      'layers', 'tools/samples/json/layers-sample1-5-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-5.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (6)',
-      'layers', 'tools/samples/json/layers-sample1-6-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-6.json'),
     importDataTask(configuration, 'Import data for sample layers #1 (7)',
-      'layers', 'tools/samples/json/layers-sample1-7-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample1-' + env + '-7.json'),
     // Layers #2
     importDataTask(configuration, 'Import data for sample layers #2 (0)',
-      'layers', 'tools/samples/json/layers-sample2-0-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample2-' + env + '-0.json'),
     importDataTask(configuration, 'Import data for sample layers #2 (1)',
-      'layers', 'tools/samples/json/layers-sample2-1-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample2-' + env + '-1.json'),
     importDataTask(configuration, 'Import data for sample layers #2 (2)',
-      'layers', 'tools/samples/json/layers-sample2-2-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample2-' + env + '-2.json'),
     // Layers #3
     importDataTask(configuration, 'Import data for sample layers #3 (0)',
-      'layers', 'tools/samples/json/layers-sample3-0-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample3-' + env + '-0.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (1)',
-      'layers', 'tools/samples/json/layers-sample3-1-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample3-' + env + '-1.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (2)',
-      'layers', 'tools/samples/json/layers-sample3-2-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample3-' + env + '-2.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (3)',
-      'layers', 'tools/samples/json/layers-sample3-3-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample3-' + env + '-3.json'),
     importDataTask(configuration, 'Import data for sample layers #3 (4)',
-      'layers', 'tools/samples/json/layers-sample3-4-' + env + '.json'),
+      'layers', 'tools/samples/json/layers-sample3-' + env + '-4.json'),
     // Sources #1
     importDataTask(configuration, 'Import data for sample sources #1 (0)',
-      'sources', 'tools/samples/json/sources-sample1-0.json'),
+      'sources', 'tools/samples/json/sources-sample1-' + env + '-0.json'),
     importDataTask(configuration, 'Import data for sample sources #1 (1)',
-      'sources', 'tools/samples/json/sources-sample1-1.json'),
+      'sources', 'tools/samples/json/sources-sample1-' + env + '-1.json'),
     // Sources #2
     importDataTask(configuration, 'Import data for sample sources #2 (0)',
-      'sources', 'tools/samples/json/sources-sample2-0.json'),
+      'sources', 'tools/samples/json/sources-sample2-' + env + '-0.json'),
     importDataTask(configuration, 'Import data for sample sources #2 (1)',
-      'sources', 'tools/samples/json/sources-sample2-1.json')
+      'sources', 'tools/samples/json/sources-sample2-' + env + '-1.json')
   ];
 
   async.series(_.map(tasks, function(task) {

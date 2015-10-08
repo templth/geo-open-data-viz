@@ -34,7 +34,7 @@
               <a href="/">Overview</a>
             </li>
             <li {{#ifCond properties.category "webui"}}class="active"{{/ifCond}}>
-              <a href="/webui.html">Web UI</a>
+              <a href="web-ui.html">Web UI</a>
             </li>
             <li class="dropdown {{#ifCond properties.category "dsl"}}active{{/ifCond}}">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">DSL <span class="caret"></span></a>
@@ -45,20 +45,29 @@
               </ul>
             </li>
             <li {{#ifCond properties.category "webapi"}}class="active"{{/ifCond}}>
-              <a href="/webapi.html">Web API</a>
+              <a href="web-api.html">Web API</a>
             </li>
-            <li {{#ifCond properties.category "howtos"}}class="active"{{/ifCond}}>
-              <a href="/howtos.html">Howtos</a>
+            <li class="dropdown {{#ifCond properties.category "dsl"}}active{{/ifCond}}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Use cases <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="dsl-map.html">Map {{#ifCond properties.page "dsl-map"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+                <li><a href="dsl-layer.html">Layer {{#ifCond properties.page "dsl-layer"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+                <li><a href="dsl-source.html">Source {{#ifCond properties.page "dsl-source"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
+              </ul>
             </li>
-            <li class="dropdown {{#ifCond properties.category "tools"}}active{{/ifCond}}">
+            <!-- li {{#ifCond properties.category "howtos"}}class="active"{{/ifCond}}>
+              <a href="howtos.html">Howtos</a>
+            </li -->
+            <!-- li class="dropdown {{#ifCond properties.category "tools"}}active{{/ifCond}}">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tools <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="tools-map-managers.html">Map managers {{#ifCond properties.page "tools-map-managers"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
                 <li><a href="tools-installing.html">Installing {{#ifCond properties.page "tools-installing"}}<span class="glyphicon glyphicon-ok"></span>{{/ifCond}}</a></li>
               </ul>
-            </li>
+            </li -->
           </ul>
           <ul class="nav navbar-nav navbar-right">
+            <li><a href="demo/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Demo');">Demo</a></li>
             <li><a href="https://templth.wordpress.com/category/apispark/summer-of-api/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Blog');">Blog</a></li>
             <li><a href="https://github.com/templth/geo-open-data-viz" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Github');">Github</a></li>
           </ul>
@@ -86,6 +95,9 @@
             {{/ifCond}}
             {{#ifCond type "para"}}
             <p>{{{content}}}</p>
+            {{/ifCond}}
+            {{#ifCond type "image"}}
+            <p style="text-align:center;">{{{content}}}</p>
             {{/ifCond}}
             {{#ifCond type "table"}}
             <p>{{{content}}}</p>

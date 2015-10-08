@@ -319,7 +319,6 @@ angular.module('mapManager.utilities', [ ])
 
     createSvgElement: function(element, width, height, mWidth, mHeight) {
       var selection = d3Service.select(element[0]).select('svg');
-      console.log('>> createSvgElement - selection.empty = '+selection.empty());
       if (selection.empty()) {
         var svg = d3Service.select(element[0]).append('svg')
           .attr('preserveAspectRatio', 'xMidYMid')

@@ -58,7 +58,6 @@ angular.module('mapManager.map', [
 
       getCurrentMapContext: function() {
         if (this.currentMapContext[this.currentMapId] == null) {
-          console.log('1');
           this.currentMapContext[this.currentMapId] = {};
         }
 
@@ -72,8 +71,8 @@ angular.module('mapManager.map', [
 
         scope.$watch(scope.getElementDimensions, function(newValue, oldValue) {
           //<<perform your logic here using newValue.w and set your variables on the scope>>
-          console.log('new value = ' + newValue);
-          console.log('old value = ' + oldValue);
+          //console.log('new value = ' + newValue);
+          //console.log('old value = ' + oldValue);
         }, true);
 
         element.bind('resize', function() {

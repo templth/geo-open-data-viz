@@ -127,6 +127,15 @@ function formatMarkdownML(markdownMl) {
           type: 'inlinecode',
           content: item[1][1]
         };
+      } else if (_.isArray(item[1]) && item[1][0] === 'img') {
+        console.log('image - item = '+JSON.stringify(item));
+        var imageElements = item[1][1];
+        var content = '<img alt="' + imageElements.alt +
+            '" src="' + imageElements.href + '">';
+        return {
+          type: 'image',
+          content: content
+        };
       }
     } else if (item[0] === 'bulletlist') {
       var content = [ '<ul>' ];
@@ -144,8 +153,6 @@ function formatMarkdownML(markdownMl) {
       });
 
       content.push('</ul>');
-
-      console.log('>> content = '+content);
 
       return {
         type: 'list',
@@ -221,6 +228,7 @@ function generatePage(docFile, outputFile, properties) {
     var template = handlebars.compile(source);
 
     fs.readFile(docFile, 'utf8', function(err, data) {
+      console.log('err = '+err);
       var markdownContent = new markdown.markdown.Markdown('Maruku');
       var markdownMl = markdownContent.toTree(data);
       console.log('mk = '+JSON.stringify(markdownMl, null, 2));
@@ -271,6 +279,13 @@ generatePage('docs/reference/home.md', 'docs/site/index.html', {
 
 // Web UI
 
+generatePage('docs/reference/web/web-ui.md', 'docs/site/web-ui.html', {
+  title: 'Map visualizer',
+  description: 'Visualize your maps',
+  category: 'webui',
+  page: 'webui'
+});
+
 // DSL
 
 generatePage('docs/reference/dsl/map.md', 'docs/site/dsl-map.html', {
@@ -285,15 +300,28 @@ generatePage('docs/reference/dsl/layer.md', 'docs/site/dsl-layer.html', {
   category: 'dsl',
   page: 'dsl-layer'
 });
+generatePage('docs/reference/dsl/source.md', 'docs/site/dsl-source.html', {
+  title: 'Source DSL',
+  description: 'Configure sources using the JSON format and literal JavaScript objects.',
+  category: 'dsl',
+  page: 'dsl-source'
+});
 
 // Web API
+
+generatePage('docs/reference/web/web-api.md', 'docs/site/web-api.html', {
+  title: 'Map visualizer',
+  description: 'Using the Web API to your map structure',
+  category: 'webapi',
+  page: 'webapi'
+});
 
 // Howtos
 
 // Tools
-generatePage('docs/reference/tools/installers.md', 'docs/site/tools-installing.html', {
+/*generatePage('docs/reference/tools/installers.md', 'docs/site/tools-installing.html', {
   title: 'Installing',
   description: 'Install the application on an execution platform',
   category: 'tools',
   page: 'tools-installing'
-});
+});*/

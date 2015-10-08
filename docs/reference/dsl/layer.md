@@ -3,31 +3,29 @@
 
 ## Generic informations
 
-Some hints allow to configure the map itself, initial display and
-its behavior.
-
-// TODO: add a table
+Some hints allow to configure the layer itself, its type and its link with maps.
 
 Here is a sample configuration of these hints:
 
 ```
 {
-  id: '1',
-  name: 'World',
-  type: 'd3js',
-  projection: 'orthographic',
-  scale: 420,
-  center: {
-    lon: 60,
-    lat: -30
-  },
-  interactions: {
-    moving: 'mouseMove',
-    zooming: 'mouseWheel'
-  },
+  "id": "graticuleLayer",
+  "type": "graticule",
+  "rank": 1,
+  "name": "Graticule",
+  "applied": true,
+  "visible": true,
+  "maps": [
+    "1"
+  ],
   (...)
 }
 ```
+
+A layer can be composed with several parts that deal with specific parts. Not all are
+required with each layer type.
+
+![Layer parts](layer-parts.png)
 
 ## Display configuration
 
@@ -36,16 +34,10 @@ be displayed on the map.
 
 | Feature               | Description                                                  |
 | --------------------- | -------------------------------------------------------------|
-| [Geo data](#geo-data) |                                                              |
-| [Fill](fill)          |                                                              |
-| [Shapes](#shape)      |                                                              |
-| [Colors](#colors)     |                                                              |
-| [Legend](#legend)     |                                                              |
-| [Tooltip](#tooltip)   |                                                              |
-
-### Geo data
-
-TODO
+| [Fill](#fill)          | Defines the strategy to use to fill shapes                   |
+| [Shape](#shape)       | Defines shapes                                               |
+| [Legend](#legend)     | Defines the legend associated with a layer                   |
+| [Tooltip](#tooltip)   | Defines the tooltip associated with elements of a layer      |
 
 ### Fill
 
@@ -68,7 +60,8 @@ TODO
 
 ### Shape
 
-Supported shapes
+Several kinds of shapes are supported. They all take into account the configured projection
+of the map.
 
 | Shape               | Description                                              |
 | ------------------- | -------------------------------------------------------- |
@@ -232,20 +225,6 @@ TODO
 }
 ```
 
-### Colors
-
-#### Fixed
-
-TODO
-
-#### Conditional
-
-TODO
-
-#### Threshold
-
-TODO
-
 ### Legend
 
 In most cases, we use a set of colors (threshold or choropleth) to display data.
@@ -332,6 +311,28 @@ Here is a sample configuration of data source:
 }
 ```
 
+Within TopoJSON files, properties can be defined for each shape. If it's not
+the case, you can leverage the attribute `properties`. The link between the shape
+and the additional properties is done using identifiers.
+
+```
+{
+  (...)
+  "data": {
+    "source": "us-counties",
+    "url": "\"http://localhost:9000/scripts/json/us/us-counties.json\"",
+    "properties": {
+      "url": "\"http://localhost:9000/scripts/json/us/us-county-names2.csv\"",
+      "type": "csv"
+    },
+    "rootObject": "counties",
+    "type": "topojson",
+    "content": [],
+    "loaded": false
+  }
+  (...)
+}
+```
 
 Data used by the layer can be also defined inline using the attribute
 `inline`. The corresponding value corresponds to a JSON object as string.
@@ -381,28 +382,21 @@ Here is a sample configuration of styles for layers:
 
 ## Behavior configuration
 
-```
-{
-  (...)
-  behavior: {
-    zoomBoundingBox: {
-      display: 'click'
-      //display: 'mouseOver',
-      //hide: 'mouseOut'
-    }
-  }
-  (...)
-}
-```
+This section describes the way to configure the interaction between a user and a
+layer.
 
 ```
 {
   (...)
-  behavior: {
-    tooltip: {
-      display: 'click'
-      //display: 'mouseOver',
-      //hide: 'mouseOut'
+  "events": {
+    "click": {
+      "display": "subMap"
+    },
+    "mouseover": {
+      "display": "tooltip"
+    },
+    "mouseout": {
+      "hide": "tooltip"
     }
   }
   (...)
@@ -414,13 +408,18 @@ Here is a sample configuration of styles for layers:
 The layers leverage some of elements described in section "Generic informations" to
 configure themselves. Here are the list of supported layer kinds:
 
-| Layer kind      | Description                              |
-| --------------- | ---------------------------------------- |
-| Graticule       |
+| Layer kind                    | Description                                               |
+| ----------------------------- | --------------------------------------------------------- |
+| [Graticule](#graticule-layer) | Defines a graticule to display world background and / or  longitude / latitude lines |
+| [Geodata](#geodata-layer)     | Displays data from TopoJSON files                         |
+| [Fill](#fill-layer)           | Fills shapes based on data files                          |
+| [Objects](#objects-layer)     | Displays shapes like circles or lines on maps             |
 
 Following sub sections describe the way to configure these layers.
 
 ## Graticule layer
+
+Sample graticule layer with lines and background color:
 
 ```
 {
@@ -454,6 +453,8 @@ Following sub sections describe the way to configure these layers.
 ```
 
 ## Geodata layer
+
+Sample geodata layer that display all country borders using a TopoJSON file:
 
 ```
 {
@@ -490,6 +491,9 @@ Following sub sections describe the way to configure these layers.
 ```
 
 ## Fill layer
+
+Sample fill layer that define a specific background for each shape element
+based on a threshold approach:
 
 ```
 {
@@ -541,6 +545,9 @@ Following sub sections describe the way to configure these layers.
 ```
 
 ## Objects layer
+
+Sample object layer that displays circle shapes for each element of
+a CSV file:
 
 ```
 {

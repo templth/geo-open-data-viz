@@ -108,30 +108,21 @@ angular.module('mapManager.d3.services')
     getLayerElement: function(svg, layer) {
       var currentMapContext = currentMapService.getCurrentMapContext();
       var currentMapId = currentMapService.getCurrentMapId();
-      console.log('>> currentMapId = '+currentMapId);
       var layerElement = d3Service.select(document.getElementById(
         currentMapId + '-' + layer.id));
-      console.log('>> layerElement.empty() = '+layerElement.empty());
       if (layerElement.empty()) {
-        console.log('  >> 0');
         var applyOn = layer.applyOn;
         if (valueChecker.isNull(applyOn)) {
-          console.log('  >> 1');
           applyOn = 'layers';
         }
-        console.log('  >> 2');
         var sel = d3Service.select(document.getElementById(
           currentMapId + '-' + applyOn));
-        console.log('  >> 3 - '+currentMapId + '-' + applyOn);
         if (valueChecker.isNull(sel)) {
-          console.log('  >> 4');
           sel = svg;
         }
 
-        console.log('  >> 5- sel.empty() = '+sel.empty());
         layerElement = sel.append('g')
             .attr('id', currentMapId + '-' + layer.id);
-        console.log('  >> 6 - '+currentMapId + '-' + layer.id);
       }
 
       return layerElement;
@@ -318,7 +309,6 @@ angular.module('mapManager.d3.services')
       // Hide tooltip
       if (hideEvent === 'mouseout') {
         elements.on('mouseout', function() {
-          console.log('mouseout');
           /*d3.select(this)
             .transition().duration(300)
             .style('opacity', 0.8);*/
@@ -697,10 +687,15 @@ angular.module('mapManager.d3.services')
           };
         })
         .tween('scale', function() {
-          //TODO: determine the right scale ratio
-          //1000 for meteorites
-          //3000 for unemployment
-          var r = d3Service.interpolate(projection.scale(), 1000);
+          var bounds = path.bounds(d);
+          var dx = bounds[1][0] - bounds[0][0];
+          var dy = bounds[1][1] - bounds[0][1];
+          var dimensions = currentMapService.getCurrentMapContext().dimensions;
+          var width = dimensions.width;
+          var height = dimensions.height;
+          var scale = 0.8 / Math.max(dx / width, dy / height);
+
+          var r = d3Service.interpolate(projection.scale(), scale * projection.scale());
           return function(t) {
             projection.scale(r(t));
             path = path.projection(projection);
@@ -793,7 +788,6 @@ angular.module('mapManager.d3.services')
       var self = this;
       if (events.display === 'click') {
         pathElements.on('click', function(d) {
-          console.log('>> configureSubMapBehavior - click');
           var currentMapContext = currentMapService.getCurrentMapContext();
           var width = currentMapContext.dimensions.width;
           var height = currentMapContext.dimensions.height;
@@ -930,7 +924,7 @@ angular.module('mapManager.d3.services')
     },
 
     configureShapeBounds: function(layer, layerElement, path, features) {
-      console.log('>> configureShapeBounds');
+      //console.log('>> configureShapeBounds');
       // See http://stackoverflow.com/questions/25310390/how-does-path-bounds-work
       // See http://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object/17067379#17067379
       // See http://bl.ocks.org/hugolpz/6391065
@@ -1876,16 +1870,12 @@ function normalise(x) {
         layer.type + '" with identifier "' + layer.id + '"');
 
       if (layer.type === 'graticule') {
-        console.log('>> create graticule layer');
         this.createGraticuleLayer(svg, path, layer, layers, additionalContext);
       } else if (layer.type === 'data' && layer.mode === 'objects') {
-        console.log('>> create data objects layer');
         this.createObjectsDataLayer(svg, path, layer, layers, additionalContext);
       } else if (layer.type === 'data' && layer.mode === 'fill') {
-        console.log('>> create data fill layer');
         this.createFillDataLayer(svg, layer, layers, additionalContext);
       } else if (layer.type === 'geodata') {
-        console.log('>> create geodata layer');
         this.createGeoDataLayer(svg, path, layer, layers, additionalContext);
       }
     },

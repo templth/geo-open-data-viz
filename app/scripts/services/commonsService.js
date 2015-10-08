@@ -64,7 +64,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
               'Successfully added');
           }, function() {
             // $log.info('Modal dismissed at: ' + new Date());
-            console.log('Modal dismissed at: ' + new Date());
+            //console.log('Modal dismissed at: ' + new Date());
           });
         };
 
@@ -78,14 +78,14 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           });
 
           modalInstance.result.then(function(sourceToAdd) {
-            console.log('source = '+JSON.stringify(sourceToAdd));
+            //console.log('source = '+JSON.stringify(sourceToAdd));
             $scope.sources.push(sourceToAdd);
             toaster.pop('success', 'Source "' +
               sourceToAdd.name + '"',
               'Successfully added');
           }, function() {
             // $log.info('Modal dismissed at: ' + new Date());
-            console.log('Modal dismissed at: ' + new Date());
+            //console.log('Modal dismissed at: ' + new Date());
           });
         };
 
@@ -123,7 +123,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
           currentMapService.getCurrentMapContext().properties;
         $scope.$watch('currentProperties.scale', function(newValue, oldValue) {
           if (newValue === oldValue) { return; }
-          console.log('updated currentProperties.scale');
+          //console.log('updated currentProperties.scale');
         });
       },
 
@@ -262,7 +262,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         });
 
         $scope.toggleLayerVisibility = function($event, layer) {
-          console.log('>> toggleLayerVisibility');
+          //console.log('>> toggleLayerVisibility');
           layerService.toggleLayerVisibility(layer);
           layer.visible = !layer.visible;
           //$event.stopPropagation();
@@ -291,13 +291,13 @@ angular.module('mapManager.commons', [ 'mapManager.map',
       },
 
       registerCommonMapLayerFunctionsInScope: function($scope, $modal) {
-        $scope.$watch('layer.name', function(newValue, oldValue) {
+        /*$scope.$watch('layer.name', function(newValue, oldValue) {
         	console.log('newValue = '+newValue);
         	console.log('oldValue = '+oldValue);
-        });
+        });*/
 
         $scope.$watch('layer.styles.background.fill', function(newValue, oldValue) {
-        	console.log('>> watch layer.styles');
+        	//console.log('>> watch layer.styles');
           if (oldValue === newValue) {
             return;
           }
@@ -348,7 +348,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
             domain[attribute] = expression;
           }, function() {
             // $log.info('Modal dismissed at: ' + new Date());
-            console.log('Modal dismissed at: ' + new Date());
+            //console.log('Modal dismissed at: ' + new Date());
           });
         };
       },

@@ -10,7 +10,7 @@ exports = module.exports;
 // Utility functions
 
 function executeApiRequest(configuration, path, method, data, callback) {
-  // console.log('>> url = '+configuration.baseUrl + 'api' + path);
+   console.log('>> url = '+configuration.baseUrl + 'api' + path);
   var options = {
     url: configuration.baseUrl + 'api' + path,
     method: method,
@@ -58,7 +58,7 @@ function getRootUrl(rootUrl, configuration) {
   var rootUrlElts = urlApi.parse(rootUrl);
   // For dev environment
   rootUrlElts.host = null;
-  if (configuration.isLocal) {
+  if (configuration.local) {
     rootUrlElts.port = 8182;
   }
   return urlApi.format(rootUrlElts);
@@ -66,9 +66,10 @@ function getRootUrl(rootUrl, configuration) {
 
 function executeWebApiRequest(configuration, apiId,
     path, method, data, callback) {
+  //console.log('>> url = '+configuration.baseUrl + 'api' + path);
   executeApiRequest(configuration, '/apis/' + apiId +
       '/versions/1/access', 'GET', null, function(err, access) {
-    //console.log('>> access = '+JSON.stringify(access));
+    console.log('>> access = '+JSON.stringify(access));
     var options = {
       url: getRootUrl(access.rootUrl, configuration) + path,
       method: method,
@@ -80,7 +81,7 @@ function executeWebApiRequest(configuration, apiId,
         pass: access.token
       }
     };
-    //console.log('url = ' + options.url);
+    console.log('url = ' + options.url);
 
     if (data !== null) {
       options.json = data;
@@ -396,6 +397,7 @@ exports.importData = function(configuration, webApiId,
     domain, fileName, callback) {
   fs.readFile(fileName, function(err, data) {
     if (err) {
+      console.log('err = '+err);
       callback(err);
       return;
     }
