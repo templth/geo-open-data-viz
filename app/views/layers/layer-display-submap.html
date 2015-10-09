@@ -2,12 +2,12 @@
   <legend>Sub Map <div class="pull-right"><span  ng-click="removeDisplayElementArea(layer, 'display', 'subMap')" class="glyphicon glyphicon-remove" aria-hidden="true"></span></div></legend>
   <field label="Layers">
     <select class="form-control input-sm" name="layers" multiple ng-model="layer.display.subMap.layers">
-      <option ng-repeat=\"optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})\" ng-selected=\"optionLayer.id === layer.applyOn\" value={{optionLayer.id}}>{{optionLayer.name}}</option>
+      <option ng-repeat="optionLayer in filteredLayers = (layers | filter: {id: '!layer.id'})" ng-selected="optionLayer.id === layer.applyOn" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
     </select>
   </field>
   <field label="Variables">
     <select class="form-control input-sm" name="variables" multiple ng-model="layer.display.subMap.variables">
-      <option ng-selected=\"optionLayer.id === layer.applyOn\" value={{optionLayer.id}}>{{optionLayer.name}}</option>
+      <option ng-selected="optionLayer.id === layer.applyOn" value="{{optionLayer.id}}">{{optionLayer.name}}</option>
     </select>
   </field>
   <field label="Legend">

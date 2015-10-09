@@ -108,16 +108,22 @@ angular
     providerService.currentProvider = $localStorage.currentProvider;
   })
   .run(function($rootScope, $location, $route, providerService) {
-    $rootScope.$on('$locationChangeStart', function(event, next, current) {
-      console.log('>> $locationChangeStart');
-      /*var nextRoute = $route.routes[$location.path()];
-      if (!providerService.hasCurrentProvider()) {
-        console.log('>> redirect');
-        event.preventDefault();
-        $location.path('/providers');
-        return;
-      }
-      console.log('>> $locationChangeStart = '+JSON.stringify(next))*/
-      console.log('>> hasCurrentProvider = ' + providerService.hasCurrentProvider());
+    //$rootScope.$on('$locationChangeStart', function(event, next, current) {
+      //console.log('>> $locationChangeStart');
+      //var nextRoute = $route.routes[$location.path()];
+      //if (!providerService.hasCurrentProvider()) {
+      //  console.log('>> redirect');
+      //  event.preventDefault();
+      //  $location.path('/providers');
+      //  return;
+      //}
+      //console.log('>> $locationChangeStart = '+JSON.stringify(next))*/
+      //console.log('>> hasCurrentProvider = ' + providerService.hasCurrentProvider());
+    //});
+
+    providerService.selectWebApiProvider({
+      url: 'https://mapapi.apispark.net/v1/',
+      readonly: true,
+      secured: false
     });
   });

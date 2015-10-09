@@ -318,6 +318,14 @@ generatePage('docs/reference/web/web-api.md', 'docs/site/web-api.html', {
 
 // Howtos
 
+generatePage('docs/reference/use-cases/meteorites.md', 'docs/site/meteorites.html', {
+  title: 'Visualizing meteorites',
+  description: 'Visualizing where meteorites felt',
+  category: 'use-cases',
+  page: 'meteorites'
+});
+
+
 // Tools
 /*generatePage('docs/reference/tools/installers.md', 'docs/site/tools-installing.html', {
   title: 'Installing',

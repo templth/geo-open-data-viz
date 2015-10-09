@@ -141,8 +141,13 @@ function createWebApiPersistenceService(domain, $http, providerService) {
   service['get' + pluralDomainSuffix] = function() {
     var currentProvider = providerService.getCurrentProvider();
     var options = {
-      headers: { Authorization: createAuthorizationHeader(currentProvider) }
+      headers: { }
     };
+
+    if (currentProvider.secured) {
+      options.headers.Authorization = createAuthorizationHeader(currentProvider);
+    }
+
     if (domain === 'layer') {
       options.params = {
         maps: arguments[0],
@@ -166,9 +171,16 @@ function createWebApiPersistenceService(domain, $http, providerService) {
 
   service['get' + singularDomainSuffix] = function(itemId) {
     var currentProvider = providerService.getCurrentProvider();
-    return $http.get(currentProvider.url + pluralDomain + '/' + itemId, {
-      headers: { Authorization: createAuthorizationHeader(currentProvider) }
-    }).then(function(response) {
+    var options = {
+      headers: { }
+    };
+
+    if (currentProvider.secured) {
+      options.headers.Authorization = createAuthorizationHeader(currentProvider);
+    }
+
+    return $http.get(currentProvider.url + pluralDomain + '/' + itemId, options)
+        .then(function(response) {
       return response.data;
     });
   };
