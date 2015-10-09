@@ -65,9 +65,9 @@ of the map.
 
 | Shape               | Description                                              |
 | ------------------- | -------------------------------------------------------- |
-| [Circle](#circle)   |                                                          |
-| [Polygon](#polygon) |                                                          |
-| [Line](#line)       |                                                          |
+| [Circle](#circle)   | Defines a circle (that takes into account projection)    |
+| [Polygon](#polygon) | Defines a polygon                                        |
+| [Line](#line)       | Defines a line                                           |
 
 #### Circle
 
@@ -149,7 +149,7 @@ Here is a sample configuration of circles with variable radius but conditional c
 
 #### Polygon
 
-TODO
+Defines a polygon from a set of points taken from data.
 
 ```
 {
@@ -209,7 +209,7 @@ Here is a sample configuration of polygons with variable radius but conditional 
 
 #### Line
 
-TODO
+Defines a line from a set of points taken from data.
 
 ```
 {
@@ -288,8 +288,6 @@ a behavior for the layer to tell when and how the tooltip will be displayed.
 Most of layers rely on data. This can be either geo data that represent
 shapes, lines... but also data sets that we need to apply on a map. Such data
 sets are used to deduce geo data.
-
-// TODO: add a table
 
 Here is a sample configuration of data source:
 
@@ -703,7 +701,12 @@ Variable values are gotten from the current context of the layer and / or the ma
 
 # Sub maps
 
-TODO
+Defines a sub map from a geodata layer. This map will be displayed on the top
+of the previous one and will contain the current shape (for example a country that
+was clicked).
+
+You specify in its definition which layers to display and context variables you
+want to use within expressions of sub layers.
 
 ```
 {
@@ -715,7 +718,8 @@ TODO
         'layer2'
       ],
       variables: [
-        bounds: 
+        bounds,
+        shape
       ]
     }
   },
@@ -723,12 +727,15 @@ TODO
 }
 ```
 
+The configuration of when to display the sub map is configured within the `behavior` block.
+
 ```
 {
   (...)
   behavior: {
-    subMap: {
-      display: 'dblclick'
+    events: {
+      click: {
+        display: 'subMap'
     }
   }
   (...)
