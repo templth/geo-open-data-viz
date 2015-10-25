@@ -11,7 +11,7 @@ angular.module('mapManager.d3.services', [
  * @description
  * Provide functions to create and refresh map rendering.
  */
-.service('mapCreatorService', function(currentMapService,
+.service('mapCreatorService', function($parse, currentMapService,
       mapInteractionService, layerService,
       projectionService, d3Service, mapHelper, valueChecker, svgHelper) {
   return {
@@ -81,12 +81,21 @@ angular.module('mapManager.d3.services', [
         projection.scale(currentMapService.getCurrentMap().scale);
       }
 
+      // Configure translate
+      if (!_.isNull(projection) &&
+          !_.isNull(currentMapService.getCurrentMap().translate)) {
+        var translateExpr = $parse(currentMapService.getCurrentMap().translate);
+        projection.translate(translateExpr({ width: width, height: height }));
+      }
+
       // Configure rotation
       if (!_.isNull(projection) &&
           currentMapService.getCurrentMap().projection === 'orthographic' &&
           !_.isNull(currentMapService.getCurrentMap().center)) {
         projection.rotate([ currentMapService.getCurrentMap().center.lon,
           currentMapService.getCurrentMap().center.lat ]);
+        /*projection.translate([ currentMapService.getCurrentMap().center.lon,
+          currentMapService.getCurrentMap().center.lat ]);*/
       }
 
       // Configure clip angle
@@ -443,6 +452,9 @@ angular.module('mapManager.d3.services', [
           //console.log('>> mouseup');
           mousemove();
           m0 = null;
+
+          // Hide tooltips if any
+          d3Service.select('.tooltip').remove();
         }
       }
 
@@ -547,6 +559,10 @@ angular.module('mapManager.d3.services', [
         if (valueChecker.isNotNull(currentMapService.getCurrentMapContext().properties)) {
           currentMapService.getCurrentMapContext().properties.scale = zoom.scale();
         }
+
+        // Hide tooltips if any
+        d3Service.select('.tooltip').remove();
+
         //});
       });
 
@@ -561,7 +577,7 @@ angular.module('mapManager.d3.services', [
       var height = dimensions.height;
 
       // Configure zooming
-      /*var zoom = d3Service.behavior.zoom()
+      var zoom = d3Service.behavior.zoom()
            //.translate(projection.translate())
            //.scale(projection.scale())
            //.scaleExtent([dimension.height, 8 * dimension.height])
@@ -586,9 +602,9 @@ angular.module('mapManager.d3.services', [
       // Apply zoom behavior
       var map = d3Service.select('#' + mapId);
       map.call(zoom);
-      map.call(zoom.event);*/
+      map.call(zoom.event);
 
-      var map = d3Service.select('#' + mapId);
+      /*var map = d3Service.select('#' + mapId);
 
       function move() {
         //console.log('>> move');
@@ -597,10 +613,10 @@ angular.module('mapManager.d3.services', [
         var zscale = s;
         var h = height/4;
 
-        /*console.log('>> s = '+s);
-        console.log('>> height = '+height);
-        console.log('>> width = '+width);
-        console.log('>> h = '+h);*/
+        //console.log('>> s = '+s);
+        //console.log('>> height = '+height);
+        //console.log('>> width = '+width);
+        //console.log('>> h = '+h);
 
         t[0] = Math.min(
             (width / height)  * (s - 1),
@@ -621,7 +637,7 @@ angular.module('mapManager.d3.services', [
           .scaleExtent([1, 9])
           .on('zoom', move);
 
-      map.call(zoom);
+      map.call(zoom);*/
 
     },
 

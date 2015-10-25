@@ -110,7 +110,7 @@ POST /layers/
 
 Now this second layer created. We can see continents displayed on our map.
 
-!(Meteorites continent)[meteorites-02-layer-continents-s.png]
+![Meteorites continent](screenshots/meteorites-02-layer-continents-s.png)
 
 We have now the foundations of our map created. Let's actually dive into ou dataset.
 
@@ -125,7 +125,7 @@ We downloaded the file from the NASA web site. The file contains 34,513 meteorit
 * __mass__: the mass of the meteorite (in grammes)
 * __year__: the year of fall
 * __reclat__: the latitude
-* __reclong__: the longiturde
+* __reclong__: the longitude
 * __GeoLocation__: the complete geo location (latitude and longitude)
 
 For simplicity, we directly uploaded the file of the dataset within a folder of our Web API with the path `/data` (it's an example). We could go further and create a dedicated entity to store such data and upload then them using the bulk import of the entity browser. This will the subject of a next post...

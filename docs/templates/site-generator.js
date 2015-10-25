@@ -84,13 +84,16 @@ function formatElement(content, element) {
       content.push('<code>');
       content.push(element[1]);
       content.push('</code>');
-    }
-    if (element[0] === 'link') {
+    } else if (element[0] === 'link') {
       content.push('<a href="');
       content.push(element[1].href);
       content.push('">');
       content.push(element[2]);
       content.push('</a>');
+    } else if (element[0] === 'strong') {
+      content.push('<strong>');
+      content.push(element[1]);
+      content.push('</strong>');
     }
   }
 }
@@ -325,6 +328,12 @@ generatePage('docs/reference/use-cases/meteorites.md', 'docs/site/meteorites.htm
   page: 'meteorites'
 });
 
+generatePage('docs/reference/use-cases/make-map.md', 'docs/site/make-map.html', {
+  title: 'Let\'s make a map',
+  description: 'Let\'s make a map',
+  category: 'use-cases',
+  page: 'make-map'
+});
 
 // Tools
 /*generatePage('docs/reference/tools/installers.md', 'docs/site/tools-installing.html', {

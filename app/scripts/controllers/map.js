@@ -23,14 +23,23 @@ angular.module('mapManagerApp')
     // Set current map elements
     currentMapService.setCurrentMap(map);
 
-    currentMapService.getCurrentMapContext().properties = {
-      scale: map.scale,
-      center: {
+    var properties = {};
+    if (!_.isNull(map.scale)) {
+      properties.scale = map.scale;
+    }
+    if (!_.isNull(map.translate)) {
+      properties.translate = map.translate;
+    }
+    if (!_.isNull(map.center)) {
+      properties.center = {
         lon: map.center.lon,
         lat: map.center.lat
-      },
-      clipAngle: map.clipAngle
-    };
+      };
+    }
+    if (!_.isNull(map.clipAngle)) {
+      properties.clipAngle = map.clipAngle;
+    }
+    currentMapService.getCurrentMapContext().properties = properties;
 
     // Set current map in scope
     commonsService.setCurrentMapInScope($scope, map);

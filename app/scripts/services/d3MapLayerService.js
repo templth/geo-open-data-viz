@@ -435,10 +435,22 @@ angular.module('mapManager.d3.services')
     applyStylesForGeoDataLayer: function(
         layer, pathElements, additionalContext) {
       if (valueChecker.isNotNull(layer.styles)) {
+        if (valueChecker.isNotNull(layer.styles.visibility)) {
+          if (valueChecker.isNotNull(layer.styles.visibility.display)) {
+            pathElements.style('display', function(d) {
+              return expressionService.parseExpression(
+                layer.styles.visibility.display)({ d: d });
+            });
+          }
+        }
+
         if (valueChecker.isNotNull(layer.styles.background)) {
           var background = '#fff';
           if (valueChecker.isNotNull(layer.styles.background.fill)) {
-            background = layer.styles.background.fill;
+            background = function(d) {
+              return expressionService.parseExpression(
+                layer.styles.background.fill)({ d: d });
+            };
           }
           pathElements.style('fill', background);
         }
@@ -460,6 +472,13 @@ angular.module('mapManager.d3.services')
           pathElements.style('stroke', stroke);
           pathElements.style('stroke-width', strokeWidth);
           pathElements.style('stroke-opacity', strokeOpacity);
+
+          if (valueChecker.isNotNull(layer.styles.lines.strokeDashArray)) {
+            pathElements.style('stroke-dasharray', layer.styles.lines.strokeDashArray);
+          }
+          if (valueChecker.isNotNull(layer.styles.lines.strokeLineJoin)) {
+            pathElements.style('stroke-linejoin', layer.styles.lines.strokeLineJoin);
+          }
         }
       }
 
@@ -794,6 +813,9 @@ angular.module('mapManager.d3.services')
           var moveType = 'mouseMove';
           var zoomType = 'mouseWheel';
 
+          // Hide tooltips if any
+          d3Service.select('.tooltip').remove();
+
           var mapElements = mapHelper.createSubMapStructure(svg, 2,
             { width: width, height: height },
             { fill: 'white', opacity: '0.75' });
@@ -902,11 +924,11 @@ angular.module('mapManager.d3.services')
           .style('text-anchor', 'middle')
           .on('click', closeFct);
 
-        //if (valueChecker.isNotNull(layer.behavior.animation)) {
-          var legendAnimation = gMap.append('g')
+        // if (valueChecker.isNotNull(layer.behavior.animation)) {
+        var legendAnimation = gMap.append('g')
             .attr('class', 'legend');
 
-          legendAnimation.append('rect')
+        legendAnimation.append('rect')
             .attr('x', 10)
             .attr('y', 75)
             .attr('width', 150)
@@ -914,12 +936,12 @@ angular.module('mapManager.d3.services')
             .style('fill', 'grey')
             .style('opacity', '0.7');
 
-          legendAnimation.append('text')
+        legendAnimation.append('text')
             .attr('x', 75)
             .attr('y', 100)
             .attr('id', 'map2-animation')
             .style('text-anchor', 'middle');
-        //}
+        // }
       }
     },
 
@@ -1039,7 +1061,10 @@ function normalise(x) {
           pathElements = layerElement.append('path')
             .datum(topojson.mesh(data,
               data.objects[layer.data.rootObject],
-              function(a, b) { return a.id !== b.id; }));
+              function(a, b) {
+                return expressionService.parseExpression(
+                  layer.data.mesh)({ a: a, b: b });
+              }));
 
           self.applyStylesForGeoDataLayer(
             layer, pathElements, additionalContext);
@@ -1052,10 +1077,10 @@ function normalise(x) {
 
           pathElements = layerElement.selectAll('path')
             .data(features)
-          .enter()
-          .append('path')
-          .attr('id', function(d) { return d.id; })
-          .attr('d', path);
+            .enter()
+            .append('path')
+            .attr('id', function(d) { return d.id; })
+            .attr('d', path);
 
           self.applyStylesForGeoDataLayer(
             layer, pathElements, additionalContext);

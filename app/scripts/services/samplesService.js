@@ -9,6 +9,7 @@ angular.module('mapManager.samples', [  ])
         maps.push(this.getMapSample1());
         maps.push(this.getMapSample2());
         maps.push(this.getMapSample3());
+        maps.push(this.getMapSample4());
         return maps;
       },
 
@@ -75,6 +76,27 @@ angular.module('mapManager.samples', [  ])
         };
       },
 
+      getMapSample4: function() {
+        var sources = this.getSourcesSample2();
+        return {
+          id: '4',
+          name: 'UK',
+          type: 'd3js',
+          projection: 'mercator',
+          scale: 1450,
+          center: {
+            lon: -0.1257400,
+            lat: 51.5085300
+          },
+          translate: '[width / 2 +200, height / 2 +1700]',
+          interactions: {
+            moving: 'mouseMove',
+            zooming: 'mouseWheel'
+          },
+          sources: sources
+        };
+      },
+
       getLayerSamples: function() {
         var layers = [];
         var layers1 = this.getLayersSample1();
@@ -87,6 +109,10 @@ angular.module('mapManager.samples', [  ])
         });
         var layers3 = this.getLayersSample3();
         _.forEach(layers3, function(layer) {
+          layers.push(layer);
+        });
+        var layers4 = this.getLayersSample4();
+        _.forEach(layers4, function(layer) {
           layers.push(layer);
         });
         return layers;
@@ -111,7 +137,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               background: {
-                fill: '#a4bac7'
+                fill: '"#a4bac7"'
               },
               border: {
                 stroke: '#000',
@@ -173,7 +199,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               background: {
-                fill: '#ff0000'
+                fill: '"#ff0000"'
               },
               lines: {
                 stroke: '#fff',
@@ -497,7 +523,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               background: {
-                fill: '#a4bac7'
+                fill: '"#a4bac7"'
               },
               border: {
                 stroke: '#000',
@@ -536,7 +562,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               path: {
-                fill: 'none',
+                fill: '"none"',
                 stroke: '#fff',
                 strokeLinejoin: 'round',
                 strokeLinecap: 'round'
@@ -574,7 +600,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               path: {
-                fill: 'none',
+                fill: '"none"',
                 stroke: '#fff',
                 strokeLinejoin: 'round',
                 strokeLinecap: 'round'
@@ -745,7 +771,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               background: {
-                fill: '#a4bac7'
+                fill: '"#a4bac7"'
               },
               border: {
                 stroke: '#000',
@@ -804,7 +830,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               path: {
-                fill: 'none',
+                fill: '"none"',
                 stroke: '#fff',
                 strokeLinejoin: 'round',
                 strokeLinecap: 'round'
@@ -857,7 +883,7 @@ angular.module('mapManager.samples', [  ])
             },
             styles: {
               path: {
-                fill: 'none',
+                fill: '"none"',
                 stroke: '#fff',
                 strokeLinejoin: 'round',
                 strokeLinecap: 'round'
@@ -999,6 +1025,133 @@ angular.module('mapManager.samples', [  ])
             applied: false,
             visible: false
           },
+        ];
+      },
+
+      getLayersSample4: function() {
+        return [
+          // Map #4
+          /*{
+            id: 'graticuleLayer4',
+            type: 'graticule',
+            rank: 1,
+            name: 'Graticule',
+            applied: true,
+            visible: true,
+            maps: [ '4' ],
+            display: {
+              background: true,
+              lines: true,
+              border: true
+            },
+            styles: {
+              background: {
+                fill: '"#a4bac7"'
+              },
+              border: {
+                stroke: '#000',
+                strokeWidth: '3px'
+              },
+              lines: {
+                stroke: '#777',
+                strokeWidth: '.5px',
+                strokeOpacity: '.5'
+              }
+            }
+          },*/
+          {
+            id: 'ukLayer',
+            type: 'geodata',
+            rank: 2,
+            name: 'UK',
+            applied: true,
+            visible: true,
+            maps: [ '4' ],
+            data: {
+              url: '"http://localhost:9000/scripts/json/uk/uk.json"',
+              rootObject: 'subunits',
+              type: 'topojson',
+              source: 'continents-source',
+              content: [],
+              loaded: false
+            },
+            display: {
+              shape: {
+                label: {
+                  text: 'd.properties.name',
+                  position: { x: 5, y: 5 }
+                }
+              }
+            },
+            styles: {
+              visibility: {
+                display: 'd.id==="IRL" ? "none" : null'
+              },
+              background: {
+                fill: 'd.id==="SCT" ? "#ddc": (d.id==="WLS" ? "#cdd" : (d.id==="NIR" ? "#cdc" : (d.id==="ENG"? "#dcd" : "#000000")))'
+              }
+            },
+          },
+          {
+            id: 'boundaryLayer',
+            type: 'geodata',
+            rank: 2,
+            name: 'Boundary',
+            applied: true,
+            visible: true,
+            maps: [ '4' ],
+            data: {
+              url: '"http://localhost:9000/scripts/json/uk/uk.json"',
+              rootObject: 'subunits',
+              type: 'topojson',
+              source: 'continents-source',
+              content: [],
+              mesh: 'a !== b && a.id !== "IRL"',
+              loaded: false
+            },
+            display: {
+            },
+            styles: {
+              background: {
+                fill: '"none"'
+              },
+              lines: {
+                stroke: '#777',
+                strokeDashArray: '2,2',
+                strokeLineJoin: 'round'
+              }
+            }
+          },
+          {
+            id: 'irlBoundaryLayer',
+            type: 'geodata',
+            rank: 2,
+            name: 'Irland boundary',
+            applied: true,
+            visible: true,
+            maps: [ '4' ],
+            data: {
+              url: '"http://localhost:9000/scripts/json/uk/uk.json"',
+              rootObject: 'subunits',
+              type: 'topojson',
+              source: 'continents-source',
+              content: [],
+              mesh: 'a === b && a.id === "IRL"',
+              loaded: false
+            },
+            display: {
+            },
+            styles: {
+              background: {
+                fill: '"none"'
+              },
+              lines: {
+                stroke: '#aaa',
+                strokeDashArray: '2,2',
+                strokeLineJoin: 'round'
+              }
+            }
+          }
         ];
       },
 

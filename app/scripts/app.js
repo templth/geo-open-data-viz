@@ -121,9 +121,11 @@ angular
       //console.log('>> hasCurrentProvider = ' + providerService.hasCurrentProvider());
     //});
 
-    providerService.selectWebApiProvider({
+    /*providerService.selectWebApiProvider({
       url: 'https://mapapi.apispark.net/v1/',
       readonly: true,
       secured: false
-    });
+    });*/
+
+    providerService.selectInMemoryProvider();
   });

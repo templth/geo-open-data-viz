@@ -108,6 +108,7 @@ angular.module('mapManager.commons', [ 'mapManager.map',
         $scope.properties = {
           projection: currentMap.projection,
           scale: currentMap.scale,
+          translate: currentMap.translate,
           center: currentMap.center
         };
         $scope.interactions = {

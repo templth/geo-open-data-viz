@@ -34,7 +34,7 @@ be displayed on the map.
 
 | Feature               | Description                                                  |
 | --------------------- | -------------------------------------------------------------|
-| [Fill](#fill)          | Defines the strategy to use to fill shapes                   |
+| [Fill](#fill)         | Defines the strategy to use to fill shapes                   |
 | [Shape](#shape)       | Defines shapes                                               |
 | [Legend](#legend)     | Defines the legend associated with a layer                   |
 | [Tooltip](#tooltip)   | Defines the tooltip associated with elements of a layer      |
