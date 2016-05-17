@@ -11,13 +11,13 @@ import {
   expect,
   iit,
   inject,
+  injectAsync,
+  async,
   beforeEachProviders,
   setBaseTestProviders,
   it,
   xit
 } from '@angular/core/testing';
-
-import {AsyncTestCompleter} from '@angular/core/testing/async_test_completer';
 
 import {
     TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
@@ -28,14 +28,32 @@ import {GraticuleLayerComponent} from './map.graticule';
 import {GRATICULE_DEFAULTS} from './layers.defaults';
 import {GraticuleLayer} from '../../../model/map.model';
 import {rgb2hex} from '../../../services/utils';
+import {MapUpdateService} from '../../../services/map/map.update.service';
 
 declare var d3: any;
 
 describe('Test for graticule layer', () => {
   setBaseTestProviders(TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
     [TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS]);
-  /*setBaseTestProviders(TEST_BROWSER_STATIC_PLATFORM_PROVIDERS,
-    [TEST_BROWSER_STATIC_APPLICATION_PROVIDERS, AsyncTestCompleter]);*/
+
+  var graticuleLayerConfig = <GraticuleLayer>{
+    id: 'graticuleLayer',
+    type: 'graticule',
+    styles: {
+      border: {
+        stroke: '#000000',
+        strokeWidth: '3px'
+      },
+      background: {
+        fill: '#a4bac7'
+      },
+      lines: {
+        stroke: '#777777',
+        strokeWidth: '0.5px',
+        strokeOpacity: '0.5'
+      }
+    }
+  };
 
   function checkGraticuleStructure(nativeElement, borderStroke:string,
     borderStrokeWidth:string, backgroundFill:string, linesStroke:string,
@@ -70,7 +88,7 @@ describe('Test for graticule layer', () => {
 
     // Testing path elements
     var pathElement = [].find.call(nativeElement.childNodes, child => child.nodeName.toLowerCase() === 'path');
-    expect(pathElement.id).toEqual('layer.id');
+    expect(pathElement.id).toEqual('lines');
     expect(pathElement.d).not.null;
     expect(pathElement.d).not.toEqual('');
     var pathElementStyles = pathElement.style;
@@ -81,9 +99,14 @@ describe('Test for graticule layer', () => {
   }
     
   it('should define default values for properties',
-    inject([TestComponentBuilder, AsyncTestCompleter], (tcb: TestComponentBuilder) => {
-      tcb.createAsync(GraticuleLayerComponent).then((componentFixture) => {
-        let componentInstance = componentFixture.componentInstance;
+    async(inject([TestComponentBuilder], (tcb: TestComponentBuilder) => {
+      var updateService = new MapUpdateService();
+
+      tcb.overrideProviders(GraticuleLayerComponent, [
+            provide(MapUpdateService, { useValue: updateService })
+          ])
+          .createAsync(GraticuleLayerComponent).then((componentFixture) => {
+        let componentInstance = componentFixture.debugElement.componentInstance;
         componentInstance.layer = { type: 'graticule' };
         componentInstance.path = d3.geo.path();
 
@@ -95,30 +118,18 @@ describe('Test for graticule layer', () => {
           GRATICULE_DEFAULTS.LINES_STROKE, GRATICULE_DEFAULTS.LINES_STROKE_WIDTH,
           GRATICULE_DEFAULTS.LINES_STROKE_OPACITY);
       });
-    }));
+    })));
 
   it('should use custom values for properties',
-    inject([TestComponentBuilder, AsyncTestCompleter], (tcb: TestComponentBuilder) => {
-      tcb.createAsync(GraticuleLayerComponent).then((componentFixture) => {
+    async(inject([TestComponentBuilder], (tcb: TestComponentBuilder) => {
+      var updateService = new MapUpdateService();
+
+      tcb.overrideProviders(GraticuleLayerComponent, [
+             provide(MapUpdateService, { useValue: updateService })
+           ])
+          .createAsync(GraticuleLayerComponent).then((componentFixture) => {
         let componentInstance = componentFixture.componentInstance;
-        console.log(componentInstance)
-        componentInstance.layer = <GraticuleLayer>{
-          type: 'graticule',
-          styles: {
-            border: {
-              stroke: '#000000',
-              strokeWidth: '3px'
-            },
-            background: {
-              fill: '#a4bac7'
-            },
-            lines: {
-              stroke: '#777777',
-              strokeWidth: '0.5px',
-              strokeOpacity: '0.5'
-            }
-          }
-        };
+        componentInstance.layer = graticuleLayerConfig;
         componentInstance.path = d3.geo.path();
 
         componentFixture.detectChanges();
@@ -127,5 +138,47 @@ describe('Test for graticule layer', () => {
         checkGraticuleStructure(nativeElement, '#000000',
           '3px', '#a4bac7', '#777777', '0.5px', '0.5');
       });
-    }));
+    })));
+
+  it('should update values for properties',
+    async(inject([TestComponentBuilder], (tcb: TestComponentBuilder) => {
+      var updateService = new MapUpdateService();
+
+      tcb.overrideProviders(GraticuleLayerComponent, [
+            provide(MapUpdateService, { useValue: updateService })
+          ])
+          .createAsync(GraticuleLayerComponent).then((componentFixture) => {
+        let componentInstance = componentFixture.componentInstance;
+        componentInstance.layer = graticuleLayerConfig;
+        componentInstance.path = d3.geo.path();
+
+        componentFixture.detectChanges();
+
+        let nativeElement = componentFixture.nativeElement;
+        checkGraticuleStructure(nativeElement, '#000000',
+          '3px', '#a4bac7', '#777777', '0.5px', '0.5');
+
+        updateService.triggerLayerConfigurationUpdates(graticuleLayerConfig, {
+          styles: {
+            border: {
+              stroke: '#000001',
+              strokeWidth: '1px'
+            },
+            background: {
+              fill: '#ff0000'
+            },
+            lines: {
+              stroke: '#777771',
+              strokeWidth: '5px',
+              strokeOpacity: '0.1'
+            }
+          }
+        });
+
+        componentFixture.detectChanges();
+
+        checkGraticuleStructure(nativeElement, '#000001',
+          '1px', '#ff0000', '#777771', '5px', '0.1');
+      });
+    })));
 });

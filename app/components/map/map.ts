@@ -3,6 +3,7 @@ import {GraticuleLayerComponent} from './layers/map.graticule';
 import {GeodataLayerComponent} from './layers/map.geodata';
 import {ShapeLayerComponent} from './layers/map.shape';
 import {MapService} from '../../services/map/map.service';
+import {MapUpdateService} from '../../services/map/map.update.service';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
@@ -46,14 +47,84 @@ export class MapComponent {
 	  	'height', event.target.innerHeight);
   }
 
-  constructor(private mapService: MapService, private renderer:Renderer, private changeDetector:ChangeDetectorRef, private elementRef:ElementRef) {
+  constructor(private mapService: MapService, private renderer: Renderer,
+  	private changeDetector: ChangeDetectorRef, private elementRef: ElementRef,
+  	private updateService: MapUpdateService) {
 	  console.log(elementRef);
 	  this.layers = [
-		  { type: 'graticule' },
-		  { type: 'geodata' },
-		  { type: 'shape' }
+		  {
+		  	id: 'graticule',
+		  	type: 'graticule',
+            styles: {
+              border: {
+                stroke: '',
+                strokeWidth: ''
+              },
+              background: {
+                fill: ''
+              },
+              lines: {
+                stroke: '',
+                strokeWidth: '',
+                strokeOpacity: '',
+              }
+			}
+		  },
+		  { id: 'geodata', type: 'geodata',
+			  display: { fill: { categorical: { distinctNeighbors : true} } }
+		  },
+		  {
+		  	id: 'shape', type: 'shape',
+			data: {
+			  url: 'data/meteorites-all.csv',
+              type: 'csv',
+              id: 'name',
+              where: 'd.mass < 50000',
+              order: {
+                field: 'mass',
+                ascending: false
+              }
+            },
+            name: 'Meteorites',
+            display: {
+              shape: {
+                type: 'circle',
+                radius: 'd.mass / 5000000',
+                origin: '[ d.reclong, d.reclat ]',
+                opacity: 0.75,
+                threshold: {
+                  values: [1800, 1900, 1950, 2000, 2015],
+                  colors: ['#ffffb2', '#fed976', '#feb24c',
+                  '#fd8d3c', '#f03b20', '#bd0026']
+                },
+                value: 'parseDate(d.year).getFullYear()'
+              }
+            }
+		  }
 	  ];
 
+      setTimeout(() => {
+		  this.updateService.triggerLayerConfigurationUpdates(this.layers[0], {
+            styles: {
+              background: {
+                fill: '#ff0000'
+              },
+              borders: {
+                strokeWidth: '4px'
+              }
+            }
+		  });
+
+      }, 1000);
+
+	  d3.json('data/continent.json', (data) => {
+		this.updateService.triggerLayerDataLoaded(this.layers[1], data);
+	  });
+
+	  d3.csv('data/meteorites-all.csv', (data) => {
+		  console.log('1');
+        this.updateService.triggerLayerDataLoaded(this.layers[2], data);
+      });
   }
 
   ngAfterViewInit() {

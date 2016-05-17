@@ -38,6 +38,12 @@ var GeodataLayerStyles = (function () {
     return GeodataLayerStyles;
 }());
 exports.GeodataLayerStyles = GeodataLayerStyles;
+var GeodataLayerDisplay = (function () {
+    function GeodataLayerDisplay() {
+    }
+    return GeodataLayerDisplay;
+}());
+exports.GeodataLayerDisplay = GeodataLayerDisplay;
 var GeodataLayer = (function (_super) {
     __extends(GeodataLayer, _super);
     function GeodataLayer() {
@@ -46,6 +52,7 @@ var GeodataLayer = (function (_super) {
     return GeodataLayer;
 }(Layer));
 exports.GeodataLayer = GeodataLayer;
+// Shape layer
 // Map
 var Map = (function () {
     function Map() {

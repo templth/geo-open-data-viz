@@ -1,5 +1,5 @@
 {
-  "name": "angular2-quickstart",
+  "name": "map-visualizer",
   "version": "1.0.0",
   "scripts": {
     "build": "rm -rf dist && tsc",
@@ -46,10 +46,12 @@
     "karma": "^0.13.22",
     "karma-chrome-launcher": "^1.0.1",
     "karma-coverage": "^1.0.0",
+    "karma-firefox-launcher": "^1.0.0",
     "karma-jasmine": "^1.0.2",
     "karma-phantomjs-launcher": "^1.0.0",
-    "phantomjs": "^2.1.7",
     "lite-server": "^2.2.0",
+    "phantomjs": "^2.1.7",
+    "phantomjs-prebuilt": "^2.1.7",
     "typescript": "^1.8.10",
     "typings": "^0.8.1",
     "uglify": "^0.1.5"

@@ -34,9 +34,16 @@ export class GeodataLayerStyles {
   lines: { stroke: string, strokeWidth: string, strokeOpacity: string };
 }
 
+export class GeodataLayerDisplay {
+  fill: { categorical: any }
+}
+
 export class GeodataLayer extends Layer {
   styles: GeodataLayerStyles;
+  fill: GeodataLayerDisplay;
 }
+
+// Shape layer
 
 // Map
 

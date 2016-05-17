@@ -14,3 +14,7 @@ export const GEODATA_DEFAULTS = {
 	LINES_STROKE_WIDTH: '0.5px',
 	LINES_STROKE_OPACITY: '0.5'
 };
+
+export const SHAPE_DEFAULTS = {
+  SHAPE_OPACITY: 0.75
+};

@@ -1,14 +1,21 @@
 
-export function getPropertyValue(obj: any, ...keys): string {
+export function getPropertyValue(obj: any, keys: string[], defaultValue: any): any {
   var current = obj;
-  /*console.log('keys');
-  console.log(keys);
-  console.log('obj');
-  console.log(obj);*/
   keys.forEach(elt => {
     if (current) {
-	  current = current[elt];
+	    current = current[elt];
     }
   });
-  return current;
+  return current || defaultValue;
+};
+
+export function hasProperty(obj: any, keys: string[]): boolean {
+  var current = obj;
+  keys.forEach(elt => {
+    if (current) {
+      current = current[elt];
+    }
+  });
+
+  return (current != null);
 };

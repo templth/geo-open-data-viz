@@ -1,8 +1,9 @@
 import {Component, Input, ElementRef} from '@angular/core';
 import {isPresent} from '@angular/compiler/src/facade/lang';
 import {GraticuleLayer} from '../../../model/map.model';
-import {GRATICULE_DEFAULTS} from './layers.defaults';
-import {getPropertyValue} from '../../../utils/properties.utils';
+import {SHAPE_DEFAULTS} from './layers.defaults';
+import {getPropertyValue, hasProperty} from '../../../utils/properties.utils';
+import {MapUpdateService} from '../../../services/map/map.update.service';
 import {ExpressionsService} from '../../../services/expressions/expressions.service';
 
 declare var d3: any;
@@ -20,7 +21,9 @@ export class ShapeLayerComponent {
 
   initialized: boolean = false;
 
-  constructor(private eltRef: ElementRef, private expressionService:ExpressionsService) {
+  constructor(private eltRef: ElementRef,
+    private updateService: MapUpdateService,
+    private expressionService: ExpressionsService) {
   }
 
   ngOnChanges(changes) {
@@ -31,50 +34,84 @@ export class ShapeLayerComponent {
   }
 
   ngAfterViewInit() {
-    this.initializeLayer();
+    this.updateService.registerOnLayerDataLoaded(this.layer).subscribe(data => {
+      this.initializeLayer(data.data);
+    });
   }
 
-  initializeLayer() {
+  initializeLayer(data: any) {
+    if (this.isCircleShape(this.layer)) {
+      this.initializeCircleShapeLayer(this.layer, data);
+    }
+    this.initialized = true;
+  }
+
+  initializeCircleShapeLayer(layer, data) {
     var layerElement = d3.select(this.eltRef.nativeElement);
 
-    var r = this.expressionService.evaluate('test', { test: 19 });
-    console.log('r = ' + r);
+    var features = data.filter(d => d.mass > 50000);
+    console.log('features = ' + features.length);
+    var circle = d3.geo.circle();
 
-    d3.csv('data/meteorites.csv', (features) => {
-			var circle = d3.geo.circle();
-			var pathElements = layerElement.selectAll('path')
-				.data(features)
-				.enter()
-				.append('path')
-				.datum((d, i) => {
-					//console.log('datum - d = '+JSON.stringify(d));
-					//var orig = this.expressionService.evaluate('d.reclat + d.reclong', { d, i });
-					//console.log(orig);
-					var orig = [d.reclat, d.reclong];/*expressionService.evaluateExpression(origin,
-					d, i, additionalContext);*/
-						orig[0] = parseFloat(orig[0]);
-					orig[1] = parseFloat(orig[1]);
-					/*var rad = expressionService.evaluateExpression(radius,
-					d, i, additionalContext);
-					rad = parseFloat(rad);*/
-					var c = circle
-						.origin(orig)
-						.angle(10)({d,i});
-					console.log('c = ' + c);
-					c.d = d;
-					return c;
-				})
-				.attr('id', function(d) {
-					return d.d.name;
-				})
-				.attr('class', 'point')
-				.attr('d', this.path)
-				//.style('fill-opacity', 0.0)
-				.style('opacity', 0.75)
-				.style('fill', 'rgb(254, 178, 76)');
-		});
+    var originExpression = this.getShapeOrigin(this.layer);
+    var radiusExpression = this.getShapeRadius(this.layer);
+    var opacity = this.getShapeOpacity(this.layer);
 
+    var pathElements = layerElement.selectAll('path')
+          .data(features)
+          .enter()
+          .append('path')
+          .datum((d, i) => {
+            var orig = this.expressionService.evaluate(originExpression,
+              { d, i/*, additionalContext*/ });
+            orig[0] = parseFloat(orig[0]);
+            orig[1] = parseFloat(orig[1]);
+            var rad = this.expressionService.evaluate(radiusExpression,
+              { d, i/*, additionalContext*/ });
+            console.log('rad = ' + rad);
+            rad = parseFloat(rad);
+            var c = circle
+              .origin(orig)
+              .angle(rad)({d,i});
+            c.d = d;
+            return c;
+          })
+          .attr('id', function(d) {
+            return d.d.name;
+          })
+          .attr('class', 'point')
+          .attr('d', this.path)
+          //.style('fill-opacity', 0.0)
+          .style('opacity', opacity)
+          .style('fill', 'rgb(254, 178, 76)');
 
-		this.initialized = true;
-	}
+  }
+
+  // Direct getters for property values
+
+  getShapeConfiguration(obj) {
+    return getPropertyValue(obj, ['display', 'shape'], {});
+  }
+
+  isCircleShape(obj) {
+    return (getPropertyValue(obj, ['display', 'shape', 'type'], '') === 'circle');
+  }
+
+  getShapeOrigin(obj) {
+    return getPropertyValue(obj,
+      ['display', 'shape', 'origin'],
+      '');
+  }
+
+  getShapeRadius(obj) {
+    return getPropertyValue(obj,
+      ['display', 'shape', 'radius'],
+      '');
+  }
+
+  getShapeOpacity(obj) {
+    return getPropertyValue(obj,
+      ['display', 'shape', 'opacity'],
+      SHAPE_DEFAULTS.SHAPE_OPACITY);
+  }
 }

@@ -1,3 +1,5 @@
+'use strict';
+
 // Tun on full stack traces in errors to help debugging
 Error.stackTraceLimit = Infinity;
 
@@ -7,53 +9,49 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;
 // // we will call `__karma__.start()` later, once all the specs are loaded.
 __karma__.loaded = function() {};
 
-  var map = {
-    'app': 'base/app',
-    'rxjs': 'base/node_modules/rxjs',
-    '@angular': 'base/node_modules/@angular'
-  };
+var map = {
+  'app': 'base/app',
+  'rxjs': 'base/node_modules/rxjs',
+  '@angular': 'base/node_modules/@angular'
+};
 
-  // packages tells the System loader how to load when no filename and/or no extension
-  var packages = {
-    'app': { main: 'main.js',  defaultExtension: 'js' },
-    'rxjs': { defaultExtension: 'js' }
-  };
+// packages tells the System loader how to load when no filename and/or no extension
+var packages = {
+  'app': { main: 'main.js',  defaultExtension: 'js' },
+  'rxjs': { defaultExtension: 'js' }
+};
 
-  var packageNames = [
-    '@angular/common',
-    '@angular/compiler',
-    '@angular/core',
-    '@angular/http',
-    '@angular/platform-browser',
-    '@angular/platform-browser-dynamic',
-    '@angular/router',
-    '@angular/router-deprecated',
-    '@angular/testing',
-    '@angular/upgrade',
-  ];
+var packageNames = [
+  '@angular/common',
+  '@angular/compiler',
+  '@angular/core',
+  '@angular/http',
+  '@angular/platform-browser',
+  '@angular/platform-browser-dynamic',
+  '@angular/router',
+  '@angular/router-deprecated',
+  '@angular/testing',
+  '@angular/upgrade',
+];
 
-  // add package entries for angular packages in the form '@angular/common': { main: 'index.js', defaultExtension: 'js' }
-  packageNames.forEach(function(pkgName) {
-    packages[pkgName] = { main: 'index.js', defaultExtension: 'js' };
-  });
+// add package entries for angular packages in the form '@angular/common': { main: 'index.js', defaultExtension: 'js' }
+packageNames.forEach(function(pkgName) {
+  packages[pkgName] = { main: 'index.js', defaultExtension: 'js' };
+});
 
-  packages['base/app'] = {
-            defaultExtension: 'js',
-            format: 'cjs',
-            map: Object.keys(window.__karma__.files).filter(onlyAppFiles).reduce(createPathRecords, {})
-        };
+packages['base/app'] = {
+  defaultExtension: 'js',
+  format: 'cjs',
+  map: Object.keys(window.__karma__.files).filter(onlyAppFiles).reduce(createPathRecords, {})
+};
 
-  var config = {
-    //"defaultJSExtensions": true,
-    map: map,
-    packages: packages
-  };
+var config = {
+  //"defaultJSExtensions": true,
+  map: map,
+  packages: packages
+};
 
-  //System.config('config');
-  System.config(config);
-
-//console.log(JSON.stringify(config, null, 2));
-//console.log(Object.keys(window.__karma__.files).filter(onlyAppFiles).reduce(createPathRecords, {}));
+System.config(config);
 
 System.import('@angular/platform-browser/src/browser/browser_adapter')
     .then(function(browser_adapter) { browser_adapter.BrowserDomAdapter.makeCurrent(); })

@@ -1,21 +1,24 @@
 "use strict";
-function getPropertyValue(obj) {
-    var keys = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        keys[_i - 1] = arguments[_i];
-    }
+function getPropertyValue(obj, keys, defaultValue) {
     var current = obj;
-    /*console.log('keys');
-    console.log(keys);
-    console.log('obj');
-    console.log(obj);*/
     keys.forEach(function (elt) {
         if (current) {
             current = current[elt];
         }
     });
-    return current;
+    return current || defaultValue;
 }
 exports.getPropertyValue = getPropertyValue;
+;
+function hasProperty(obj, keys) {
+    var current = obj;
+    keys.forEach(function (elt) {
+        if (current) {
+            current = current[elt];
+        }
+    });
+    return (current != null);
+}
+exports.hasProperty = hasProperty;
 ;
 //# sourceMappingURL=properties.utils.js.map

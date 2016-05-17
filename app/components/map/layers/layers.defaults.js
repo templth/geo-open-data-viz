@@ -13,4 +13,7 @@ exports.GEODATA_DEFAULTS = {
     LINES_STROKE_WIDTH: '0.5px',
     LINES_STROKE_OPACITY: '0.5'
 };
+exports.SHAPE_DEFAULTS = {
+    SHAPE_OPACITY: 0.75
+};
 //# sourceMappingURL=layers.defaults.js.map
