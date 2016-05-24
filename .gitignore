@@ -8,5 +8,5 @@ tmp/
 docs/api
 docs/site
 typings
-app/*.js
-app/*.js.map
+app/**/*.js
+app/**/*.js.map
