@@ -14,10 +14,14 @@ var MapUpdateService = (function () {
             .next({ layerId: layer.id, layer: layer, diffs: diffs });
     };
     MapUpdateService.prototype.registerOnLayerDataLoaded = function (layer) {
+        console.log('>> registerOnLayerDataLoaded');
+        console.log(layer);
         return this.layerDataLoaded$
             .filter(function (update) { return update.layerId === layer.id; });
     };
     MapUpdateService.prototype.triggerLayerDataLoaded = function (layer, data) {
+        console.log('>> triggerLayerDataLoaded');
+        console.log(layer);
         this.layerDataLoaded$
             .next({ layerId: layer.id, data: data });
     };

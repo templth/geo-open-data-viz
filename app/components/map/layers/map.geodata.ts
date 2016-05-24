@@ -1,4 +1,6 @@
 import {Component, Input, ElementRef} from '@angular/core';
+
+import {AbstractLayer} from './map.layer';
 import {GeodataLayer} from '../../../model/map.model';
 import {GEODATA_DEFAULTS} from './layers.defaults';
 import {getPropertyValue, hasProperty} from '../../../utils/properties.utils';
@@ -16,13 +18,14 @@ declare var topojson: any;
  *   type: 'geodata',
  *   rank: 2,
  *   data: {
-       layer: {
+ *     layer: {
  *       url: 'http://localhost:9000/scripts/json/continent.json',
  *       rootObject: 'countries',
  *       type: 'topojson'
  *     },
  *     threshold: {
- *       
+ *       url: 'http://localhost:9000/scripts/json/continent.json',
+ *       type: 'csv'
  *     }
  *   },
  *   display: {
@@ -59,17 +62,16 @@ declare var topojson: any;
   template: `
   `
 })
-export class GeodataLayerComponent {
+export class GeodataLayerComponent extends AbstractLayer {
   @Input()
   layer: GeodataLayer;
   @Input()
   path: any;
 
-  initialized: boolean = false;
-
   constructor(private eltRef: ElementRef,
       private updateService: MapUpdateService,
       private expressionService: ExpressionsService) {
+    super();
   }
 
   ngOnChanges(changes) {
@@ -112,6 +114,7 @@ export class GeodataLayerComponent {
         .on('blur', () => console.log('blur'));
 
     this.initialized = true;
+    this.layerLoaded.next(true);
   }
 
   /**
@@ -120,13 +123,13 @@ export class GeodataLayerComponent {
   initializeFill(data: any, features: any, backgroundFill: string): any {
     if (this.hasDisplayFillCategorical(this.layer)) {
       // Categorical
-      this.initializeCategoricalFill(data, features);
+      return this.initializeCategoricalFill(data, features);
     } else if (this.hasDisplayFillThreshold(this.layer)) {
       // Threshold
-      this.initializeThresholdFill(data, features);
+      return this.initializeThresholdFill(data, features);
     } else if (this.hasDisplayFillChoropleth(this.layer)) {
       // Choropleth
-      this.initializeChoroplethFill(data, features);
+      return this.initializeChoroplethFill(data, features);
     } else {
       // Default
       return backgroundFill;

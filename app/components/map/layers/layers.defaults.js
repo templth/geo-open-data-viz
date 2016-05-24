@@ -13,7 +13,18 @@ exports.GEODATA_DEFAULTS = {
     LINES_STROKE_WIDTH: '0.5px',
     LINES_STROKE_OPACITY: '0.5'
 };
-exports.SHAPE_DEFAULTS = {
-    SHAPE_OPACITY: 0.75
+exports.SHAPE_CIRCLE_DEFAULTS = {
+    BACKGROUND_OPACITY: '0.75',
+    BACKGROUND_FILL: '#ffffff',
+    LINES_STROKE: '#000000',
+    LINES_STROKE_WIDTH: '0.5px',
+    LINES_STROKE_OPACITY: '0.5'
+};
+exports.SHAPE_POINT_DEFAULTS = {
+    BACKGROUND_OPACITY: '0.75',
+    BACKGROUND_FILL: '#ffffff',
+    LINES_STROKE: '#000000',
+    LINES_STROKE_WIDTH: '0.5px',
+    LINES_STROKE_OPACITY: '0.5'
 };
 //# sourceMappingURL=layers.defaults.js.map

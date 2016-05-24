@@ -1,4 +1,9 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -9,6 +14,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var map_layer_1 = require('./map.layer');
 var map_model_1 = require('../../../model/map.model');
 var layers_defaults_1 = require('./layers.defaults');
 var properties_utils_1 = require('../../../utils/properties.utils');
@@ -35,11 +41,12 @@ var map_update_service_1 = require('../../../services/map/map.update.service');
  *   }
  * }
  */
-var GraticuleLayerComponent = (function () {
+var GraticuleLayerComponent = (function (_super) {
+    __extends(GraticuleLayerComponent, _super);
     function GraticuleLayerComponent(eltRef, updateService) {
+        _super.call(this);
         this.eltRef = eltRef;
         this.updateService = updateService;
-        this.initialized = false;
     }
     /**
      * Detect path updates
@@ -87,7 +94,7 @@ var GraticuleLayerComponent = (function () {
         }
     };
     /**
-      *
+      * Trigger the graticule layer initialization
       */
     GraticuleLayerComponent.prototype.ngAfterViewInit = function () {
         this.initializeLayer();
@@ -130,6 +137,7 @@ var GraticuleLayerComponent = (function () {
             .style('stroke-opacity', linesStrokeOpacity)
             .attr('d', this.path);
         this.initialized = true;
+        this.layerLoaded.next(true);
     };
     // Direct getters for property values
     GraticuleLayerComponent.prototype.hasStylesBorderStroke = function (obj) {
@@ -184,6 +192,6 @@ var GraticuleLayerComponent = (function () {
         __metadata('design:paramtypes', [core_1.ElementRef, map_update_service_1.MapUpdateService])
     ], GraticuleLayerComponent);
     return GraticuleLayerComponent;
-}());
+}(map_layer_1.AbstractLayer));
 exports.GraticuleLayerComponent = GraticuleLayerComponent;
 //# sourceMappingURL=map.graticule.js.map

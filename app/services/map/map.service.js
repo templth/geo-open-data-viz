@@ -57,27 +57,33 @@ var MapService = (function () {
         }
     };
     MapService.prototype.configureConformalMapBehaviors = function (component, svg, projection, projectionConfig) {
+        var _this = this;
         var zoom = d3.behavior.zoom()
             .scale(projection.scale())
             .on('zoom', function () {
             if (d3.event.scale != projection.scale()) {
                 projection.scale(d3.event.scale);
+                _this.current.scale = projection.scale();
                 component.path = d3.geo.path().projection(projection);
             }
             else {
                 projection.translate(d3.event.translate);
+                _this.current.center = projection.center();
                 component.path = d3.geo.path().projection(projection);
             }
         });
         svg.call(zoom);
     };
     MapService.prototype.configureSphericalMapBehaviors = function (component, svg, projection, projectionConfig) {
+        var _this = this;
         // Zoom
         var zoom = d3.behavior.zoom()
             .scale(projection.scale())
             .on('zoom', function () {
             if (d3.event.scale != projection.scale()) {
+                _this.current.previousScale = projection.scale();
                 projection.scale(d3.event.scale);
+                _this.current.scale = projection.scale();
                 component.path = d3.geo.path().projection(projection);
             }
         });
@@ -95,6 +101,7 @@ var MapService = (function () {
             var m1 = d3_service_1.trackballAngles(projection, d3.mouse(svg[0][0]));
             o1 = d3_service_1.composedRotation(o0[0], o0[1], o0[2], m1[0] - m0[0], m1[1] - m0[1]);
             projection.rotate(o1);
+            _this.current.center = projection.rotate();
             component.path = d3.geo.path().projection(projection);
         });
         svg.call(drag);

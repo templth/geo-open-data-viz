@@ -39,11 +39,39 @@ export class GeodataLayerDisplay {
 }
 
 export class GeodataLayer extends Layer {
+  display: GeodataLayerDisplay;
   styles: GeodataLayerStyles;
-  fill: GeodataLayerDisplay;
 }
 
 // Shape layer
+
+export class ShapeCircleLayerStyles {
+  background: { fill: string, opacity: string };
+  lines: { stroke: string, strokeWidth: string, strokeOpacity: string };
+}
+
+export class ShapeCircleLayerDisplay {
+  shape: { type: string, originExpr: string, radius: string, radiusExpr: string, opacity: string }
+}
+
+export class ShapeCircleLayer extends Layer {
+  display: ShapeCircleLayerDisplay;
+  styles: ShapeCircleLayerStyles;
+}
+
+export class ShapePointLayerStyles {
+  background: { fill: string, opacity: string };
+  lines: { stroke: string, strokeWidth: string, strokeOpacity: string };
+}
+
+export class ShapePointLayerDisplay {
+  shape: { type: string, originExpr: string, radius: string, radiusExpr: string, opacity: string }
+}
+
+export class ShapePointLayer extends Layer {
+  display: ShapePointLayerDisplay;
+  styles: ShapePointLayerStyles;
+}
 
 // Map
 

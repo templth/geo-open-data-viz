@@ -53,6 +53,46 @@ var GeodataLayer = (function (_super) {
 }(Layer));
 exports.GeodataLayer = GeodataLayer;
 // Shape layer
+var ShapeCircleLayerStyles = (function () {
+    function ShapeCircleLayerStyles() {
+    }
+    return ShapeCircleLayerStyles;
+}());
+exports.ShapeCircleLayerStyles = ShapeCircleLayerStyles;
+var ShapeCircleLayerDisplay = (function () {
+    function ShapeCircleLayerDisplay() {
+    }
+    return ShapeCircleLayerDisplay;
+}());
+exports.ShapeCircleLayerDisplay = ShapeCircleLayerDisplay;
+var ShapeCircleLayer = (function (_super) {
+    __extends(ShapeCircleLayer, _super);
+    function ShapeCircleLayer() {
+        _super.apply(this, arguments);
+    }
+    return ShapeCircleLayer;
+}(Layer));
+exports.ShapeCircleLayer = ShapeCircleLayer;
+var ShapePointLayerStyles = (function () {
+    function ShapePointLayerStyles() {
+    }
+    return ShapePointLayerStyles;
+}());
+exports.ShapePointLayerStyles = ShapePointLayerStyles;
+var ShapePointLayerDisplay = (function () {
+    function ShapePointLayerDisplay() {
+    }
+    return ShapePointLayerDisplay;
+}());
+exports.ShapePointLayerDisplay = ShapePointLayerDisplay;
+var ShapePointLayer = (function (_super) {
+    __extends(ShapePointLayer, _super);
+    function ShapePointLayer() {
+        _super.apply(this, arguments);
+    }
+    return ShapePointLayer;
+}(Layer));
+exports.ShapePointLayer = ShapePointLayer;
 // Map
 var Map = (function () {
     function Map() {

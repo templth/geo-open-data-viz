@@ -1,4 +1,9 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -9,6 +14,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var map_layer_1 = require('./map.layer');
 var map_model_1 = require('../../../model/map.model');
 var layers_defaults_1 = require('./layers.defaults');
 var properties_utils_1 = require('../../../utils/properties.utils');
@@ -22,13 +28,14 @@ var expressions_service_1 = require('../../../services/expressions/expressions.s
  *   type: 'geodata',
  *   rank: 2,
  *   data: {
-       layer: {
+ *     layer: {
  *       url: 'http://localhost:9000/scripts/json/continent.json',
  *       rootObject: 'countries',
  *       type: 'topojson'
  *     },
  *     threshold: {
- *
+ *       url: 'http://localhost:9000/scripts/json/continent.json',
+ *       type: 'csv'
  *     }
  *   },
  *   display: {
@@ -59,12 +66,13 @@ var expressions_service_1 = require('../../../services/expressions/expressions.s
  *   }
  * }
  */
-var GeodataLayerComponent = (function () {
+var GeodataLayerComponent = (function (_super) {
+    __extends(GeodataLayerComponent, _super);
     function GeodataLayerComponent(eltRef, updateService, expressionService) {
+        _super.call(this);
         this.eltRef = eltRef;
         this.updateService = updateService;
         this.expressionService = expressionService;
-        this.initialized = false;
     }
     GeodataLayerComponent.prototype.ngOnChanges = function (changes) {
         if (this.initialized && changes.path) {
@@ -100,6 +108,7 @@ var GeodataLayerComponent = (function () {
             .on('hover', function () { return console.log('hover'); })
             .on('blur', function () { return console.log('blur'); });
         this.initialized = true;
+        this.layerLoaded.next(true);
     };
     /**
      *
@@ -107,15 +116,15 @@ var GeodataLayerComponent = (function () {
     GeodataLayerComponent.prototype.initializeFill = function (data, features, backgroundFill) {
         if (this.hasDisplayFillCategorical(this.layer)) {
             // Categorical
-            this.initializeCategoricalFill(data, features);
+            return this.initializeCategoricalFill(data, features);
         }
         else if (this.hasDisplayFillThreshold(this.layer)) {
             // Threshold
-            this.initializeThresholdFill(data, features);
+            return this.initializeThresholdFill(data, features);
         }
         else if (this.hasDisplayFillChoropleth(this.layer)) {
             // Choropleth
-            this.initializeChoroplethFill(data, features);
+            return this.initializeChoroplethFill(data, features);
         }
         else {
             // Default
@@ -231,6 +240,6 @@ var GeodataLayerComponent = (function () {
         __metadata('design:paramtypes', [core_1.ElementRef, map_update_service_1.MapUpdateService, expressions_service_1.ExpressionsService])
     ], GeodataLayerComponent);
     return GeodataLayerComponent;
-}());
+}(map_layer_1.AbstractLayer));
 exports.GeodataLayerComponent = GeodataLayerComponent;
 //# sourceMappingURL=map.geodata.js.map

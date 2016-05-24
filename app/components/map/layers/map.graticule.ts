@@ -1,5 +1,7 @@
 import {Component, Input, ElementRef} from '@angular/core';
 import {isPresent} from '@angular/compiler/src/facade/lang';
+
+import {AbstractLayer} from './map.layer';
 import {GraticuleLayer} from '../../../model/map.model';
 import {GRATICULE_DEFAULTS} from './layers.defaults';
 import {getPropertyValue, hasProperty} from '../../../utils/properties.utils';
@@ -35,15 +37,15 @@ declare var d3: any;
 	template: `
 	`
 })
-export class GraticuleLayerComponent {
+export class GraticuleLayerComponent extends AbstractLayer {
   @Input()
   layer: GraticuleLayer;
   @Input()
   path: any;
 
-  initialized: boolean = false;
-
-  constructor(private eltRef: ElementRef, private updateService: MapUpdateService) {
+  constructor(private eltRef: ElementRef,
+      private updateService: MapUpdateService) {
+    super();
   }
 
   /**
@@ -104,8 +106,8 @@ export class GraticuleLayerComponent {
     }
   }
 
-  /** 
-    *
+  /**
+    * Trigger the graticule layer initialization
     */
   ngAfterViewInit() {
     this.initializeLayer();
@@ -156,6 +158,7 @@ export class GraticuleLayerComponent {
       .attr('d', this.path);
 
     this.initialized = true;
+    this.layerLoaded.next(true);
   }
 
   // Direct getters for property values

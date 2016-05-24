@@ -1,13 +1,16 @@
 import {Component, Input, HostListener, ViewChild, ElementRef, Renderer, ChangeDetectorRef, ComponentRef} from '@angular/core';
 import {GraticuleLayerComponent} from './layers/map.graticule';
 import {GeodataLayerComponent} from './layers/map.geodata';
-import {ShapeLayerComponent} from './layers/map.shape';
+import {ShapeCircleLayerComponent} from './layers/map.shape.circle';
 import {MapService} from '../../services/map/map.service';
 import {MapUpdateService} from '../../services/map/map.update.service';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
 declare var d3: any;
+
+// Dynamic adding for layers components
+// See: http://stackoverflow.com/questions/36325212/angular-2-dynamic-tabs-with-user-click-chosen-components/36325468#36325468
 
 @Component({
 	selector: 'map',
@@ -28,7 +31,7 @@ declare var d3: any;
 	    </g>
 	  </svg>
 	`,
-	directives: [GraticuleLayerComponent, GeodataLayerComponent, ShapeLayerComponent]
+	directives: [GraticuleLayerComponent, GeodataLayerComponent, ShapeCircleLayerComponent]
 })
 export class MapComponent {
   @Input('id') id: string;
@@ -71,7 +74,7 @@ export class MapComponent {
 			}
 		  },
 		  { id: 'geodata', type: 'geodata',
-			  display: { fill: { categorical: { distinctNeighbors : true} } }
+			  display: { fill: { categorical: { distinctNeighbors : true } } }
 		  },
 		  {
 		  	id: 'shape', type: 'shape',
@@ -89,9 +92,9 @@ export class MapComponent {
             display: {
               shape: {
                 type: 'circle',
-                radius: 'd.mass / 5000000',
-                origin: '[ d.reclong, d.reclat ]',
-                opacity: 0.75,
+                radiusExpr: 'd.mass / 5000000',
+                originExpr: '[ d.reclong, d.reclat ]',
+                opacity: '0.75',
                 threshold: {
                   values: [1800, 1900, 1950, 2000, 2015],
                   colors: ['#ffffb2', '#fed976', '#feb24c',
@@ -122,8 +125,8 @@ export class MapComponent {
 	  });
 
 	  d3.csv('data/meteorites-all.csv', (data) => {
-		  console.log('1');
-        this.updateService.triggerLayerDataLoaded(this.layers[2], data);
+        var features = data.filter(d => d.mass > 50000);
+        this.updateService.triggerLayerDataLoaded(this.layers[2], features);
       });
   }
 
@@ -139,6 +142,10 @@ export class MapComponent {
 	var projection = this.mapService.createProjection(mapConfig);
 	this.path = d3.geo.path().projection(projection);
 
+    this.mapService.current = {
+      scale: projection.scale(),
+      center: projection.center()
+    };
 	this.mapService.configureMapBehaviors(
 		this, this.svgElement.nativeElement, projection,
 		mapConfig);

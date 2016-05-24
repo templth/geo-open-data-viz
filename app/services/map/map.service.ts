@@ -5,10 +5,11 @@ declare var d3: any;
 
 @Injectable()
 export class MapService {
+  current: any;
 
   createProjection(map) {
   	if (map.projection.type === 'orthographic') {
-	  return this.createOrthographicProjection(map.projection);
+      return this.createOrthographicProjection(map.projection);
     } else if(map.projection.type === 'mercator') {
       return this.createMercatorProjection(map.projection);
     } else if(map.projection.type === 'satellite') {
@@ -17,7 +18,7 @@ export class MapService {
   }
 
   createOrthographicProjection(projectionConfig) {
-	return d3.geo.orthographic()
+    return d3.geo.orthographic()
 		  .scale(248)
 		  .clipAngle(90);
   }
@@ -44,11 +45,11 @@ export class MapService {
 
   configureMapBehaviors(component, element, projection, map) {
     var projectionConfig = map.projection;
-	var svg = d3.select(element);
-	if (this.isSphericalProjection(projectionConfig)) {
+    var svg = d3.select(element);
+    if (this.isSphericalProjection(projectionConfig)) {
       this.configureSphericalMapBehaviors(component,
         svg, projection, projectionConfig);
-	} else {
+    } else {
       this.configureConformalMapBehaviors(component,
         svg, projection, projectionConfig);
     }
@@ -56,13 +57,15 @@ export class MapService {
 
   configureConformalMapBehaviors(component, svg, projection, projectionConfig) {
     var zoom = d3.behavior.zoom()
-	  .scale(projection.scale())
+      .scale(projection.scale())
       .on('zoom', () => {
         if (d3.event.scale != projection.scale()) {
           projection.scale(d3.event.scale);
+          this.current.scale = projection.scale();
           component.path = d3.geo.path().projection(projection);
         } else {
           projection.translate(d3.event.translate);
+          this.current.center = projection.center();
           component.path = d3.geo.path().projection(projection);
         }
       });
@@ -75,10 +78,12 @@ export class MapService {
     var zoom = d3.behavior.zoom()
       .scale(projection.scale())
       .on('zoom', () => {
-		  if (d3.event.scale != projection.scale()) {
-			  projection.scale(d3.event.scale);
-			  component.path = d3.geo.path().projection(projection);
-		  }
+		    if (d3.event.scale != projection.scale()) {
+        this.current.previousScale = projection.scale();
+        projection.scale(d3.event.scale);
+          this.current.scale = projection.scale();
+          component.path = d3.geo.path().projection(projection);
+		    }
       });
 
     svg.call(zoom);
@@ -89,16 +94,17 @@ export class MapService {
     let o1;
 
     var drag = d3.behavior.drag()
-      .on('dragstart', function() {
+      .on('dragstart', () => {
         m0 = trackballAngles(projection, d3.mouse(svg[0][0]));
         o0 = projection.rotate();
       })
-      .on('drag', function() {
+      .on('drag', () => {
         var m1 = trackballAngles(projection, d3.mouse(svg[0][0]));
         o1 = composedRotation(o0[0], o0[1], o0[2],
           m1[0] - m0[0], m1[1] - m0[1]);
 
         projection.rotate(o1);
+        this.current.center = projection.rotate();
 
         component.path = d3.geo.path().projection(projection);
       });

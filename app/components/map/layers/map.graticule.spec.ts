@@ -34,7 +34,7 @@ declare var d3: any;
 
 describe('Test for graticule layer', () => {
   setBaseTestProviders(TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
-    [TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS]);
+    TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS);
 
   var graticuleLayerConfig = <GraticuleLayer>{
     id: 'graticuleLayer',
@@ -106,7 +106,7 @@ describe('Test for graticule layer', () => {
             provide(MapUpdateService, { useValue: updateService })
           ])
           .createAsync(GraticuleLayerComponent).then((componentFixture) => {
-        let componentInstance = componentFixture.debugElement.componentInstance;
+        let componentInstance = componentFixture.componentInstance;
         componentInstance.layer = { type: 'graticule' };
         componentInstance.path = d3.geo.path();
 
