@@ -11,6 +11,7 @@ declare var d3: any;
 
 // Dynamic adding for layers components
 // See: http://stackoverflow.com/questions/36325212/angular-2-dynamic-tabs-with-user-click-chosen-components/36325468#36325468
+// See: http://stackoverflow.com/questions/37439696/angular-2-rc1-databinding-and-componentresolver
 
 @Component({
 	selector: 'map',
@@ -43,17 +44,15 @@ export class MapComponent {
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
-	  console.log(event);
-	  this.renderer.setElementAttribute(this.svgElement.nativeElement,
-	  	'width', event.target.innerWidth);
-	  this.renderer.setElementAttribute(this.svgElement.nativeElement,
-	  	'height', event.target.innerHeight);
+    this.renderer.setElementAttribute(this.svgElement.nativeElement,
+      'width', event.target.innerWidth);
+    this.renderer.setElementAttribute(this.svgElement.nativeElement,
+      'height', event.target.innerHeight);
   }
 
   constructor(private mapService: MapService, private renderer: Renderer,
   	private changeDetector: ChangeDetectorRef, private elementRef: ElementRef,
   	private updateService: MapUpdateService) {
-	  console.log(elementRef);
 	  this.layers = [
 		  {
 		  	id: 'graticule',

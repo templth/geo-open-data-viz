@@ -55,6 +55,18 @@ System.config(config);
 
 System.import('@angular/platform-browser/src/browser/browser_adapter')
     .then(function(browser_adapter) { browser_adapter.BrowserDomAdapter.makeCurrent(); })
+    .then(function() {
+      return Promise.all([
+        System.import('@angular/core/testing'),
+        System.import('@angular/platform-browser-dynamic/testing/browser')
+      ]);
+    })
+    .then(function(modules) {
+      var testing = modules[0];
+      var testingBrowser = modules[1];
+      testing.setBaseTestProviders(testingBrowser.TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
+        testingBrowser.TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS);
+    })
     .then(function() { return Promise.all(resolveTestFiles()); })
     .then(function() { __karma__.start(); }, function(error) { __karma__.error(error.stack || error); });
 

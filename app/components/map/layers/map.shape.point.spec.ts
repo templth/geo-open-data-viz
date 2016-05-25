@@ -19,11 +19,6 @@ import {
   xit
 } from '@angular/core/testing';
 
-import {
-  TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
-  TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS
-} from '@angular/platform-browser-dynamic/testing/browser';
-
 import {ShapePointLayerComponent} from './map.shape.point';
 import {SHAPE_POINT_DEFAULTS} from './layers.defaults';
 import {ShapePointLayer} from '../../../model/map.model';
@@ -34,10 +29,7 @@ import {ExpressionsService} from '../../../services/expressions/expressions.serv
 
 declare var d3: any;
 
-describe('Test for shape point layer', () => {
-  setBaseTestProviders(TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
-    TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS);
-
+describe('Tests for shape point layer', () => {
   var defaultShapeLayerConfig = <ShapePointLayer>{
     id: 'shapeLayer',
     type: 'shape',

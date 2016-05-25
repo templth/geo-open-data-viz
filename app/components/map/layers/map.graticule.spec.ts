@@ -19,11 +19,6 @@ import {
   xit
 } from '@angular/core/testing';
 
-import {
-    TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
-    TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS
-} from '@angular/platform-browser-dynamic/testing/browser';
-
 import {GraticuleLayerComponent} from './map.graticule';
 import {GRATICULE_DEFAULTS} from './layers.defaults';
 import {GraticuleLayer} from '../../../model/map.model';
@@ -32,10 +27,7 @@ import {MapUpdateService} from '../../../services/map/map.update.service';
 
 declare var d3: any;
 
-describe('Test for graticule layer', () => {
-  setBaseTestProviders(TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS,
-    TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS);
-
+describe('Tests for graticule layer', () => {
   var graticuleLayerConfig = <GraticuleLayer>{
     id: 'graticuleLayer',
     type: 'graticule',

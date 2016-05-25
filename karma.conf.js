@@ -46,8 +46,8 @@ module.exports = function(config) {
     autoWatch: true,
 
     //browsers: ['Firefox'],
-    browsers: ['Chrome'],
-    //browsers: ['PhantomJS', 'Chrome', 'Firefox'],
+    //browsers: ['Chrome'],
+    browsers: ['PhantomJS', 'Chrome', 'Firefox'],
 
     // Karma plugins loaded
     plugins: [
