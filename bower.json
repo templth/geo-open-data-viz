@@ -1,0 +1,19 @@
+{
+  "name": "map-visualizer",
+  "version": "0.1.0",
+  "homepage": "https://github.com/templth/geo-open-data-viz",
+  "authors": [
+    "Thierry Templier <templth@yahoo.fr>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.17"
+  }
+}

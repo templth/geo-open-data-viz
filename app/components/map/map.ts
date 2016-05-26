@@ -73,6 +73,7 @@ export class MapComponent {
 			}
 		  },
 		  { id: 'geodata', type: 'geodata',
+
 			  display: { fill: { categorical: { distinctNeighbors : true } } }
 		  },
 		  {
@@ -105,7 +106,7 @@ export class MapComponent {
 		  }
 	  ];
 
-      setTimeout(() => {
+      /*setTimeout(() => {
 		  this.updateService.triggerLayerConfigurationUpdates(this.layers[0], {
             styles: {
               background: {
@@ -117,7 +118,7 @@ export class MapComponent {
             }
 		  });
 
-      }, 1000);
+      }, 1000);*/
 
 	  d3.json('data/continent.json', (data) => {
 		this.updateService.triggerLayerDataLoaded(this.layers[1], data);
@@ -127,6 +128,20 @@ export class MapComponent {
         var features = data.filter(d => d.mass > 50000);
         this.updateService.triggerLayerDataLoaded(this.layers[2], features);
       });
+  }
+
+  ngOnInit() {
+	if (this.layers) {
+      this.loadLayersData();
+    }
+  }
+
+  loadLayersData() {
+    this.layers.forEach((layer) => {
+      if (layer.data) {
+
+      }
+    });
   }
 
   ngAfterViewInit() {
